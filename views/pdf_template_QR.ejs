@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport des Badges</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            padding: 20px;
+            background-color: #212529;
+            color: white;
+        }
+        .content {
+            margin: 20px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .participant-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            padding: 15px;
+            width: calc(33.333% - 20px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: inline-block;
+            margin: 10px;
+        }
+        .qrcode-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .user-info p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .badge-administrateur {
+            background-color: #007bff; /* Bleu pour les administrateurs */
+        }
+        .badge-journalise {
+            background-color: #ffc107; /* Jaune pour les journalistes */
+        }
+        .badge-organisateur {
+            background-color: #28a745; /* Vert pour les organisateurs */
+        }
+        .badge-membre {
+            background-color: #6f42c1; /* Pourpre pour les membres */
+        }
+        .badge-default {
+            background-color: #6c757d; /* Gris pour les rôles non spécifiés */
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <!-- Logo -->
+        <% if (logoBase64) { %>
+            <img src="data:image/png;base64,<%= logoBase64 %>" alt="Logo" style="max-width: 150px;">
+        <% } else { %>
+            <p>Logo non disponible</p>
+        <% } %>
+        <h1>Rapport des Badges</h1>
+        <p><strong>Nom de l'Événement :</strong> <%= eventName || 'Non spécifié' %></p>
+        <p><strong>Dates :</strong> <%= eventStartDate || 'Non spécifiée' %> - <%= eventEndDate || 'Non spécifiée' %></p>
+    </div>
+    <div class="content">
+        <h2>Liste des Participants</h2>
+        <div class="participants-container">
+            <% users.forEach(user => { %>
+                <div class="participant-card">
+                    <div class="qrcode-container">
+                        <% if (user.qrcode) { %>
+                            <img src="<%= user.qrcode %>" alt="QR Code">
+                        <% } else { %>
+                            <p>QR Code non disponible</p>
+                        <% } %>
+                    </div>
+                    <div class="user-info">
+                        <p><strong><%= user.name || 'Non spécifié' %></strong></p>
+                        <p><%= user.surname || 'Non spécifié' %></p>
+                        <!-- Inline definition of getBadgeClass -->
+                        <span class="badge <%= 
+                            (user.role === 'Administrateur') ? 'badge-administrateur' : 
+                            (user.role === 'Journalise') ? 'badge-journalise' : 
+                            (user.role === 'Organisateur') ? 'badge-organisateur' : 
+                            (user.role === 'Membre') ? 'badge-membre' : 
+                            'badge-default' 
+                        %>"><%= user.role || 'Non spécifié' %></span>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+</body>
+</html>

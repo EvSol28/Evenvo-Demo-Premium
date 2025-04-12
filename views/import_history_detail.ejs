@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails de l'importation</title>
+    <%# Liens CSS (Bootstrap 5, Font Awesome 6, SweetAlert2) %>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <%# Styles CSS adaptés %>
+    <style>
+        /* === Styles Base === */
+        :root {
+            --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
+            --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
+            --gray: #64748B; --light-gray: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --navbar-bg: rgba(162, 217, 206, 0.3); --navbar-hover-bg: rgba(162, 217, 206, 0.4);
+            --navbar-border: rgba(255, 255, 255, 0.2);
+            --navbar-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 20px rgba(13, 148, 136, 0.05);
+            --navbar-hover-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 6px 25px rgba(13, 148, 136, 0.1);
+            --card-border: rgba(13, 148, 136, 0.15); --card-hover-border: rgba(13, 148, 136, 0.4);
+            --card-shadow: 0 6px 15px rgba(190, 190, 190, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+            --card-hover-shadow: 0 12px 28px rgba(13, 148, 136, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+            --sans: 'Hellix', 'Arial', sans-serif;
+            --color-danger: #EF4444;
+            --color-import: #22D3EE;
+        }
+        body { font-family: var(--sans); background-color: #F1F5F9; color: var(--dark); min-height: 100vh; margin: 0; padding-top: 90px; }
+
+        /* --- Navbar & Links --- */
+        .navbar { background: var(--navbar-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 0.4rem 1rem; box-shadow: var(--navbar-shadow); border: 1px solid var(--navbar-border); border-radius: 20px; position: fixed; width: 96%; left: 2%; top: 10px; z-index: 1030; display: flex; justify-content: space-between; align-items: center; transition: all 0.4s ease; }
+        .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
+        .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
+        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
+        .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
+        .nav-link.active { color: var(--light) !important; background: var(--navbar-bg) !important; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1) !important; font-weight: 600; box-shadow: none; text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); }
+        .nav-link i { font-size: 1rem; }
+        .dropdown-toggle::after { margin-left: 0.4rem; border-top-color: currentColor; transition: transform 0.3s ease; }
+        .nav-item.show .dropdown-toggle::after, .nav-item.dropdown:hover .dropdown-toggle::after { transform: rotate(180deg); }
+        .dropdown-menu { background: white; border: 1px solid var(--light-gray); border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); padding: 0.75rem; margin-top: 0.6rem !important; }
+        .dropdown-item { font-size: 0.85rem; color: var(--primary-dark); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease; }
+        .dropdown-item:hover { background: var(--primary); color: var(--light); transform: translateX(3px); }
+        .navbar-right { margin-left: auto; }
+
+        /* --- Contenu Principal & Titre --- */
+        .main-content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+        .page-header { margin-bottom: 2.5rem; text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
+        .page-header p { font-size: 1rem; color: var(--gray); margin-top: 0.5rem; }
+        .content-block { background: var(--card-bg); border-radius: 16 PX; box-shadow: var(--card-shadow); border: 1px solid var(--card-border); padding: 1.75rem; margin-bottom: 1.5rem; transition: all 0.3s ease; }
+        .content-block:hover { border-color: var(--card-hover-border); box-shadow: var(--card-hover-shadow); transform: translateY(-4px); }
+        .content-block h2 { font-size: 1.3rem; font-weight: 600; color: var(--dark); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--light-gray); }
+        .content-block h3 { font-size: 1.15rem; font-weight: 600; color: var(--dark); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--light-gray); }
+        .content-block h4 { font-size: 1.1rem; font-weight: 600; color: var(--dark); margin-bottom: 1rem; }
+        .content-block h5 { font-size: 1rem; font-weight: 500; color: var(--gray); margin-bottom: 0.75rem; }
+
+        /* Boutons */
+        .btn-custom-action { display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 500; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 25px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.1); transition: all 0.25s ease; text-decoration: none; }
+        .btn-custom-action:hover { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); transform: scale(1.03); }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i> <span class="d-lg-none">Accueil</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="/administration"><i class="fas fa-cog"></i> Administration</a></li>
+                <li class="nav-item"><a class="nav-link" href="/import_user"><i class="fas fa-file-import"></i> Import</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/import_user"><i class="fas fa-history"></i> Historique Log Import</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user"></i> <span class="d-lg-none">Profil</span></a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-right d-none d-lg-block"><a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a></div>
+    </nav>
+
+    <!-- Contenu Principal -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Détails de l'importation</h1>
+            <p>Consultez les détails de l'importation sélectionnée.</p>
+        </div>
+
+        <div class="content-block">
+            <h2>Détails de l'importation</h2>
+            <div class="card-body">
+                <p><strong>Nom du fichier :</strong> <%= history.fileName %></p>
+                <p><strong>Super Admin :</strong> <%= history.superAdmin %></p>
+                <p><strong>Date :</strong> <%= new Date(history.importDate).toLocaleString('fr-FR') %></p>
+                <p><strong>Résultat :</strong> <%= history.result %></p>
+                <p><strong>Log :</strong> <%= history.log %></p>
+                <% if (history.details) { %>
+                    <h4>Détails :</h4>
+                    <h5>Importés :</h5>
+                    <ul>
+                        <% history.details.imported.forEach(item => { %>
+                            <% 
+                                const detailsText = item.details && typeof item.details === 'string' ? item.details : 'Détails non disponibles';
+                                const roleMatch = detailsText.match(/Rôle: (.+)/);
+                                const roleName = roleMatch ? roleMatch[1] : 'Inconnu';
+                                const roleInfo = roles.find(r => r.name === roleName);
+                                const voteStatus = roleInfo ? (roleInfo.voteEnabled ? ' (Vote autorisé)' : ' (Vote non autorisé)') : ' (Rôle non reconnu)';
+                            %>
+                            <li><%= item.email %> - <%= item.status %> (<%= detailsText %><%= voteStatus %>)</li>
+                        <% }); %>
+                    </ul>
+                    <h5>Échecs :</h5>
+                    <ul>
+                        <% history.details.failed.forEach(item => { %>
+                            <li><%= item.email %> - <%= item.status %> (<%= item.details %>)</li>
+                        <% }); %>
+                    </ul>
+                <% } %>
+                <a href="/import_user" class="btn btn-custom-action">Retour</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('/get_user_info');
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+                const user = await response.json();
+                document.getElementById('userFullName').textContent = `${user.name || ''} ${user.surname || ''}`.trim() || 'Utilisateur';
+                document.getElementById('userEmail').textContent = user.email || 'Email non disponible';
+            } catch (error) {
+                console.error('Erreur fetchUserInfo:', error);
+                document.getElementById('userFullName').textContent = 'Erreur';
+                document.getElementById('userEmail').textContent = 'Chargement impossible';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchUserInfo();
+        });
+    </script>
+</body>
+</html>

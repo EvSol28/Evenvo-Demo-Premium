@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Invitations - <%= eventName || 'Événement sans nom' %></title>
+    <link rel="icon" href="/path/to/favicon.ico" type="image/x-icon">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        .table-container { margin: 2rem; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); background-color: #f8f9fa; }
+        .edit-icon { cursor: pointer; margin-left: 10px; color: #007bff; }
+        .edit-icon:hover { color: #0056b3; }
+        .form-control[disabled], .form-control:disabled { background-color: #e9ecef; opacity: 1; }
+        .btn-save { display: none; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg" style="background-color: #212529;">
+        <a class="navbar-brand text-white" href="#">NocEvent</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item"><a class="nav-link text-white" href="/dashboard">Tableau de bord</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/event/<%= eventId %>">Page événement</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container table-container">
+        <h2 class="text-center mb-4">Gestion des Invitations pour <%= eventName || 'Événement sans nom' %></h2>
+        
+        <div class="form-group">
+            <label for="emailTitle">Titre de l'email</label>
+            <div class="d-flex align-items-center">
+                <input type="text" class="form-control" id="emailTitle" value="Vous êtes convié(e) à <%= eventName || 'Événement sans nom' %>" disabled>
+                <i class="fas fa-edit edit-icon" id="edit-title"></i>
+            </div>
+            <button class="btn btn-primary btn-save" id="save-title">Valider</button>
+        </div>
+
+        <div class="form-group">
+            <label for="emailBody">Contenu de l'email</label>
+            <div class="d-flex align-items-center">
+                <textarea class="form-control" id="emailBody" rows="8" disabled>Bonjour,
+
+Nous avons le plaisir de vous inviter à l'événement "<%= eventName || 'Événement sans nom' %>". Cet événement se tiendra :
+
+- **Date de début** : <%= startDate || 'Non défini' %>
+- **Date de fin** : <%= endDate || 'Non défini' %>
+- **Lieu** : <%= eventAddress || 'À préciser' %>
+
+Nous serions ravis de vous compter parmi nous pour cette occasion spéciale. Merci de nous confirmer votre présence en répondant à cet email ou en contactant l'organisateur.
+
+Cordialement,
+L'équipe de NocEvent</textarea>
+                <i class="fas fa-edit edit-icon" id="edit-body"></i>
+            </div>
+            <button class="btn btn-primary btn-save" id="save-body">Valider</button>
+        </div>
+
+        <!-- Premier compte Gmail (obligatoire) -->
+        <div class="form-group">
+            <label for="senderEmail1">Expéditeur 1 (Gmail)</label>
+            <input type="email" class="form-control" id="senderEmail1" placeholder="salonevents1@gmail.com" required>
+        </div>
+        <div class="form-group">
+            <label for="emailPassword1">Mot de passe d'application 1</label>
+            <input type="password" class="form-control" id="emailPassword1" placeholder="Mot de passe d'application Gmail" required>
+        </div>
+
+        <!-- Deuxième compte Gmail (facultatif) -->
+        <div class="form-group">
+            <label for="senderEmail2">Expéditeur 2 (Gmail, facultatif)</label>
+            <input type="email" class="form-control" id="senderEmail2" placeholder="salonevents2@gmail.com">
+        </div>
+        <div class="form-group">
+            <label for="emailPassword2">Mot de passe d'application 2 (facultatif)</label>
+            <input type="password" class="form-control" id="emailPassword2" placeholder="Mot de passe d'application Gmail">
+            <small class="form-text text-muted">
+                Générez un mot de passe d'application depuis les paramètres de sécurité de votre compte Google (avec vérification en deux étapes activée). Laissez vide si vous utilisez un seul compte.
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label for="recipients">Destinataires (Participants à l'événement)</label>
+            <div class="d-flex align-items-center">
+                <% if (userEmails && userEmails.length > 0) { %>
+                    <textarea class="form-control" id="recipients" rows="3" disabled><%= userEmails.join(', ') %></textarea>
+                    <i class="fas fa-edit edit-icon" id="edit-recipients"></i>
+                <% } else { %>
+                    <input type="text" class="form-control" value="Aucun participant trouvé" disabled>
+                <% } %>
+            </div>
+            <button class="btn btn-primary btn-save" id="save-recipients">Valider</button>
+        </div>
+
+        <button id="sendInvitations" class="btn btn-success">Envoyer les invitations</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const eventId = '<%= eventId %>';
+            const titleInput = document.getElementById('emailTitle');
+            const bodyTextarea = document.getElementById('emailBody');
+            const senderEmail1Input = document.getElementById('senderEmail1');
+            const emailPassword1Input = document.getElementById('emailPassword1');
+            const senderEmail2Input = document.getElementById('senderEmail2');
+            const emailPassword2Input = document.getElementById('emailPassword2');
+            const recipientsTextarea = document.getElementById('recipients');
+            const editTitle = document.getElementById('edit-title');
+            const editBody = document.getElementById('edit-body');
+            const editRecipients = document.getElementById('edit-recipients');
+            const saveTitle = document.getElementById('save-title');
+            const saveBody = document.getElementById('save-body');
+            const saveRecipients = document.getElementById('save-recipients');
+            const sendButton = document.getElementById('sendInvitations');
+
+            editTitle.addEventListener('click', () => {
+                titleInput.disabled = false;
+                titleInput.focus();
+                saveTitle.style.display = 'block';
+            });
+            saveTitle.addEventListener('click', () => {
+                titleInput.disabled = true;
+                saveTitle.style.display = 'none';
+            });
+
+            editBody.addEventListener('click', () => {
+                bodyTextarea.disabled = false;
+                bodyTextarea.focus();
+                saveBody.style.display = 'block';
+            });
+            saveBody.addEventListener('click', () => {
+                bodyTextarea.disabled = true;
+                saveBody.style.display = 'none';
+            });
+
+            if (editRecipients) {
+                editRecipients.addEventListener('click', () => {
+                    recipientsTextarea.disabled = false;
+                    recipientsTextarea.focus();
+                    saveRecipients.style.display = 'block';
+                });
+            }
+            if (saveRecipients) {
+                saveRecipients.addEventListener('click', () => {
+                    recipientsTextarea.disabled = true;
+                    saveRecipients.style.display = 'none';
+                });
+            }
+
+            sendButton.addEventListener('click', async () => {
+                const title = titleInput.value.trim();
+                const body = bodyTextarea.value.trim();
+                const senderEmail1 = senderEmail1Input.value.trim();
+                const emailPassword1 = emailPassword1Input.value.trim();
+                const senderEmail2 = senderEmail2Input.value.trim();
+                const emailPassword2 = emailPassword2Input.value.trim();
+                const recipients = recipientsTextarea ? recipientsTextarea.value.trim() : '';
+
+                // Vérifier le premier compte (obligatoire)
+                if (!title || !body || !senderEmail1 || !emailPassword1 || !recipients) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: 'Veuillez remplir tous les champs obligatoires (titre, corps, expéditeur 1, mot de passe 1, destinataires).'
+                    });
+                    return;
+                }
+
+                // Vérifier que si senderEmail2 est rempli, emailPassword2 l'est aussi
+                if (senderEmail2 && !emailPassword2) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: 'Si vous utilisez un deuxième expéditeur, le mot de passe d\'application 2 est requis.'
+                    });
+                    return;
+                }
+
+                const userEmails = recipients.split(/[,;]\s*/).map(email => email.trim()).filter(email => email);
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const invalidEmails = userEmails.filter(email => !emailRegex.test(email));
+                if (invalidEmails.length > 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: `Les adresses email suivantes sont invalides : ${invalidEmails.join(', ')}`
+                    });
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/send_invitations', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            eventId,
+                            title,
+                            body,
+                            senderEmail1,
+                            emailPassword1,
+                            senderEmail2: senderEmail2 || null, // Envoi null si vide
+                            emailPassword2: emailPassword2 || null, // Envoi null si vide
+                            userEmails
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Succès',
+                            text: 'Invitations envoyées avec succès !'
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erreur',
+                            text: result.message || 'Une erreur est survenue lors de l\'envoi.'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: 'Une erreur inattendue est survenue.'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

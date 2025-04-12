@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport de l'Événement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header img {
+            width: 100px;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+        .header p {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        .table-container {
+            margin-top: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f4f4f4;
+        }
+        .chart-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="<%= logoUrl %>" alt="Logo">
+        <h1>Rapport de l'Événement</h1>
+        <p><strong>Nom de l'Événement :</strong> <%= eventName %></p>
+        <p><strong>Date :</strong> <%= eventStartDate %> - <%= eventEndDate %></p>
+        <p><strong>Organisateur :</strong> <%= organizerName %></p>
+    </div>
+
+    <div class="table-container">
+        <h2>Liste des Utilisateurs</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Rôle</th>
+                    <th>Email</th>
+                    <th>Présence</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(user => { %>
+                    <tr>
+                        <td><%= user.name %></td>
+                        <td><%= user.surname %></td>
+                        <td><%= user.role %></td>
+                        <td><%= user.email %></td>
+                        <td><%= user.presence ? 'Présent' : 'Absent' %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="chart-container">
+        <h2>Statistiques</h2>
+        <img src="<%= chartImageUrl %>" alt="Statistiques" style="width: 100%; max-width: 600px;">
+    </div>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Création utilisateur avec QR Code</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .table-container {
+            margin-top: 50px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #f8f9fa;
+        }
+        .form-container {
+            display: none; /* Masquer le formulaire par défaut */
+            margin-top: 20px;
+        }
+        .qr-code-container canvas {
+            margin: 10px auto;
+            display: block;
+        }
+        .btn-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+		/* Style pour les flèches de tri */
+/* Style pour les flèches de tri */
+.arrow {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    margin-left: 5px;
+}
+
+.arrow.asc {
+    border-bottom: 6px solid #fff;  /* Flèche vers le bas en blanc */
+}
+
+.arrow.desc {
+    border-top: 6px solid #fff;  /* Flèche vers le haut en blanc */
+}
+
+th[data-tri="none"] .arrow {
+    display: none;  /* Ne pas afficher la flèche si aucun tri */
+}
+
+
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg" style="background-color: #212529;">
+        <a class="navbar-brand text-white" href="#">NocEvent</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="/dashboard">Tableau de bord</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Bouton pour afficher le formulaire -->
+    <div class="container table-container text-center">
+        <h2 class="text-center mb-4">Créer un nouvel utilisateur</h2>
+        <button id="createUserBtn" class="btn btn-primary">Créer un utilisateur</button>
+    </div>
+	
+<!--	<div class="container table-container">
+    <label for="searchInput">Rechercher un utilisateur :</label>
+    <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par nom ou prénom...">
+</div> -->
+
+    <!-- Table des utilisateurs -->
+    <div class="container table-container">
+        <h3 class="text-center ">Liste des utilisateurs</h3>
+		 <div class="pull-right">
+    <input type="text" id="searchInput"  style="max-width: 300px;" class="col-xs-4 col-sm-4 col-md-4 form-control mb-4" placeholder="Rechercher par nom ou prénom...">
+ </div>
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+
+    <tr>
+         <th data-tri="none" data-column="id">ID <span class="arrow"></span></th>
+      <th data-tri="none" data-column="name">Nom <span class="arrow"></span></th>
+      <th data-tri="none" data-column="surname">Prénom <span class="arrow"></span></th>
+      <th data-tri="none" data-column="civility">Civilité <span class="arrow"></span></th>
+	  <th data-tri="none" data-column="birthdate">Date de naissance <span class="arrow"></span></th>
+	  <th data-tri="none" data-column="email">Email <span class="arrow"></span></th>
+        <th data-tri="none" data-column="role">Rôle <span class="arrow"></span></th>
+    </tr>
+</thead>
+<tbody>
+    <% if (users && users.length > 0) { %>
+        <% users.forEach(user => { %>
+            <tr>
+                <td><%= user.id %></td>
+                <td><%= user.name %></td>
+                <td><%= user.surname %></td>
+                <td><%= user.civility %></td>
+                <td><%= user.birthdate %></td>
+                <td><%= user.email %></td>
+                <td><%= user.role %></td>
+            </tr>
+        <% }) %>
+    <% } else { %>
+        <tr>
+            <td colspan="7" class="text-center">Aucun utilisateur trouvé.</td>
+        </tr>
+    <% } %>
+</tbody>
+
+
+        </table>
+    </div>
+	
+
+    <!-- Formulaire de création d'utilisateur -->
+    <div class="container table-container text-center" id="userFormContainer">
+        <h2 class="text-center mb-4">Créer un nouvel utilisateur</h2>
+        <form action="/create_user" method="POST" id="userForm">
+		
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="name">Nom</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="surname">Prénom</label>
+                    <input type="text" class="form-control" id="surname" name="surname" required>
+                </div>
+            </div>
+<div class="form-row">			
+<div class="form-group col-md-6">
+    <label for="civility">Civilité</label>
+    <select class="form-control" id="civility" name="civility" required>
+        <option value="M">M</option>
+        <option value="Mme">Mme</option>
+    </select>
+</div>
+
+
+<div class="form-group col-md-6">
+    <label for="birthdate">Date de naissance</label>
+    <input type="date" class="form-control" id="birthdate" name="birthdate" required>
+</div>
+</div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="role">Rôle</label>
+                    <select class="form-control" id="role" name="role" required>
+                        <option value="admin">Administrateur</option>
+                        <option value="journalist">Journaliste</option>
+                        <option value="member">Membre</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email">
+                </div>
+            </div>
+
+            <div class="qr-code-container text-center">
+                <h5>QR Code généré automatiquement</h5>
+                <canvas id="qrcodeCanvas"></canvas>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" class="btn btn-success">Valider</button>
+                <button type="button" id="cancelBtn" class="btn btn-danger">Annuler</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <!-- SweetAlert CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        const createUserBtn = document.getElementById('createUserBtn');
+        const userFormContainer = document.getElementById('userFormContainer');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const nameInput = document.getElementById('name');
+        const surnameInput = document.getElementById('surname');
+        const roleInput = document.getElementById('role');
+        const emailInput = document.getElementById('email');
+        const qrCodeCanvas = document.getElementById('qrcodeCanvas');
+
+        // Fonction pour générer le QR Code
+        function generateQRCode() {
+            const name = nameInput.value.trim();
+            const surname = surnameInput.value.trim();
+            const role = roleInput.value.trim();
+            const email = emailInput.value.trim();
+
+            const qrContent = JSON.stringify({
+                name,
+                surname,
+                role,
+                email: email || "Non fourni"
+            });
+
+            QRCode.toCanvas(qrCodeCanvas, qrContent, function (error) {
+                if (error) {
+                    console.error("Erreur lors de la génération du QR Code :", error);
+                }
+            });
+        }
+
+        // Gestion de l'affichage du formulaire
+        createUserBtn.addEventListener('click', () => {
+            userFormContainer.style.display = 'block';
+            localStorage.setItem('formVisible', 'true'); // Enregistrer l'état dans le stockage local
+        });
+
+        // Masquer le formulaire sur clic d'Annuler
+        cancelBtn.addEventListener('click', () => {
+            userFormContainer.style.display = 'none';
+            localStorage.setItem('formVisible', 'false'); // Enregistrer l'état dans le stockage local
+        });
+// Ajouter un événement pour détecter quand on quitte la page ou on revient au tableau de bord
+document.getElementById('navbarNav').addEventListener('click', (event) => {
+    if (event.target.href && event.target.href.includes('/dashboard')) {
+        // Effacer l'état du formulaire dans le localStorage
+        localStorage.removeItem('formVisible');
+    }
+});
+
+        // Vérifier l'état du formulaire lors du chargement de la page
+    document.addEventListener('DOMContentLoaded', () => {
+    const table = document.querySelector('table tbody'); // Le corps du tableau
+    const headers = document.querySelectorAll('th[data-column]'); // Les entêtes de colonnes
+    const searchInput = document.getElementById('searchInput'); // Le champ de recherche
+
+    // Fonction pour trier les lignes
+    function sortTable(n, type, direction) {
+        const rows = Array.from(table.rows);
+        const sortedRows = rows.sort((a, b) => {
+            const cellA = a.cells[n].innerText.trim();
+            const cellB = b.cells[n].innerText.trim();
+
+            if (type === 'string') {
+                return direction === 'asc' ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA); // Pour les chaînes de caractères
+            } else if (type === 'number') {
+                return direction === 'asc' ? Number(cellA) - Number(cellB) : Number(cellB) - Number(cellA); // Pour les numéros (ID)
+            }
+        });
+
+        // Ajouter les lignes triées au tableau
+        table.innerHTML = '';
+        sortedRows.forEach(row => table.appendChild(row));
+    }
+
+    // Fonction pour réinitialiser les flèches
+    function resetArrows() {
+        headers.forEach(header => {
+            const arrow = header.querySelector('.arrow');
+            header.setAttribute('data-tri', 'none');
+            arrow.classList.remove('asc', 'desc');
+        });
+    }
+
+    // Ajouter les événements de tri pour chaque colonne
+    headers.forEach(header => {
+        header.addEventListener('click', () => {
+            const column = header.getAttribute('data-column');
+            let currentDirection = header.getAttribute('data-tri');
+            let newDirection = 'asc';
+
+            // Réinitialiser les flèches
+            resetArrows();
+
+            // Si le tri est actuellement ascendant, passer à descendant
+            if (currentDirection === 'asc') {
+                newDirection = 'desc';
+            }
+
+            // Définir la flèche et le sens du tri
+            const arrow = header.querySelector('.arrow');
+            header.setAttribute('data-tri', newDirection);
+
+            // Afficher la flèche appropriée
+            if (newDirection === 'asc') {
+                arrow.classList.add('asc');
+            } else {
+                arrow.classList.add('desc');
+            }
+
+            // Déterminer la colonne et le type (string ou number)
+            let columnIndex = -1;
+            let type = 'string'; // Par défaut, on trie par chaîne
+
+            switch (column) {
+                case 'id':
+                    columnIndex = 0;
+                    type = 'number';
+                    break;
+                case 'name':
+                    columnIndex = 1;
+                    break;
+                case 'surname':
+                    columnIndex = 2;
+                    break;
+                case 'role':
+                    columnIndex = 3;
+                    break;
+            }
+
+            // Trier le tableau
+            sortTable(columnIndex, type, newDirection);
+        });
+    });
+
+    // Fonction de recherche
+    function searchTable() {
+        const filter = searchInput.value.toLowerCase();
+        const rows = Array.from(table.rows);
+        
+        rows.forEach(row => {
+            const nameCell = row.cells[1].innerText.toLowerCase();  // Cellule du nom
+            const surnameCell = row.cells[2].innerText.toLowerCase();  // Cellule du prénom
+            
+            // Vérifie si le nom ou le prénom contient le texte recherché
+            if (nameCell.includes(filter) || surnameCell.includes(filter)) {
+                row.style.display = '';  // Affiche la ligne
+            } else {
+                row.style.display = 'none';  // Masque la ligne
+            }
+        });
+    }
+
+    // Ajouter l'événement de recherche
+    searchInput.addEventListener('input', searchTable);
+});
+
+// Fonction de recherche
+function searchTable() {
+    const filter = searchInput.value.toLowerCase(); // Filtrer selon la saisie
+    const rows = Array.from(table.rows);
+
+    // Parcourir les lignes du tableau
+    rows.forEach(row => {
+        const cells = Array.from(row.cells); // Récupérer toutes les cellules de la ligne
+        const match = cells.some(cell => cell.innerText.toLowerCase().includes(filter)); // Vérifier si le texte de la cellule correspond à la recherche
+        if (match) {
+            row.style.display = ''; // Afficher la ligne si elle correspond
+        } else {
+            row.style.display = 'none'; // Masquer la ligne si elle ne correspond pas
+        }
+    });
+}
+
+// Ajouter un événement de recherche
+searchInput.addEventListener('input', searchTable);
+
+
+
+        // Soumission du formulaire avec validation de l'email
+        document.getElementById("userForm").addEventListener("submit", function(e) {
+        e.preventDefault(); // Empêcher l'envoi du formulaire avant la vérification
+
+        const email = document.getElementById('email').value.trim();
+
+        // Vérifier si l'email est vide ou invalide
+        if (!email || !validateEmail(email)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: "L'adresse e-mail est invalide.",
+            });
+            return; // Arrêter le processus si l'email est invalide
+        }
+
+        // Vérifier l'existence de l'email dans la base de données
+        checkEmailExists(email).then(exists => {
+            if (exists) {
+                // Afficher un message d'erreur si l'email existe déjà
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Email existant',
+                    text: "Cet email est déjà utilisé. Veuillez en choisir un autre.",
+                });
+				 return; // Arrêter la soumission
+				
+            } else {
+                // Si l'email n'existe pas, soumettre le formulaire
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Utilisateur créé',
+                    text: 'L\'utilisateur a été créé avec succès.',
+                }).then(() => {
+                    document.getElementById("userForm").submit(); // Soumettre le formulaire après la confirmation
+                });
+            }
+        });
+    });
+
+        // Fonction pour valider l'email
+        function validateEmail(email) {
+            const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return re.test(email);
+        }
+
+        // Fonction pour vérifier si l'email existe déjà dans la base de données
+        async function checkEmailExists(email) {
+    try {
+        const response = await fetch(`/api/check-email?email=${encodeURIComponent(email)}`);
+        const data = await response.json();
+        return data.exists;
+    } catch (error) {
+        console.error("Erreur lors de la vérification de l'email :", error);
+        return false; // Considérer l'email comme non existant en cas d'erreur
+    }
+}
+
+
+        // Générer le QR Code lorsque les champs sont modifiés
+        nameInput.addEventListener('input', generateQRCode);
+        surnameInput.addEventListener('input', generateQRCode);
+        emailInput.addEventListener('input', generateQRCode);
+        roleInput.addEventListener('input', generateQRCode);
+    </script>
+</body>
+</html>

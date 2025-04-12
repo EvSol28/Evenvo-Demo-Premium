@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exporter des Fichiers</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root {
+            --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
+            --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
+            --gray: #64748B; --light-gray: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --navbar-bg: rgba(162, 217, 206, 0.3); --navbar-hover-bg: rgba(162, 217, 206, 0.4);
+            --navbar-border: rgba(255, 255, 255, 0.2);
+            --navbar-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 20px rgba(13, 148, 136, 0.05);
+            --navbar-hover-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 6px 25px rgba(13, 148, 136, 0.1);
+            --card-border: rgba(13, 148, 136, 0.15); --card-hover-border: rgba(13, 148, 136, 0.4);
+            --card-shadow: 0 6px 15px rgba(190, 190, 190, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+            --card-hover-shadow: 0 12px 28px rgba(13, 148, 136, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+            --sans: 'Hellix', 'Arial', sans-serif;
+            --color-danger: #EF4444;
+            --color-import: #22D3EE;
+            --color-success: #4BC0C0;
+            --color-partial: #F5A623;
+            --color-failure: #F7464A;
+        }
+        body { font-family: var(--sans); background-color: #F1F5F9; color: var(--dark); min-height: 100vh; margin: 0; padding-top: 90px; }
+        .navbar { background: var(--navbar-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 0.4rem 1rem; box-shadow: var(--navbar-shadow); border: 1px solid var(--navbar-border); border-radius: 20px; position: fixed; width: 96%; left: 2%; top: 10px; z-index: 1030; display: flex; justify-content: space-between; align-items: center; transition: all 0.4s ease; }
+        .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
+        .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
+        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
+        .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
+        .nav-link.active { color: var(--light) !important; background: var(--navbar-bg) !important; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1) !important; font-weight: 600; box-shadow: none; text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); }
+        .dropdown-menu { background: white; border: 1px solid var(--light-gray); border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); padding: 0.75rem; margin-top: 0.6rem !important; }
+        .dropdown-item { font-size: 0.85rem; color: var(--primary-dark); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease; }
+        .dropdown-item:hover { background: var(--primary); color: var(--light); transform: translateX(3px); }
+        .navbar-right { margin-left: auto; }
+        .main-content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+        .page-header { margin-bottom: 2.5rem; text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
+        .content-block { background: var(--card-bg); border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--card-border); padding: 1.75rem; margin-bottom: 1.5rem; transition: all 0.3s ease; }
+        .content-block:hover { border-color: var(--card-hover-border); box-shadow: var(--card-hover-shadow); transform: translateY(-4px); }
+        .content-block h2 { font-size: 1.3rem; font-weight: 600; color: var(--dark); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--light-gray); }
+        .btn-custom-action { display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 500; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 25px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.1); transition: all 0.25s ease; }
+        .btn-custom-action:hover { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); transform: scale(1.03); }
+        .btn-custom-action i { margin-right: 0.8rem; } /* Ajustement pour plus d'espace entre icône et texte */
+        .btn-custom-danger { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: var(--color-danger); border-radius: 25px; padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 500; transition: all 0.25s ease; border: 1px solid; }
+        .btn-custom-danger:hover { background: var(--color-danger); color: white; border-color: var(--color-danger); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); transform: scale(1.03); }
+        .form-label { font-weight: 500; font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem; }
+        .form-control, .form-select { border-radius: 8px; border: 1px solid var(--light-gray); padding: 0.6rem 1rem; font-size: 0.9rem; background-color: rgba(255, 255, 255, 0.7); }
+        .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.25); }
+        .table-responsive-scrollable { max-height: 400px; overflow-y: auto; border: 1px solid var(--light-gray); border-radius: 8px; }
+        .table thead th { background: var(--navbar-bg) !important; backdrop-filter: blur(8px); color: var(--primary-dark) !important; font-weight: 600; padding: 0.8rem 1rem; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(13, 148, 136, 0.2) !important; }
+        .table tbody td { background-color: white; vertical-align: middle; padding: 0.75rem 1rem; font-size: 0.9rem; color: var(--dark); border-bottom: 1px solid var(--light-gray); }
+        .log-link { color: var(--primary) !important; text-decoration: underline; }
+        .log-link:hover { color: var(--primary-dark) !important; }
+        .badge { font-size: 0.75rem; padding: 0.4em 0.8em; border-radius: 15px; min-width: 80px; text-align: center; font-weight: 600; border: 1px solid; }
+        .badge-success { color: var(--color-success); border-color: rgba(75, 192, 192, 0.2); background: rgba(75, 192, 192, 0.08); }
+        .badge-failure { color: var(--color-failure); border-color: rgba(247, 70, 74, 0.2); background: rgba(247, 70, 74, 0.08); }
+        .page-header p { font-size: 1rem; color: var(--gray); margin-top: 0.5rem; }
+	</style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i> Accueil</a></li>
+                <li class="nav-item"><a class="nav-link" href="/events"><i class="far fa-calendar-alt"></i> Événements</a></li>
+                <li class="nav-item"><a class="nav-link" href="/create_user_organisation"><i class="fas fa-users"></i> Utilisateurs</a></li>
+                <li class="nav-item"><a class="nav-link" href="/stats_user"><i class="fas fa-chart-line"></i> Statistique</a></li>
+                <li class="nav-item"><a class="nav-link" href="/administration"><i class="fas fa-cog"></i> Administration</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/export_user"><i class="fas fa-file-export"></i> Export</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user"></i> Profil
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-right d-none d-lg-block">
+            <a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Exporter des fichiers</h1>
+			<p>Gérez l'exportation des données utilisateurs et organisations ici.</p>
+        </div>
+
+        <div class="content-block">
+            <h2>Formulaire d'exportation</h2>
+            <form id="exportForm" action="/export" method="post">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="typeExport" class="form-label">Type d'export</label>
+                            <select class="form-select" id="typeExport" name="typeExport" required>
+                                <option value="export_utilisateurs">Exporter utilisateurs</option>
+                                <option value="export_utilisateurs_organisation">Exporter utilisateurs organisation</option>
+                                <option value="exporter_utilisateurs_evenement">Exporter des utilisateurs rattachés à un événement</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3" id="eventIdGroup" style="display: none;">
+                            <label for="eventId" class="form-label">ID de l'événement</label>
+                            <input type="text" class="form-control" id="eventId" name="eventId" placeholder="Entrez l'ID de l'événement">
+                        </div>
+
+                        <div class="mb-3" id="orgCodeGroup" style="display: none;">
+                            <label for="orgCode" class="form-label">Code de l'organisation</label>
+                            <input type="text" class="form-control" id="orgCode" name="orgCode" placeholder="Entrez le code de l'organisation">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cultureExport" class="form-label">Culture d'export</label>
+                            <select class="form-select" id="cultureExport" name="cultureExport" required>
+                                <option value="français (France)">Français (France)</option>
+                                <option value="English (United States)">Anglais (États-Unis)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fileFormat" class="form-label">Format du fichier</label>
+                            <select class="form-select" id="fileFormat" name="fileFormat" required>
+                                <option value="csv">CSV</option>
+                                <option value="xlsx">XLSX</option>
+                            </select>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-custom-action"><i class="fas fa-download"></i> Exporter</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="content-block">
+            <h2>Historique des exports</h2>
+            <form method="GET" action="/export_user" class="mb-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="filterDate" class="form-label">Filtrer par date :</label>
+                        <input type="date" class="form-control" id="filterDate" name="filterDate" value="<%= filterDate %>">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="filterResult" class="form-label">Filtrer par résultat :</label>
+                        <select class="form-select" id="filterResult" name="filterResult">
+                            <option value="" <%= filterResult === '' ? 'selected' : '' %>>Tous</option>
+                            <option value="Succès" <%= filterResult === 'Succès' ? 'selected' : '' %>>Succès</option>
+                            <option value="Échec" <%= filterResult === 'Échec' ? 'selected' : '' %>>Échec</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-custom-action"><i class="fas fa-filter"></i> Appliquer</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="mb-3">
+                <button id="delete-old-logs-btn" class="btn btn-custom-danger"><i class="fas fa-trash-alt"></i> Supprimer les historiques de plus de 7 jours</button>
+                <p id="delete-message" style="color: green; display: none;"></p>
+            </div>
+
+            <div class="table-responsive-scrollable">
+                <% if (exportHistory && exportHistory.length > 0) { %>
+                    <table class="table table-hover align-middle" id="exportHistoryTable">
+                        <thead>
+                            <tr>
+                                <th>Nom du fichier</th>
+                                <th>Super Admin</th>
+                                <th>Date</th>
+                                <th>Résultat</th>
+                                <th>Log</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% exportHistory.forEach(history => { %>
+                                <tr>
+                                    <td><%= history.fileName %></td>
+                                    <td><%= history.superAdmin %></td>
+                                    <td><%= history.exportDate && history.exportDate.toDate ? new Date(history.exportDate.toDate()).toLocaleString('fr-FR') : 'Date invalide' %></td>
+                                    <td>
+                                        <% if (history.result === 'Succès') { %>
+                                            <span class="badge badge-success">Succès</span>
+                                        <% } else if (history.result === 'Échec') { %>
+                                            <span class="badge badge-failure">Échec</span>
+                                        <% } else { %>
+                                            <%= history.result %>
+                                        <% } %>
+                                    </td>
+                                    <td><a href="/export_history/<%= history.id %>" class="log-link"><%= history.log %></a></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p class="text-center">Aucun historique d'exportation disponible.</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const typeExportSelect = document.getElementById('typeExport');
+        const eventIdGroup = document.getElementById('eventIdGroup');
+        const orgCodeGroup = document.getElementById('orgCodeGroup');
+
+        function updateFormFields() {
+            const typeExport = typeExportSelect.value;
+            if (typeExport === 'exporter_utilisateurs_evenement') {
+                eventIdGroup.style.display = 'block';
+                orgCodeGroup.style.display = 'none';
+                document.getElementById('eventId').setAttribute('required', 'required');
+                document.getElementById('orgCode').removeAttribute('required');
+            } else if (typeExport === 'export_utilisateurs_organisation') {
+                eventIdGroup.style.display = 'none';
+                orgCodeGroup.style.display = 'block';
+                document.getElementById('eventId').removeAttribute('required');
+                document.getElementById('orgCode').setAttribute('required', 'required');
+            } else {
+                eventIdGroup.style.display = 'none';
+                orgCodeGroup.style.display = 'none';
+                document.getElementById('eventId').removeAttribute('required');
+                document.getElementById('orgCode').removeAttribute('required');
+            }
+        }
+
+        typeExportSelect.addEventListener('change', updateFormFields);
+        updateFormFields();
+
+        document.getElementById('exportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const formData = new FormData(form);
+
+            fetch('/export', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+                const contentDisposition = response.headers.get('Content-Disposition');
+                return response.blob().then(blob => ({ blob, contentDisposition }));
+            })
+            .then(({ blob, contentDisposition }) => {
+                let fileName = 'exported_file';
+                if (contentDisposition) {
+                    const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
+                    if (fileNameMatch && fileNameMatch[1]) {
+                        fileName = fileNameMatch[1];
+                    }
+                }
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Succès',
+                    text: 'Exportation réussie ! Le fichier a été téléchargé.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.reload();
+                });
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Échec de l\'exportation',
+                    text: error.message || 'Une erreur est survenue lors de l\'exportation',
+                    confirmButtonText: 'OK'
+                });
+            });
+        });
+
+        document.getElementById('filterResult').addEventListener('change', function() {
+            const filterValue = this.value;
+            const rows = document.getElementById('exportHistoryTable')?.getElementsByTagName('tr');
+            if (!rows) return;
+            for (let i = 1; i < rows.length; i++) {
+                const resultCell = rows[i].getElementsByTagName('td')[3];
+                const resultText = resultCell.textContent || resultCell.innerText;
+                rows[i].style.display = (filterValue === '' || resultText === filterValue) ? '' : 'none';
+            }
+        });
+
+        function deleteOldLogs() {
+            fetch('/delete-old-logs')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('delete-message').style.display = 'block';
+                    document.getElementById('delete-message').textContent = data.message;
+                    setTimeout(() => location.reload(), 2000);
+                })
+                .catch(error => {
+                    document.getElementById('delete-message').style.display = 'block';
+                    document.getElementById('delete-message').style.color = 'red';
+                    document.getElementById('delete-message').textContent = 'Erreur lors de la suppression';
+                });
+        }
+
+        document.getElementById('delete-old-logs-btn').addEventListener('click', deleteOldLogs);
+
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('/get_user_info');
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+                const user = await response.json();
+                document.getElementById('userFullName').textContent = `${user.name || ''} ${user.surname || ''}`.trim() || 'Utilisateur';
+                document.getElementById('userEmail').textContent = user.email || 'Email non disponible';
+            } catch (error) {
+                console.error('Erreur fetchUserInfo:', error);
+                document.getElementById('userFullName').textContent = 'Erreur';
+                document.getElementById('userEmail').textContent = 'Chargement impossible';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchUserInfo();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail Evenvo | Gestion des Événements</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        /* === Styles Base === */
+        :root {
+            --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
+            --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
+            --gray: #64748B; --light-gray: #e2e8f0; /* Gris clair pour les grilles */
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --navbar-bg: rgba(162, 217, 206, 0.3); --navbar-hover-bg: rgba(162, 217, 206, 0.4);
+            --navbar-border: rgba(255, 255, 255, 0.2);
+            --navbar-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 20px rgba(13, 148, 136, 0.05);
+            --navbar-hover-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 6px 25px rgba(13, 148, 136, 0.1);
+            --card-border: rgba(13, 148, 136, 0.15); --card-hover-border: rgba(13, 148, 136, 0.4);
+            --card-shadow: 0 6px 15px rgba(190, 190, 190, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+            --card-hover-shadow: 0 12px 28px rgba(13, 148, 136, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+            --sans: 'Hellix', 'Arial', sans-serif;
+            --color-events: #0D9488; --color-users: #F59E0B; --color-stats: #FF9999;
+            --color-admin: #A78BFA; --color-secondary: #64748B;
+            --color-coming: #F59E0B;
+        }
+        /* ... (Le reste du CSS identique sauf Modals et SweetAlert ci-dessous) ... */
+         body { font-family: var(--sans); background-color: #F1F5F9; color: var(--dark); min-height: 100vh; margin: 0; padding-top: 90px; }
+        .navbar { background: var(--navbar-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 0.4rem 1rem; box-shadow: var(--navbar-shadow); border: 1px solid var(--navbar-border); border-radius: 20px; position: fixed; width: 96%; left: 2%; top: 10px; z-index: 1030; display: flex; justify-content: space-between; align-items: center; transition: all 0.4s ease; }
+        .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
+        .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
+        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
+        .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
+        .nav-link.active { color: var(--light) !important; background: var(--navbar-bg) !important; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1) !important; font-weight: 600; box-shadow: none; text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); }
+        .nav-link i { font-size: 1rem; }
+        .dropdown-toggle::after { margin-left: 0.4rem; border-top-color: currentColor; transition: transform 0.3s ease; }
+        .nav-item.show .dropdown-toggle::after, .nav-item.dropdown:hover .dropdown-toggle::after { transform: rotate(180deg); }
+        .dropdown-menu { background: #FFFFFF; border: 1px solid var(--navbar-border); border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); padding: 0.75rem; margin-top: 0.6rem !important; }
+        .dropdown-item-text strong { color: var(--dark); font-weight: 600; } .dropdown-item-text small { color: var(--gray); font-size: 0.8rem; display: block; margin-top: 2px; }
+        .dropdown-divider { border-top: 1px solid rgba(0, 0, 0, 0.1); margin: 0.5rem 0; }
+        .dropdown-item { font-size: 0.85rem; color: var(--primary-dark); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease; background: transparent; }
+        .dropdown-item:hover { background: var(--primary); color: var(--light); transform: translateX(3px); box-shadow: none; }
+        .navbar-right { margin-left: auto; }
+        .main-content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+        .page-header { margin-bottom: 2rem; text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
+        .page-header p { font-size: 1rem; color: var(--gray); margin-top: 0.5rem; }
+        .content-block { background: var(--card-bg); border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--card-border); padding: 1.75rem; margin-bottom: 1.5rem; overflow: hidden; }
+        .row.graphic-row > [class*="col-"] > .content-block { margin-bottom: 1rem; }
+        .content-block h2 { font-size: 1.3rem; font-weight: 600; color: var(--dark); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--light-gray); }
+        .btn-custom-action { display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 500; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 25px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.1); transition: all 0.25s ease; text-decoration: none; cursor: pointer; }
+        .btn-custom-action i { margin-right: 0.4rem; }
+        .btn-custom-action:hover { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); transform: scale(1.03); }
+        .btn-custom-secondary { display: inline-flex; align-items: center; justify-content: center; background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.2); color: var(--gray); border-radius: 25px; padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 500; transition: all 0.25s ease; border: 1px solid; }
+        .btn-custom-secondary:hover { background: var(--gray); color: white; border-color: var(--gray); box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2); transform: scale(1.03); }
+        .btn-custom-danger { display: inline-flex; align-items: center; justify-content: center; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #EF4444; border-radius: 25px; padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 500; transition: all 0.25s ease; border: 1px solid; }
+        .btn-custom-danger:hover { background: #EF4444; color: white; border-color: #EF4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); transform: scale(1.03); }
+        .create-event-btn-container { text-align: center; margin-bottom: 1.5rem; }
+        #eventFormContainer { display: none; }
+        #create-event-form .form-label { font-weight: 500; font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem; }
+        #create-event-form .form-control, #create-event-form .form-select { border-radius: 8px; border: 1px solid var(--light-gray); padding: 0.6rem 1rem; font-size: 0.9rem; background-color: rgba(255, 255, 255, 0.7); }
+        #create-event-form .form-control:focus, #create-event-form .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.25); }
+        #create-event-form .btn-container { margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem; }
+        .table-responsive-scrollable { max-height: 500px; overflow-y: auto; border: 1px solid var(--light-gray); border-radius: 8px; }
+        .table { margin-bottom: 0; border-collapse: separate; border-spacing: 0; }
+        .table thead th { background: var(--navbar-bg) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--primary-dark) !important; font-weight: 600; text-align: center; padding: 0.8rem 1rem; vertical-align: middle; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(13, 148, 136, 0.2) !important; }
+        .table thead th:first-child { border-top-left-radius: 7px; } .table thead th:last-child { border-top-right-radius: 7px; }
+        .table tbody td { background-color: white; text-align: center; vertical-align: middle; padding: 0.75rem 1rem; font-size: 0.9rem; color: var(--dark); border-right: 1px solid var(--light-gray); border-bottom: 1px solid var(--light-gray); }
+        .table tbody td:last-child { border-right: 0; } .table tbody tr:last-child td { border-bottom: 0; }
+        .table-hover tbody tr:hover td { background-color: #f1f5f9; cursor: pointer; }
+        .table tbody tr.selected td { background-color: #E2E8F0; }
+        .badge { display: inline-block; font-size: 0.75rem; padding: 0.4em 0.8em; border-radius: 15px; min-width: 80px; text-align: center; font-weight: 600; letter-spacing: 0.5px; transition: all 0.25s ease; user-select: none; background: transparent; border: 1px solid; margin: 0 0.25rem; }
+        .badge-success { color: var(--color-events); border-color: rgba(13, 148, 136, 0.2); background: rgba(13, 148, 136, 0.08); }
+        .badge-success:hover { background: var(--color-events); color: white; border-color: var(--color-events); box-shadow: 0 2px 5px rgba(13, 148, 136, 0.3); transform: scale(1.03); }
+        .badge-danger { color: var(--color-stats); border-color: rgba(255, 153, 153, 0.2); background: rgba(255, 153, 153, 0.08); }
+        .badge-danger:hover { background: var(--color-stats); color: white; border-color: var(--color-stats); box-shadow: 0 2px 5px rgba(255, 153, 153, 0.3); transform: scale(1.03); }
+        .badge-warning { color: var(--color-coming); border-color: rgba(245, 158, 11, 0.2); background: rgba(245, 158, 11, 0.08); }
+        .badge-warning:hover { background: var(--color-coming); color: white; border-color: var(--color-coming); box-shadow: 0 2px 5px rgba(245, 158, 11, 0.3); transform: scale(1.03); }
+        .counts-container { text-align: center; margin-top: 1rem; width: 100%; }
+        #totalEventsCount { display: block; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 0.375rem 0.75rem; font-size: 0.95rem; line-height: 1.5; color: var(--dark); background-color: #fff; border: 1px solid var(--light-gray); border-radius: 0.25rem; }
+        #calendar { max-width: 100%; margin: 0 auto; }
+        .fc { font-family: var(--sans); font-size: 0.9rem; }
+        .fc .fc-toolbar { margin-bottom: 1.5em !important; padding-bottom: 1em; border-bottom: 1px solid var(--light-gray); display: flex; justify-content: space-between; flex-wrap: wrap; }
+        .fc .fc-toolbar-title { font-size: 1.2rem; font-weight: 600; color: var(--dark); }
+        .fc .fc-button { background: none !important; border: none !important; color: var(--gray) !important; box-shadow: none !important; text-transform: none !important; padding: 0.4em 0.8em !important; margin: 0 0.2em !important; border-radius: 6px !important; transition: color 0.2s ease, background-color 0.2s ease; position: relative; font-weight: 500; }
+        .fc .fc-button:hover { color: var(--primary-dark) !important; background-color: rgba(13, 148, 136, 0.05) !important; }
+        .fc .fc-button-primary.fc-button-active { color: var(--primary-dark) !important; background-color: rgba(13, 148, 136, 0.15) !important; box-shadow: none !important; }
+        .fc .fc-today-button { color: var(--gray) !important; }
+        .fc .fc-today-button:hover { color: var(--primary-dark) !important; background-color: rgba(13, 148, 136, 0.05) !important; }
+        .fc .fc-today-button.fc-button-active { color: var(--primary-dark) !important; background-color: rgba(13, 148, 136, 0.15) !important; }
+        .fc .fc-icon { font-size: 1.1em; vertical-align: text-bottom; }
+        .fc .fc-daygrid-day-number { color: var(--dark); padding: 0.5em; }
+        .fc .fc-day-today { background-color: rgba(13, 148, 136, 0.08) !important; }
+        .fc .fc-daygrid-day:hover { background-color: rgba(13, 148, 136, 0.05); }
+        .fc .fc-col-header-cell { background-color: #F8FAFC !important; color: var(--gray) !important; font-weight: 500; border: none !important; padding: 0.8em 0 !important; }
+        .fc-theme-standard .fc-scrollgrid { border: none !important; }
+        .fc-event { border: 1px solid var(--color-admin) !important; background-color: rgba(167, 139, 250, 0.2) !important; color: #333333 !important; padding: 2px 5px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+        .fc-event .fc-event-title { color: #333333 !important; }
+        .fc-list-event { background-color: rgba(167, 139, 250, 0.2) !important; border: 1px solid var(--color-admin) !important; }
+        .fc-list-event .fc-list-event-title a, .fc-list-event .fc-list-event-time { color: #333333 !important; }
+        .chart-container { position: relative; height: 300px; width: 100%; }
+        .row.g-3.graphic-row { row-gap: 1rem; }
+        .modal-content { border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); background-color: var(--light); }
+        .modal-header { background-color: var(--primary); color: white; border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom: none; padding: 1rem 1.5rem; }
+        .modal-header .btn-close { filter: brightness(0) invert(1); }
+        .modal-title { font-size: 1.1rem; font-weight: 600; }
+        .modal-body { padding: 1.5rem; }
+        .modal-body p { margin-bottom: 0.8rem; font-size: 0.95rem; color: var(--gray); }
+        .modal-body p strong { color: var(--dark); min-width: 120px; display: inline-block; }
+        .modal-footer { border-top: 1px solid var(--light-gray); padding: 1rem 1.5rem; display: flex; justify-content: center; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+        .modal-footer .btn { min-width: 100px; }
+        #editEventModal .modal-footer .btn { min-width: 120px; }
+        #editEventModal .form-label { font-weight: 500; font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem; }
+        #editEventModal .form-control, #editEventModal .form-select { border-radius: 8px; border: 1px solid var(--light-gray); padding: 0.6rem 1rem; font-size: 0.9rem; background-color: rgba(255, 255, 255, 0.7); }
+        #editEventModal .form-control:focus, #editEventModal .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.25); }
+
+        /* MODIFICATION: Ajout d'espace après l'icône poubelle */
+        #eventModal #deleteEventBtn i {
+            margin-right: 0.5rem;
+        }
+
+        /* --- SweetAlert --- */
+        .swal2-popup { border-radius: 12px !important; font-family: var(--sans) !important; }
+        .swal2-title { color: var(--dark) !important; font-weight: 600 !important; }
+        .swal2-html-container { color: var(--gray) !important; }
+        .swal2-confirm, .swal2-cancel { border-radius: 25px !important; padding: 0.6rem 1.5rem !important; font-weight: 500 !important; transition: all 0.25s ease !important; box-shadow: none !important; border: 1px solid transparent !important; }
+
+        /* Style SPÉCIFIQUE pour le bouton OK des Swal de SUCCÈS */
+        .swal2-confirm.swal-confirm-button-success {
+            background: rgba(13, 148, 136, 0.08) !important; /* Fond vert clair transparent */
+            border: 1px solid rgba(13, 148, 136, 0.2) !important; /* Bordure vert clair */
+            color: var(--primary) !important; /* Texte vert foncé */
+            box-shadow: none !important;
+        }
+        .swal2-confirm.swal-confirm-button-success:hover {
+            background: var(--primary) !important; /* Fond vert foncé plein */
+            color: white !important; /* Texte blanc */
+            border-color: var(--primary) !important; /* Bordure vert foncé */
+            transform: scale(1.03); /* Effet de zoom léger */
+        }
+
+        /* Style par défaut pour le bouton rouge (supprimer) */
+        /* Assure-toi que cette règle ne cible pas le bouton succès */
+        .swal2-confirm.swal2-styled.swal2-default-outline:not(.swal-confirm-button-success) {
+            background-color: #EF4444 !important;
+            border-color: #EF4444 !important;
+            color: white !important;
+        }
+        .swal2-confirm.swal2-styled.swal2-default-outline:not(.swal-confirm-button-success):hover {
+            background-color: #dc2626 !important;
+            border-color: #dc2626 !important;
+            transform: scale(1.03);
+        }
+
+        /* Style pour le bouton Annuler (gris) */
+        .swal2-cancel.swal2-styled.swal2-default-outline {
+            background-color: rgba(100, 116, 139, 0.1) !important;
+            border: 1px solid rgba(100, 116, 139, 0.2) !important;
+            color: var(--gray) !important;
+        }
+        .swal2-cancel.swal2-styled.swal2-default-outline:hover {
+            background-color: var(--gray) !important;
+            border-color: var(--gray) !important;
+            color: white !important;
+            transform: scale(1.03);
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 991.98px) { .navbar-nav { margin-top: 1rem; flex-direction: column; align-items: stretch; width: 100%; } .nav-item { width: 100%; } .nav-link { justify-content: flex-start; width: 100%; margin-bottom: 0.5rem; padding: 0.5rem 1rem; } .navbar-right { display: none; } .dropdown-menu { width: 95%; } }
+        @media (max-width: 767.98px) { body { padding-top: 80px; } .navbar { width: 94%; left: 3%; top: 10px; padding: 0.5rem 1rem; border-radius: 15px; } .main-content { padding: 1.5rem; } .content-block { padding: 1.25rem; border-radius: 12px; margin-bottom: 1rem; } .page-header h1 { font-size: 1.5rem; } .fc .fc-toolbar { flex-direction: column; align-items: center; gap: 0.5rem; } .fc .fc-toolbar .fc-toolbar-chunk:nth-child(2) { order: -1; margin-bottom: 0.5rem; } .chart-container { height: 250px; } .modal-footer { justify-content: center; } .modal-footer .btn { width: 45%; min-width: unset;} }
+
+    </style>
+</head>
+<body>
+     <!-- ... (HTML identique) ... -->
+     <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i> <span class="d-lg-none">Accueil</span></a></li>
+                <li class="nav-item"><a class="nav-link active" href="/events"><i class="far fa-calendar-alt"></i> Événements</a></li>
+                <li class="nav-item"><a class="nav-link" href="/create_user_organisation"><i class="fas fa-users"></i> Utilisateurs</a></li>
+                <li class="nav-item"><a class="nav-link" href="/stats_user"><i class="fas fa-chart-line"></i> Statistique</a></li>
+                <li class="nav-item"><a class="nav-link" href="/administration"><i class="fas fa-cog"></i> Administration</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user"></i> <span class="d-lg-none">Profil</span></a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-right d-none d-lg-block"><a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a></div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Gestion des Événements</h1>
+			<p>Gérez et consultez vos événements en toute simplicité.</p>
+        </div>
+
+        <div class="create-event-btn-container">
+            <button id="createEventBtn" class="btn btn-custom-action"><i class="fas fa-plus"></i> Créer un nouvel événement</button>
+        </div>
+
+        <div class="content-block" id="eventFormContainer">
+            <h2>Créer un nouvel événement</h2>
+            <form action="/create_event" method="POST" id="create-event-form">
+                <div class="row g-3">
+                    <div class="col-md-6"><label for="event_name" class="form-label">Nom</label><input type="text" class="form-control" id="event_name" name="event_name" required></div>
+                    <div class="col-md-6"><label for="address" class="form-label">Adresse</label><input type="text" class="form-control" id="address" name="address" required></div>
+                    <div class="col-md-4"><label for="start_date" class="form-label">Début</label><input type="date" class="form-control" id="start_date" name="start_date" required></div>
+                    <div class="col-md-4"><label for="end_date" class="form-label">Fin</label><input type="date" class="form-control" id="end_date" name="end_date" required></div>
+                    <div class="col-md-4"><label for="wilaya" class="form-label">Wilaya</label><select class="form-select" id="wilaya" name="wilaya" required><option value="" selected disabled>Choisir...</option></select></div>
+                </div>
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-custom-action"><i class="fas fa-check"></i> Valider</button>
+                    <button type="button" id="annuleBtn" class="btn btn-custom-secondary"><i class="fas fa-times"></i> Annuler</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="content-block">
+            <h2>Liste des événements</h2>
+            <div class="table-responsive-scrollable">
+                <table class="table table-hover">
+                    <thead><tr><th>ID</th><th>Nom</th><th>Début</th><th>Fin</th><th>Adresse</th><th>Wilaya</th><th>Statut</th></tr></thead>
+                    <tbody>
+                        <% events.forEach(event => { %>
+                        <tr class="event-row"
+                            data-id="<%= event.id %>"
+                            data-name="<%= event.name %>"
+                            data-start="<%= event.startDate %>"
+                            data-end="<%= event.endDate %>"
+                            data-address="<%= event.address %>"
+                            data-wilaya="<%= event.wilaya %>"
+                            data-status="<%= event.status %>">
+                            <td><%= event.id %></td>
+                            <td><%= event.name %></td>
+                            <td><%= new Date(event.startDate).toLocaleDateString('fr-FR') %></td>
+                            <td><%= new Date(event.endDate).toLocaleDateString('fr-FR') %></td>
+                            <td><%= event.address %></td>
+                            <td><%= event.wilaya %></td>
+                            <td>
+                                <% if (event.status === 'Actif') { %>
+                                    <span class="badge badge-success">Actif</span>
+                                <% } else if (event.status === 'Terminé') { %>
+                                    <span class="badge badge-danger">Terminé</span>
+                                <% } else { %>
+                                    <span class="badge badge-warning">À venir</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <% }); %>
+                        <% if (events.length === 0) { %>
+                        <tr><td colspan="7" class="text-center text-muted py-4">Aucun événement trouvé.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+             <div class="counts-container">
+                <span id="totalEventsCount" class="form-control">
+                    Nombre total d'événements : <%= events.length %>
+                </span>
+            </div>
+        </div>
+
+        <div class="row g-3 graphic-row">
+             <div class="col-lg-7">
+                <div class="content-block">
+                    <h2>Calendrier des disponibilités</h2>
+                    <div id="calendar"></div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="content-block">
+                    <h2>Événements par Statut</h2>
+                    <div class="chart-container"><canvas id="eventsStatusChart"></canvas></div>
+                </div>
+                <div class="content-block">
+                    <h2>Événements par Mois (Année en cours)</h2>
+                    <div class="chart-container"><canvas id="eventsPerMonthChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 graphic-row">
+            <div class="col-md-6">
+                <div class="content-block">
+                    <h2>Événements par Jour (7 derniers jours)</h2>
+                    <div class="chart-container"><canvas id="eventsPerDayChart"></canvas></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="content-block">
+                    <h2>Événements par Semaine (4 dernières)</h2>
+                    <div class="chart-container"><canvas id="eventsPerWeekChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+        <div class="row g-3 graphic-row">
+            <div class="col-md-6">
+                <div class="content-block">
+                    <h2>Événements par An (±5 ans)</h2>
+                    <div class="chart-container"><canvas id="eventsPerYearChart"></canvas></div>
+                </div>
+            </div>
+            <div class="col-md-6"></div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title" id="eventModalLabel">Détails</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                <div class="modal-body">
+                    <p><strong>ID :</strong> <span id="modalEventId"></span></p>
+                    <p><strong>Nom :</strong> <span id="modalEventName"></span></p>
+                    <p><strong>Début :</strong> <span id="modalEventStart"></span></p>
+                    <p><strong>Fin :</strong> <span id="modalEventEnd"></span></p>
+                    <p><strong>Adresse :</strong> <span id="modalEventAddress"></span></p>
+                    <p><strong>Wilaya :</strong> <span id="modalEventWilaya"></span></p>
+                    <p><strong>Statut :</strong> <span id="modalEventStatus" class="badge"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <a id="accessEventBtn" href="#" class="btn btn-custom-action"><i class="fas fa-eye"></i> Accéder</a>
+                    <button id="modifEventBtn" type="button" class="btn btn-custom-action"><i class="fas fa-pencil-alt"></i> Modifier</button>
+                    <button id="deleteEventBtn" type="button" class="btn btn-custom-danger"><i class="fas fa-trash-alt"></i> Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="editEventModal" tabindex="-1" aria-labelledby="editEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title" id="editEventModalLabel">Modifier l'événement</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                <div class="modal-body">
+                    <form id="editEventForm">
+                        <input type="hidden" id="editEventId" name="eventId">
+                        <div class="mb-3"><label for="editEventName" class="form-label">Nom</label><input type="text" class="form-control" id="editEventName" name="name" required></div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6"><label for="editEventStart" class="form-label">Début</label><input type="date" class="form-control" id="editEventStart" name="startDate" required></div>
+                            <div class="col-md-6"><label for="editEventEnd" class="form-label">Fin</label><input type="date" class="form-control" id="editEventEnd" name="endDate" required></div>
+                        </div>
+                        <div class="mb-3"><label for="editEventAddress" class="form-label">Adresse</label><input type="text" class="form-control" id="editEventAddress" name="address" required></div>
+                        <div class="mb-3"><label for="editEventWilaya" class="form-label">Wilaya</label><select class="form-select" id="editEventWilaya" name="wilaya" required><option value="">Sélectionner...</option></select></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-custom-action" id="saveEditBtn"><i class="fas fa-save"></i> Enregistrer</button>
+                    <button type="button" class="btn btn-custom-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/locales/fr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+    <script>
+        // === DATA & CONSTANTES ===
+        // ... (identique) ...
+        const eventsData = <%- JSON.stringify(events || []) %>;
+        const algerianWilayas = ["Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa", "Biskra", "Béchar", "Blida", "Bouira", "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "Sétif", "Saïda", "Skikda", "Sidi Bel Abbès", "Annaba", "Guelma", "Constantine", "Médéa", "Mostaganem", "M'Sila", "Mascara", "Ouargla", "Oran", "El Bayadh", "Illizi", "Bordj Bou Arreridj", "Boumerdès", "El Tarf", "Tindouf", "Tissemsilt", "El Oued", "Khenchela", "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma", "Aïn Témouchent", "Ghardaïa", "Relizane", "Timimoun", "Bordj Badji Mokhtar", "Ouled Djellal", "Béni Abbès", "In Salah", "In Guezzam", "Touggourt", "Djanet", "El M'Ghair", "El Menia"];
+        const colorEvents = '#0D9488';
+        const colorUsers = '#F59E0B';
+        const colorStats = '#FF9999';
+        const colorAdmin = '#A78BFA';
+        const colorSecondary = '#64748B';
+        const colorComing = '#F59E0B';
+
+        let eventModalInstance = null;
+        let editEventModalInstance = null;
+
+
+        // === INITIALISATION AU CHARGEMENT ===
+        // ... (identique) ...
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM chargé, initialisation...");
+            try {
+                const eventModalEl = document.getElementById('eventModal');
+                const editEventModalEl = document.getElementById('editEventModal');
+                if (eventModalEl) eventModalInstance = new bootstrap.Modal(eventModalEl);
+                if (editEventModalEl) editEventModalInstance = new bootstrap.Modal(editEventModalEl);
+
+                fetchUserInfo();
+                populateWilayaSelects();
+                setupCreateFormToggle();
+                setupCreateFormSubmit();
+                setupTableInteractions();
+                setupDetailsModalButtons();
+                setupEditModalSaveButton();
+                initializeCalendar();
+                initializeCharts();
+
+                const eventFormContainer = document.getElementById('eventFormContainer');
+                const formVisible = localStorage.getItem('formVisible');
+                if (eventFormContainer) { eventFormContainer.style.display = (formVisible === 'true') ? 'block' : 'none'; }
+
+                window.addEventListener('beforeunload', () => { localStorage.removeItem('formVisible'); });
+                console.log("Initialisation terminée.");
+            } catch (error) {
+                console.error("Erreur grave lors de l'initialisation:", error);
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'alert alert-danger mt-3';
+                    errorDiv.textContent = 'Une erreur critique est survenue lors du chargement de la page. Vérifiez la console pour les détails.';
+                    mainContent.prepend(errorDiv);
+                }
+            }
+        });
+
+        // === FONCTIONS UTILITAIRES & SETUP ===
+        // ... (fonctions fetchUserInfo, etc. identiques) ...
+        async function fetchUserInfo() { /* ... (inchangé) ... */
+            console.log("fetchUserInfo: Début");
+            try {
+                const response = await fetch('/get_user_info');
+                if (!response.ok) {
+                     let errorMsg = `Erreur HTTP fetchUserInfo: ${response.status}`;
+                     try { const errData = await response.json(); errorMsg = errData.message || errData.error || errorMsg; } catch(e) {}
+                     throw new Error(errorMsg);
+                }
+                const user = await response.json();
+                const fullName = `${user.name || ''} ${user.surname || ''}`.trim();
+                const userFullNameEl = document.getElementById('userFullName');
+                const userEmailEl = document.getElementById('userEmail');
+                if (userFullNameEl) userFullNameEl.textContent = fullName || 'Utilisateur';
+                if (userEmailEl) userEmailEl.textContent = user.email || 'Email non disponible';
+                console.log("fetchUserInfo: Infos utilisateur chargées:", user);
+            } catch (error) {
+                console.error('fetchUserInfo: Erreur:', error);
+                const userFullNameEl = document.getElementById('userFullName');
+                const userEmailEl = document.getElementById('userEmail');
+                if (userFullNameEl) userFullNameEl.textContent = 'Erreur';
+                if (userEmailEl) userEmailEl.textContent = 'Chargement impossible';
+            }
+         }
+        function populateWilayaSelects() { /* ... (inchangé) ... */
+            console.log("populateWilayaSelects: Début");
+            const wilayaSelect = document.getElementById('wilaya');
+            const editWilayaSelect = document.getElementById('editEventWilaya');
+            [wilayaSelect, editWilayaSelect].forEach(select => {
+                if (!select) { console.warn("populateWilayaSelects: Select non trouvé"); return; }
+                const currentValue = select.value;
+                const placeholderOption = select.querySelector('option[disabled], option[value=""]');
+                select.innerHTML = '';
+                if (placeholderOption) select.appendChild(placeholderOption);
+
+                algerianWilayas.forEach(wilaya => {
+                    const option = document.createElement('option');
+                    option.value = wilaya;
+                    option.textContent = wilaya;
+                    select.appendChild(option);
+                });
+                if (select === editWilayaSelect && currentValue) {
+                    select.value = currentValue;
+                }
+            });
+            console.log("populateWilayaSelects: Terminé");
+         }
+        function setupCreateFormToggle() { /* ... (inchangé) ... */
+            console.log("setupCreateFormToggle: Début");
+            const createEventBtn = document.getElementById('createEventBtn');
+            const annuleBtn = document.getElementById('annuleBtn');
+            const eventFormContainer = document.getElementById('eventFormContainer');
+            if (createEventBtn && annuleBtn && eventFormContainer) {
+                createEventBtn.addEventListener('click', () => {
+                    console.log("Bouton Créer cliqué");
+                    eventFormContainer.style.display = 'block';
+                    localStorage.setItem('formVisible', 'true');
+                    window.scrollTo({ top: eventFormContainer.offsetTop - 100, behavior: 'smooth' });
+                });
+                annuleBtn.addEventListener('click', () => {
+                    console.log("Bouton Annuler (form) cliqué");
+                    eventFormContainer.style.display = 'none';
+                    localStorage.setItem('formVisible', 'false');
+                    const form = document.getElementById('create-event-form');
+                    if (form) form.reset();
+                });
+                console.log("setupCreateFormToggle: Écouteurs attachés");
+            } else {
+                console.warn("setupCreateFormToggle: Éléments manquants", { createEventBtn, annuleBtn, eventFormContainer });
+            }
+         }
+        function setupCreateFormSubmit() {
+             console.log("setupCreateFormSubmit: Début");
+            const createEventForm = document.getElementById('create-event-form');
+            if (createEventForm) {
+                createEventForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    console.log("Formulaire création soumis");
+
+                    const submitButton = createEventForm.querySelector('button[type="submit"]');
+                    const originalButtonText = submitButton.innerHTML;
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Validation...`;
+
+                    const startDate = document.getElementById('start_date').value;
+                    const endDate = document.getElementById('end_date').value;
+
+                    if (new Date(endDate) < new Date(startDate)) {
+                        Swal.fire({ icon: 'error', title: 'Date invalide', text: 'La date de fin ne peut pas être antérieure à la date de début.', customClass: { confirmButton: 'swal2-confirm swal2-styled' } });
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalButtonText;
+                        return;
+                    }
+
+                    const formData = new FormData(createEventForm);
+                    const eventData = {};
+                    formData.forEach((value, key) => { eventData[key] = value; });
+                    console.log("Données formulaire création:", eventData);
+
+                    try {
+                        const response = await fetch('/create_event', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(eventData)
+                        });
+
+                        const result = await response.json();
+                        console.log("Réponse serveur création:", response.status, result);
+
+                        if (!response.ok) {
+                            throw new Error(result.error || result.message || `Erreur ${response.status}`);
+                        }
+
+                        // MODIFICATION ICI: Affichage du Swal succès avec bouton stylé
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Succès!',
+                            text: result.message || "Événement créé avec succès.",
+                            showConfirmButton: true,
+                            confirmButtonText: 'OK',
+                            customClass: {
+                                confirmButton: 'swal2-confirm swal2-styled swal-confirm-button-success', // Ajout de la classe pour le style succès
+                                popup: 'swal2-popup'
+                            }
+                        }).then((swalResult) => {
+                            if (swalResult.isConfirmed) {
+                                localStorage.setItem('formVisible', 'false');
+                                location.reload();
+                            }
+                        });
+
+                    } catch (error) {
+                        console.error('Erreur création événement:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erreur',
+                            text: error.message || "Impossible de créer l'événement.",
+                             customClass: {
+                                confirmButton: 'swal2-confirm swal2-styled' // Garde le style par défaut (rouge?) pour l'erreur
+                            }
+                        });
+                         submitButton.disabled = false;
+                         submitButton.innerHTML = originalButtonText;
+                    } finally {
+                        // Réactiver le bouton même si le Swal succès n'est pas cliqué (au cas où)
+                        // Note : le rechargement de page le fera de toute façon
+                        if(submitButton.disabled) {
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = originalButtonText;
+                        }
+                    }
+                });
+                console.log("setupCreateFormSubmit: Écouteur attaché");
+            } else {
+                console.warn("setupCreateFormSubmit: Formulaire #create-event-form non trouvé");
+            }
+         }
+        function setupTableInteractions() { /* ... (inchangé) ... */
+            console.log("setupTableInteractions: Début");
+            if (!eventModalInstance) { console.error("setupTableInteractions: Instance du modal de détails non initialisée!"); return; }
+
+            let rowCount = 0;
+            document.querySelectorAll('.event-row').forEach(row => {
+                rowCount++;
+                row.addEventListener('click', function() {
+                    const eventId = this.dataset.id;
+                    console.log(`Ligne ${eventId} cliquée`);
+
+                    document.querySelectorAll('.event-row').forEach(r => r.classList.remove('selected'));
+                    this.classList.add('selected');
+
+                    const eventName = this.dataset.name;
+                    const eventStart = new Date(this.dataset.start).toLocaleDateString('fr-FR');
+                    const eventEnd = new Date(this.dataset.end).toLocaleDateString('fr-FR');
+                    const eventAddress = this.dataset.address;
+                    const eventWilaya = this.dataset.wilaya;
+                    const eventStatus = this.dataset.status;
+
+                    document.getElementById('modalEventId').textContent = eventId;
+                    document.getElementById('modalEventName').textContent = eventName;
+                    document.getElementById('modalEventStart').textContent = eventStart;
+                    document.getElementById('modalEventEnd').textContent = eventEnd;
+                    document.getElementById('modalEventAddress').textContent = eventAddress;
+                    document.getElementById('modalEventWilaya').textContent = eventWilaya;
+
+                    const statusSpan = document.getElementById('modalEventStatus');
+                    statusSpan.textContent = eventStatus;
+                    statusSpan.className = `badge ${
+                        eventStatus === 'Actif' ? 'badge-success' :
+                        eventStatus === 'Terminé' ? 'badge-danger' : 'badge-warning'
+                    }`;
+
+                    document.getElementById('accessEventBtn').href = `/event/${eventId}`;
+                    document.getElementById('modifEventBtn').dataset.eventId = eventId;
+                    document.getElementById('deleteEventBtn').dataset.eventId = eventId;
+
+                    eventModalInstance.show();
+                });
+            });
+            console.log(`setupTableInteractions: Écouteurs attachés à ${rowCount} lignes.`);
+         }
+        function setupDetailsModalButtons() { /* ... (inchangé) ... */
+            console.log("setupDetailsModalButtons: Début");
+            if (!eventModalInstance) { console.error("setupDetailsModalButtons: Instance du modal de détails non initialisée!"); return; }
+
+            const accessBtn = document.getElementById('accessEventBtn');
+            const modifBtn = document.getElementById('modifEventBtn');
+            const deleteBtn = document.getElementById('deleteEventBtn');
+
+            if (accessBtn) {
+                accessBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetUrl = this.href;
+                    console.log("Bouton Accéder cliqué, URL:", targetUrl);
+                    eventModalInstance.hide();
+                    setTimeout(() => { window.location.href = targetUrl; }, 300);
+                });
+            } else { console.warn("setupDetailsModalButtons: Bouton Accéder non trouvé"); }
+
+            if (modifBtn) {
+                modifBtn.addEventListener('click', function() {
+                    const eventId = this.dataset.eventId;
+                    if (!eventId) { console.error("Modifier: ID manquant sur le bouton"); return; }
+                    console.log(`Bouton Modifier cliqué pour ID: ${eventId}`);
+                    openEditModal(eventId);
+                    eventModalInstance.hide();
+                });
+            } else { console.warn("setupDetailsModalButtons: Bouton Modifier non trouvé"); }
+
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    const eventId = this.dataset.eventId;
+                    if (!eventId) { console.error("Supprimer: ID manquant sur le bouton"); return; }
+                    console.log(`Bouton Supprimer cliqué pour ID: ${eventId}`);
+                    confirmDeleteEvent(eventId);
+                });
+            } else { console.warn("setupDetailsModalButtons: Bouton Supprimer non trouvé"); }
+
+            console.log("setupDetailsModalButtons: Écouteurs attachés");
+         }
+        function openEditModal(eventId) { /* ... (inchangé) ... */
+             console.log(`openEditModal: Ouverture pour ID ${eventId}`);
+             if (!editEventModalInstance) { console.error("openEditModal: Instance du modal de modification non initialisée!"); return; }
+
+            const row = document.querySelector(`.event-row[data-id="${eventId}"]`);
+            if (!row) {
+                console.error(`openEditModal: Ligne non trouvée pour ID ${eventId}`);
+                Swal.fire('Erreur', 'Impossible de trouver les données de l\'événement sélectionné.', 'error');
+                return;
+            }
+
+            document.getElementById('editEventId').value = eventId;
+            document.getElementById('editEventName').value = row.dataset.name;
+            document.getElementById('editEventStart').value = row.dataset.start;
+            document.getElementById('editEventEnd').value = row.dataset.end;
+            document.getElementById('editEventAddress').value = row.dataset.address;
+            document.getElementById('editEventWilaya').value = row.dataset.wilaya;
+
+            editEventModalInstance.show();
+            console.log(`openEditModal: Modal affiché pour ID ${eventId}`);
+         }
+        function setupEditModalSaveButton() {
+            console.log("setupEditModalSaveButton: Début");
+            const saveEditBtn = document.getElementById('saveEditBtn');
+            const editEventForm = document.getElementById('editEventForm');
+
+            if (!saveEditBtn || !editEventForm || !editEventModalInstance) {
+                console.error("setupEditModalSaveButton: Éléments manquants", { saveEditBtn, editEventForm, editEventModalInstance });
+                return;
+            }
+
+            saveEditBtn.addEventListener('click', async () => {
+                const eventId = document.getElementById('editEventId').value;
+                if (!eventId) { console.error("Enregistrer Modif: ID non trouvé dans le formulaire."); return; }
+                console.log(`Bouton Enregistrer (modif) cliqué pour ID: ${eventId}`);
+
+                const startDate = document.getElementById('editEventStart').value;
+                const endDate = document.getElementById('editEventEnd').value;
+                if (new Date(endDate) < new Date(startDate)) {
+                    Swal.fire({ icon: 'error', title: 'Date invalide', text: 'La date de fin doit être postérieure ou égale à la date de début.', customClass: { confirmButton: 'swal2-confirm swal2-styled' } });
+                    return;
+                }
+
+                 const originalButtonText = saveEditBtn.innerHTML;
+                 saveEditBtn.disabled = true;
+                 saveEditBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enregistrement...`;
+
+                const formData = new FormData(editEventForm);
+                const updatedEvent = {};
+                 updatedEvent.name = formData.get('name');
+                 updatedEvent.startDate = formData.get('startDate');
+                 updatedEvent.endDate = formData.get('endDate');
+                 updatedEvent.address = formData.get('address');
+                 updatedEvent.wilaya = formData.get('wilaya');
+                console.log("Données modifiées envoyées:", updatedEvent);
+
+                try {
+                    const response = await fetch(`/update_event/${eventId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updatedEvent)
+                    });
+
+                    const data = await response.json();
+                    console.log("Réponse serveur modification:", response.status, data);
+                    if (!response.ok) { throw new Error(data.message || data.error || `Erreur ${response.status}`); }
+
+                    editEventModalInstance.hide();
+
+                    // MODIFICATION ICI: Affichage du Swal succès avec bouton stylé
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succès!',
+                        text: data.message || 'L\'événement a été modifié avec succès.',
+                        customClass: {
+                            confirmButton: 'swal2-confirm swal2-styled swal-confirm-button-success' // Ajout de la classe pour le style succès
+                        }
+                    }).then(() => { location.reload(); });
+
+                } catch (error) {
+                    console.error('Erreur modification événement:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur de Modification',
+                        text: `La modification a échoué: ${error.message || 'Une erreur inconnue est survenue.'}`,
+                        customClass: {
+                            confirmButton: 'swal2-confirm swal2-styled' // Garde le style par défaut (rouge?) pour l'erreur
+                        }
+                    });
+                     saveEditBtn.disabled = false;
+                     saveEditBtn.innerHTML = originalButtonText;
+                } finally {
+                     // S'assurer que le bouton est réactivé si on reste sur la page
+                     if(saveEditBtn.disabled) {
+                         saveEditBtn.disabled = false;
+                         saveEditBtn.innerHTML = originalButtonText;
+                     }
+                }
+            });
+            console.log("setupEditModalSaveButton: Écouteur attaché");
+        }
+        function confirmDeleteEvent(eventId) {
+             console.log(`confirmDeleteEvent: Confirmation pour ID ${eventId}`);
+             if (!eventModalInstance) { console.error("confirmDeleteEvent: Instance du modal de détails non initialisée!"); }
+
+            Swal.fire({
+                title: 'Êtes-vous sûr?',
+                text: "La suppression de cet événement entraînera la suppression des votes associés et le retrait de l'événement pour les utilisateurs liés. Cette action est irréversible!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Oui, supprimer!',
+                cancelButtonText: 'Annuler',
+                reverseButtons: true,
+                customClass: {
+                    // La classe par défaut swal2-default-outline cible le bouton rouge
+                    confirmButton: 'swal2-confirm swal2-styled swal2-default-outline',
+                    cancelButton: 'swal2-cancel swal2-styled swal2-default-outline'
+                    // Pas besoin de la classe succès ici
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log(`confirmDeleteEvent: Suppression confirmée pour ID ${eventId}`);
+                    fetch(`/delete_event/${eventId}`, { method: 'DELETE' })
+                        .then(async response => {
+                            const data = await response.json();
+                            console.log("Réponse serveur suppression:", response.status, data);
+                            if (!response.ok) { throw new Error(data.message || data.error || `Erreur ${response.status}`); }
+                             if (eventModalInstance) eventModalInstance.hide();
+
+                            // Affichage du Swal succès APRÈS suppression (utilise maintenant le style succès)
+                            Swal.fire({
+                                title: 'Supprimé!',
+                                text: data.message || 'L\'événement a été supprimé avec succès.',
+                                icon: 'success',
+                                customClass: {
+                                     confirmButton: 'swal2-confirm swal2-styled swal-confirm-button-success' // Style succès
+                                }
+                            }).then(() => location.reload());
+                        })
+                        .catch(error => {
+                            console.error('Erreur suppression fetch:', error);
+                            Swal.fire({
+                                title: 'Erreur de Suppression',
+                                text: `La suppression a échoué: ${error.message || 'Une erreur inconnue est survenue.'}`,
+                                icon: 'error',
+                                customClass: {
+                                    confirmButton: 'swal2-confirm swal2-styled' // Style erreur (rouge?)
+                                }
+                            });
+                        });
+                } else {
+                    console.log(`confirmDeleteEvent: Suppression annulée pour ID ${eventId}`);
+                }
+            });
+         }
+        function openDetailsModalForEvent(eventId) { /* ... (inchangé) ... */
+            console.log(`openDetailsModalForEvent: Tentative d'ouverture pour ID ${eventId}`);
+            const row = document.querySelector(`.event-row[data-id="${eventId}"]`);
+            if (row) { row.click(); }
+            else { console.warn(`openDetailsModalForEvent: Ligne non trouvée pour ID ${eventId}`); }
+         }
+        function initializeCalendar() { /* ... (inchangé) ... */
+             console.log("initializeCalendar: Début");
+            const calendarEl = document.getElementById('calendar');
+            if (calendarEl && typeof FullCalendar !== 'undefined') {
+                console.log("Élément calendrier trouvé, initialisation FullCalendar...");
+                try {
+                    const calendarEvents = eventsData.map(event => ({
+                        title: event.name,
+                        start: event.startDate,
+                        end: event.endDate,
+                        allDay: true,
+                        extendedProps: { id: event.id, address: event.address }
+                    }));
+                    console.log("Événements formatés pour calendrier:", calendarEvents.length);
+                    const calendar = new FullCalendar.Calendar(calendarEl, {
+                        initialView: 'dayGridMonth',
+                        locale: 'fr',
+                        height: 'auto',
+                        fixedWeekCount: false,
+                        headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,listWeek' },
+                        buttonText: { today: 'Aujourd\'hui', month: 'Mois', week: 'Semaine', day: 'Jour', list: 'Liste' },
+                        events: calendarEvents,
+                        eventClick: function(info) {
+                            console.log("Clic sur événement calendrier:", info.event.extendedProps.id);
+                            openDetailsModalForEvent(info.event.extendedProps.id);
+                        }
+                    });
+                    calendar.render();
+                    console.log("initializeCalendar: Calendrier rendu.");
+                } catch(error) {
+                    console.error("Erreur lors de l'initialisation de FullCalendar:", error);
+                     calendarEl.innerHTML = `<div class="alert alert-warning">Impossible de charger le calendrier.</div>`;
+                }
+            } else {
+                console.warn("initializeCalendar: Élément #calendar ou FullCalendar non trouvé.");
+                if(calendarEl) calendarEl.innerHTML = `<div class="alert alert-warning">Impossible de charger le calendrier (librairie manquante?).</div>`;
+            }
+         }
+
+        // Initialise tous les graphiques Chart.js
+        function initializeCharts() {
+            // ... (Variables et fonctions utilitaires inchangées) ...
+            console.log("initializeCharts: Début");
+            if (typeof Chart === 'undefined') {
+                console.error("initializeCharts: Chart.js non chargé.");
+                document.querySelectorAll('.chart-container canvas').forEach(canvas => {
+                    const container = canvas.parentElement;
+                    if(container) container.innerHTML = `<div class="alert alert-warning p-2 text-center small">Graphique non disponible.</div>`;
+                });
+                return;
+            }
+            console.log("Données brutes pour graphiques:", eventsData.length, "événements");
+
+            try {
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                function getWeekNumber(d) { d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7)); var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1)); var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7); return [d.getUTCFullYear(), weekNo]; }
+                function getDateOfISOWeek(w, y) { var simple = new Date(y, 0, 1 + (w - 1) * 7); var dow = simple.getDay(); var ISOweekStart = simple; if (dow <= 4) ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1); else ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay()); return ISOweekStart; }
+
+
+                // --- Options Communes pour les graphiques Bar/Line ---
+                // VERSION AVEC COULEURS HEX DIRECTES (confirmée comme correcte)
+                function chartOptions(suggestedMax = null, showXGrid = false, showYGrid = true) {
+                   const maxVal = suggestedMax !== null && suggestedMax > 0 ? Math.ceil(suggestedMax * 1.1) : (suggestedMax === 0 ? 5 : undefined);
+                    const noir = '#1E293B';
+                    const grisClair = '#e2e8f0';
+
+                    return {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, title: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true, suggestedMax: maxVal,
+                                ticks: { stepSize: 1, precision: 0, color: noir },
+                                grid: { color: showYGrid ? grisClair : 'transparent', display: showYGrid },
+                                border: { display: true, color: noir }
+                            },
+                            x: {
+                                ticks: { color: noir },
+                                grid: { display: showXGrid, color: showXGrid ? grisClair : 'transparent' },
+                                border: { display: true, color: noir }
+                             }
+                        },
+                        interaction: { mode: 'index', intersect: false },
+                    };
+                }
+
+                // --- 1. Graphique Événements par Statut (Doughnut) ---
+                // ... (Code identique, légende avec rectangles larges) ...
+                 const statusCounts = eventsData.reduce((acc, event) => {
+                    const status = event.status || 'Inconnu';
+                    acc[status] = (acc[status] || 0) + 1;
+                    return acc;
+                }, {});
+                const statusLabels = Object.keys(statusCounts);
+                const statusData = statusLabels.map(label => statusCounts[label]);
+                const statusBackgroundColors = statusLabels.map(label => {
+                    if (label === 'Actif') return 'rgba(13, 148, 136, 0.08)';
+                    if (label === 'Terminé') return 'rgba(255, 153, 153, 0.08)';
+                    return 'rgba(245, 158, 11, 0.08)';
+                });
+                const statusBorderColors = statusLabels.map(label => {
+                    if (label === 'Actif') return colorEvents;
+                    if (label === 'Terminé') return colorStats;
+                    return colorComing;
+                });
+                const statusHoverBackgroundColors = statusLabels.map(label => {
+                    if (label === 'Actif') return colorEvents;
+                    if (label === 'Terminé') return colorStats;
+                    return colorComing;
+                 });
+
+                const statusCtx = document.getElementById('eventsStatusChart')?.getContext('2d');
+                if (statusCtx) {
+                    new Chart(statusCtx, {
+                        type: 'doughnut',
+                        data: {
+                             labels: statusLabels,
+                            datasets: [{
+                                data: statusData,
+                                backgroundColor: statusBackgroundColors,
+                                borderColor: statusBorderColors,
+                                borderWidth: 1.5,
+                                hoverBackgroundColor: statusHoverBackgroundColors,
+                                borderRadius: 5,
+                                hoverOffset: 4
+                            }]
+                         },
+                        options: {
+                            responsive: true, maintainAspectRatio: false, cutout: '70%',
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: { color: '#1E293B', boxWidth: 30, boxHeight: 12, padding: 25 }
+                                },
+                                title: { display: false }
+                            }
+                        }
+                    });
+                    console.log("Graphe Statuts créé.");
+                } else { console.warn("Canvas Statuts #eventsStatusChart non trouvé"); }
+
+                // --- Autres Graphiques (Mois, Jour, Semaine, An) ---
+                // Ils utilisent tous chartOptions qui a les bonnes couleurs HEX directes
+
+                // Mois
+                 const eventsPerMonth = Array(12).fill(0);
+                eventsData.forEach(event => {
+                    const start = new Date(event.startDate);
+                    if (start.getFullYear() === currentYear) { eventsPerMonth[start.getMonth()]++; }
+                });
+                const monthLabels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+                const monthCtx = document.getElementById('eventsPerMonthChart')?.getContext('2d');
+                if (monthCtx) {
+                    const maxMonth = Math.max(...eventsPerMonth, 0);
+                    new Chart(monthCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: monthLabels,
+                            datasets: [{
+                                data: eventsPerMonth,
+                                backgroundColor: 'rgba(245, 158, 11, 0.5)',
+                                borderColor: colorComing,
+                                borderWidth: 1,
+                                borderRadius: 4
+                            }]
+                         },
+                        options: chartOptions(maxMonth, false, true)
+                    });
+                    console.log("Graphe Mois créé.");
+                } else { console.warn("Canvas Mois #eventsPerMonthChart non trouvé"); }
+
+                // Jour
+                 const eventsPerDay = {};
+                const dayLabelsForChart = [];
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(now.getDate() - 6);
+                sevenDaysAgo.setHours(0, 0, 0, 0);
+                for (let d = new Date(sevenDaysAgo); d <= now; d.setDate(d.getDate() + 1)) {
+                    const dateStr = d.toISOString().split('T')[0];
+                    const shortLabel = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+                    dayLabelsForChart.push(shortLabel);
+                    eventsPerDay[dateStr] = 0;
+                 }
+                eventsData.forEach(event => {
+                    const start = new Date(event.startDate); start.setHours(0, 0, 0, 0);
+                    const end = new Date(event.endDate); end.setHours(0, 0, 0, 0);
+                    Object.keys(eventsPerDay).forEach(dayStr => {
+                         const currentDay = new Date(dayStr); currentDay.setHours(0,0,0,0);
+                         if (currentDay >= start && currentDay <= end) { eventsPerDay[dayStr]++; }
+                     });
+                 });
+                const dayData = Object.values(eventsPerDay);
+                 const dayCtx = document.getElementById('eventsPerDayChart')?.getContext('2d');
+                if (dayCtx) {
+                    const maxDay = Math.max(...dayData, 0);
+                    new Chart(dayCtx, {
+                        type: 'line',
+                        data: {
+                             labels: dayLabelsForChart,
+                            datasets: [{
+                                data: dayData,
+                                borderColor: colorStats,
+                                backgroundColor: 'rgba(255, 153, 153, 0.1)',
+                                fill: true, tension: 0.3,
+                                pointBackgroundColor: colorStats, pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff', pointHoverBorderColor: colorStats,
+                                pointRadius: 3, pointHoverRadius: 5
+                            }]
+                        },
+                        options: chartOptions(maxDay, false, true)
+                    });
+                    console.log("Graphe Jours créé.");
+                } else { console.warn("Canvas Jours #eventsPerDayChart non trouvé"); }
+
+                // Semaine
+                 const weeklyDataMap = new Map();
+                const currentWeekTuple = getWeekNumber(now);
+                const currentWeekNum = currentWeekTuple[1];
+                const currentWeekYear = currentWeekTuple[0];
+                const weekLabelsForChart = [];
+                const weekDataIndices = {};
+                for (let i = 3; i >= 0; i--) {
+                    let weekNum = currentWeekNum - i;
+                    let year = currentWeekYear;
+                    if (weekNum <= 0) {
+                        const lastDayOfPrevYear = new Date(year - 1, 11, 31);
+                        const prevYearWeekTuple = getWeekNumber(lastDayOfPrevYear);
+                        weekNum = prevYearWeekTuple[1] + weekNum;
+                        year = year - 1;
+                    }
+                    const weekKey = `${year}-W${String(weekNum).padStart(2, '0')}`;
+                    const weekLabel = `Sem ${String(weekNum).padStart(2, '0')}`;
+                    weekLabelsForChart.push(weekLabel);
+                    weeklyDataMap.set(weekKey, 0);
+                    weekDataIndices[weekKey] = weekLabelsForChart.length - 1;
+                 }
+                eventsData.forEach(event => {
+                    const start = new Date(event.startDate);
+                    const [year, weekNum] = getWeekNumber(start);
+                    const weekKey = `${year}-W${String(weekNum).padStart(2, '0')}`;
+                    if (weeklyDataMap.has(weekKey)) { weeklyDataMap.set(weekKey, weeklyDataMap.get(weekKey) + 1); }
+                 });
+                const weekDataForChart = Array(weekLabelsForChart.length).fill(0);
+                weeklyDataMap.forEach((count, key) => {
+                    const index = weekDataIndices[key];
+                    if (index !== undefined) { weekDataForChart[index] = count; }
+                 });
+                 const weekCtx = document.getElementById('eventsPerWeekChart')?.getContext('2d');
+                if (weekCtx) {
+                    const maxWeek = Math.max(...weekDataForChart, 0);
+                    new Chart(weekCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: weekLabelsForChart,
+                            datasets: [{
+                                data: weekDataForChart,
+                                backgroundColor: 'rgba(167, 139, 250, 0.5)',
+                                borderColor: colorAdmin, borderWidth: 1, borderRadius: 4
+                            }]
+                         },
+                        options: chartOptions(maxWeek, false, true)
+                    });
+                    console.log("Graphe Semaines créé.");
+                } else { console.warn("Canvas Semaines #eventsPerWeekChart non trouvé"); }
+
+                // An
+                 const eventsPerYear = {};
+                const startYear = currentYear - 5;
+                const endYear = currentYear + 5;
+                const yearLabelsForChart = [];
+                for (let y = startYear; y <= endYear; y++) {
+                    eventsPerYear[y] = 0;
+                    yearLabelsForChart.push(y.toString());
+                 }
+                eventsData.forEach(event => {
+                    const start = new Date(event.startDate);
+                    const year = start.getFullYear();
+                    if (eventsPerYear[year] !== undefined) { eventsPerYear[year]++; }
+                 });
+                const yearData = yearLabelsForChart.map(label => eventsPerYear[label]);
+                 const yearCtx = document.getElementById('eventsPerYearChart')?.getContext('2d');
+                if (yearCtx) {
+                    const maxYear = Math.max(...yearData, 0);
+                    new Chart(yearCtx, {
+                        type: 'bar',
+                        data: {
+                             labels: yearLabelsForChart,
+                            datasets: [{
+                                data: yearData,
+                                backgroundColor: 'rgba(13, 148, 136, 0.5)',
+                                borderColor: colorEvents, borderWidth: 1, borderRadius: 4
+                            }]
+                        },
+                        options: chartOptions(maxYear, false, true)
+                    });
+                    console.log("Graphe Années créé.");
+                } else { console.warn("Canvas Années #eventsPerYearChart non trouvé"); }
+
+            } catch (error) { /* ... (Erreur inchangée) ... */
+                 console.error("Erreur lors de l'initialisation des graphiques Chart.js:", error);
+                document.querySelectorAll('.chart-container canvas').forEach(canvas => {
+                    const container = canvas.parentElement;
+                    if(container) container.innerHTML = `<div class="alert alert-warning p-2 text-center small">Erreur chargement graphique.</div>`;
+                });
+             }
+            console.log("initializeCharts: Terminé.");
+        } // Fin de initializeCharts
+
+    </script>
+</body>
+</html>

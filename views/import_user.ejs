@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importation des Fichiers</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root {
+            --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
+            --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
+            --gray: #64748B; --light-gray: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --navbar-bg: rgba(162, 217, 206, 0.3); --navbar-hover-bg: rgba(162, 217, 206, 0.4);
+            --navbar-border: rgba(255, 255, 255, 0.2);
+            --navbar-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 20px rgba(13, 148, 136, 0.05);
+            --navbar-hover-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 6px 25px rgba(13, 148, 136, 0.1);
+            --card-border: rgba(13, 148, 136, 0.15); --card-hover-border: rgba(13, 148, 136, 0.4);
+            --card-shadow: 0 6px 15px rgba(190, 190, 190, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+            --card-hover-shadow: 0 12px 28px rgba(13, 148, 136, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+            --sans: 'Hellix', 'Arial', sans-serif;
+            --color-danger: #EF4444;
+            --color-import: #22D3EE;
+            --color-success: #4BC0C0; /* Vert pour Succès, comme Présent */
+            --color-partial: #F5A623; /* Orange pour Partiel */
+            --color-failure: #F7464A; /* Rouge pour Échec, comme Absent */
+        }
+        body { font-family: var(--sans); background-color: #F1F5F9; color: var(--dark); min-height: 100vh; margin: 0; padding-top: 90px; }
+
+        /* Navbar */
+        .navbar { background: var(--navbar-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 0.4rem 1rem; box-shadow: var(--navbar-shadow); border: 1px solid var(--navbar-border); border-radius: 20px; position: fixed; width: 96%; left: 2%; top: 10px; z-index: 1030; display: flex; justify-content: space-between; align-items: center; transition: all 0.4s ease; }
+        .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
+        .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
+        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
+        .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
+        .nav-link.active { color: var(--light) !important; background: var(--navbar-bg) !important; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1) !important; font-weight: 600; box-shadow: none; text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); }
+        .nav-link i { font-size: 1rem; }
+        .dropdown-toggle::after { margin-left: 0.4rem; border-top-color: currentColor; transition: transform 0.3s ease; }
+        .nav-item.show .dropdown-toggle::after, .nav-item.dropdown:hover .dropdown-toggle::after { transform: rotate(180deg); }
+        .dropdown-menu { background: white; border: 1px solid var(--light-gray); border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); padding: 0.75rem; margin-top: 0.6rem !important; }
+        .dropdown-item { font-size: 0.85rem; color: var(--primary-dark); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease; }
+        .dropdown-item:hover { background: var(--primary); color: var(--light); transform: translateX(3px); }
+        .navbar-right { margin-left: auto; }
+
+        /* Contenu */
+        .main-content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+        .page-header { margin-bottom: 2.5rem; text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
+        .page-header p { font-size: 1rem; color: var(--gray); margin-top: 0.5rem; }
+        .content-block { background: var(--card-bg); border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--card-border); padding: 1.75rem; margin-bottom: 1.5rem; transition: all 0.3s ease; }
+        .content-block:hover { border-color: var(--card-hover-border); box-shadow: var(--card-hover-shadow); transform: translateY(-4px); }
+        .content-block h2 { font-size: 1.3rem; font-weight: 600; color: var(--dark); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--light-gray); }
+        .content-block h3 { font-size: 1.15rem; font-weight: 600; color: var(--dark); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--light-gray); }
+
+        /* Boutons */
+        .btn-custom-action { display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 500; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 25px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.1); transition: all 0.25s ease; }
+        .btn-custom-action i { margin-right: 0.6rem; }
+        .btn-custom-action:hover { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); transform: scale(1.03); }
+        .btn-custom-danger { display: inline-flex; align-items: center; justify-content: center; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: var(--color-danger); border-radius: 25px; padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 500; transition: all 0.25s ease; border: 1px solid; }
+        .btn-custom-danger:hover { background: var(--color-danger); color: white; border-color: var(--color-danger); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); transform: scale(1.03); }
+
+        /* Formulaire */
+        .form-label { font-weight: 500; font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem; }
+        .form-control, .form-select { border-radius: 8px; border: 1px solid var(--light-gray); padding: 0.6rem 1rem; font-size: 0.9rem; background-color: rgba(255, 255, 255, 0.7); }
+        .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.25); }
+        .custom-file-input { display: none; }
+        .custom-file-label { display: inline-block; width: 100%; border: 1px solid var(--light-gray); border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.9rem; background-color: rgba(255, 255, 255, 0.7); cursor: pointer; text-align: left; }
+        .custom-file-label:hover { border-color: var(--primary); }
+        .form-control-static { padding: 0.6rem 0; font-size: 0.9rem; color: var(--dark); }
+        .columns-table { margin-top: 1.5rem; }
+        .columns-table p { margin-top: 1rem; font-size: 0.9rem; color: var(--dark); }
+        .columns-table .columns-title { font-size: 0.9rem; font-weight: 600; color: var(--dark); margin-bottom: 1rem; }
+
+        /* Tableau */
+        .table-responsive-scrollable { max-height: 400px; overflow-y: auto; border: 1px solid var(--light-gray); border-radius: 8px; }
+        .table { margin-bottom: 0; border-collapse: separate; border-spacing: 0; }
+        .table thead th { background: var(--navbar-bg) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--primary-dark) !important; font-weight: 600; text-align: left; padding: 0.8rem 1rem; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(13, 148, 136, 0.2) !important; border-right: 1px solid var(--light-gray); }
+        .table thead th:last-child { border-right: none; }
+        .table tbody td { background-color: white; text-align: left; vertical-align: middle; padding: 0.75rem 1rem; font-size: 0.9rem; color: var(--dark); border-bottom: 1px solid var(--light-gray); border-right: 1px solid var(--light-gray); }
+        .table tbody td:last-child { border-right: none; }
+        .table tbody tr:last-child td { border-bottom: none; }
+        .table-hover tbody tr:hover td { background-color: #f1f5f9; }
+        .log-link { color: var(--primary) !important; text-decoration: underline; }
+        .log-link:hover { color: var(--primary-dark) !important; }
+
+        /* Badges pour les résultats */
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.4em 0.8em;
+            border-radius: 15px;
+            min-width: 80px;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.25s ease;
+            user-select: none;
+            background: transparent;
+            border: 1px solid;
+            margin: 0 0.25rem;
+        }
+        .badge-success {
+            color: var(--color-success);
+            border-color: rgba(75, 192, 192, 0.2);
+            background: rgba(75, 192, 192, 0.08);
+        }
+        .badge-success:hover {
+            background: var(--color-success);
+            color: white;
+            border-color: var(--color-success);
+            box-shadow: 0 2px 5px rgba(75, 192, 192, 0.3);
+            transform: scale(1.03);
+        }
+        .badge-partial {
+            color: var(--color-partial);
+            border-color: rgba(245, 166, 35, 0.2);
+            background: rgba(245, 166, 35, 0.08);
+        }
+        .badge-partial:hover {
+            background: var(--color-partial);
+            color: white;
+            border-color: var(--color-partial);
+            box-shadow: 0 2px 5px rgba(245, 166, 35, 0.3);
+            transform: scale(1.03);
+        }
+        .badge-failure {
+            color: var(--color-failure);
+            border-color: rgba(247, 70, 74, 0.2);
+            background: rgba(247, 70, 74, 0.08);
+        }
+        .badge-failure:hover {
+            background: var(--color-failure);
+            color: white;
+            border-color: var(--color-failure);
+            box-shadow: 0 2px 5px rgba(247, 70, 74, 0.3);
+            transform: scale(1.03);
+        }
+
+        /* Filtres */
+        #filterResult option[value="Échec"] { background-color: rgba(247, 70, 74, 0.08); }
+        #filterResult option[value="Partiel"] { background-color: rgba(245, 166, 35, 0.08); }
+        #filterResult option[value="Succès"] { background-color: rgba(75, 192, 192, 0.08); }
+        #filterResult option[value=""] { background-color: #ffffff; }
+
+        /* Personnalisation SweetAlert2 */
+        .swal2-confirm {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: var(--primary) !important;
+            font-weight: 500 !important;
+            font-size: 0.9rem !important;
+            padding: 0.6rem 1.2rem !important;
+            border-radius: 25px !important;
+            background: rgba(13, 148, 136, 0.08) !important;
+            border: 1px solid rgba(13, 148, 136, 0.1) !important;
+            transition: all 0.25s ease !important;
+            backdrop-filter: blur(5px) !important;
+            -webkit-backdrop-filter: blur(5px) !important;
+        }
+        .swal2-confirm:hover {
+            background: var(--primary) !important;
+            color: white !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25) !important;
+            transform: scale(1.03) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i> <span class="d-lg-none">Accueil</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="/events"><i class="far fa-calendar-alt"></i> Événements</a></li>
+                <li class="nav-item"><a class="nav-link" href="/create_user_organisation"><i class="fas fa-users"></i> Utilisateurs</a></li>
+                <li class="nav-item"><a class="nav-link" href="/stats_user"><i class="fas fa-chart-line"></i> Statistique</a></li>
+                <li class="nav-item"><a class="nav-link" href="/administration"><i class="fas fa-cog"></i> Administration</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/import_user"><i class="fas fa-file-import"></i> Import</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user"></i> <span class="d-lg-none">Profil</span></a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-right d-none d-lg-block"><a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a></div>
+    </nav>
+
+    <!-- Contenu Principal -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Importation des Fichiers</h1>
+            <p>Gérez l'importation des données utilisateurs et organisations ici.</p>
+        </div>
+
+        <div class="content-block">
+            <h2>Formulaire d'importation</h2>
+            <form id="importForm" action="/import" method="post" enctype="multipart/form-data">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="typeImport" class="form-label">Type d'import</label>
+                            <select class="form-select" id="typeImport" name="typeImport" required>
+                                <option value="import_utilisateurs">Importer utilisateurs</option>
+                                <option value="ajouter_utilisateurs_evenement">Ajouter utilisateurs à un évènement</option>
+                                <option value="ajouter_utilisateurs_organisation">Ajouter utilisateurs à une organisation</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cultureImport" class="form-label">Culture d'import</label>
+                            <select class="form-select" id="cultureImport" name="cultureImport" required>
+                                <option value="français (France)">Français (France)</option>
+                                <option value="English (United States)">Anglais (États-Unis)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modeImport" class="form-label">Mode d'import</label>
+                            <input type="hidden" name="modeImport" value="ajoutsEtMiseAJour">
+                            <p class="form-control-static">Ajouts et mise à jour</p>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fileImport" class="form-label">Fichier à importer</label>
+                            <input type="file" class="custom-file-input" id="fileImport" name="fileImport" accept=".csv,.xlsx" required>
+                            <label class="custom-file-label" for="fileImport">Choisir un fichier (*.csv, *.xlsx)</label>
+                            <div class="columns-table mt-3">
+                                <p class="columns-title"><strong>Colonnes attendues dans le fichier :</strong></p>
+                                <table class="table table-bordered" id="columnsTable">
+                                    <thead>
+                                        <tr id="columnsRow"></tr>
+                                    </thead>
+                                </table>
+                                <p id="namingRule"><strong>Règle de nommage :</strong></p>
+                                <% if (roles && roles.length > 0) { %>
+                                    <p><strong>Rôles valides :</strong> <%= roles.join(', ') %></p>
+                                <% } else { %>
+                                    <p><strong>Rôles valides :</strong> Aucun rôle défini pour le moment.</p>
+                                <% } %>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-custom-action"><i class="fas fa-upload"></i> Importer</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="content-block">
+            <h3>Historique des imports</h3>
+            <form method="GET" action="/import_user" class="mb-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="filterDate" class="form-label">Filtrer par date :</label>
+                        <input type="date" class="form-control" id="filterDate" name="filterDate" value="<%= filterDate %>">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="filterResult" class="form-label">Filtrer par résultat :</label>
+                        <select class="form-select" id="filterResult" name="filterResult">
+                            <option value="" <%= filterResult === '' ? 'selected' : '' %>>Tous</option>
+                            <option value="Succès" <%= filterResult === 'Succès' ? 'selected' : '' %>>Succès</option>
+                            <option value="Échec" <%= filterResult === 'Échec' ? 'selected' : '' %>>Échec</option>
+                            <option value="Partiel" <%= filterResult === 'Partiel' ? 'selected' : '' %>>Partiel</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-custom-action"><i class="fas fa-filter"></i> Appliquer</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="mb-3">
+                <button id="delete-old-logs-btn" class="btn btn-custom-danger"><i class="fas fa-trash-alt"></i> Supprimer les historiques de plus de 7 jours</button>
+                <p id="delete-message" style="color: green; display: none;"></p>
+            </div>
+
+            <div class="table-responsive-scrollable">
+                <% if (importHistory && importHistory.length > 0) { %>
+                    <table class="table table-hover align-middle" id="importHistoryTable">
+                        <thead>
+                            <tr>
+                                <th>Nom du fichier</th>
+                                <th>Super Admin</th>
+                                <th>Date d'import</th>
+                                <th>Résultat</th>
+                                <th>Log</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <% importHistory.forEach(history => { %>
+                                <tr>
+                                    <td><%= history.fileName %></td>
+                                    <td><%= history.superAdmin %></td>
+                                    <td><%= new Date(history.importDate.toDate ? history.importDate.toDate() : history.importDate).toLocaleString('fr-FR') %></td>
+                                    <td>
+                                        <% if (history.result === 'Succès') { %>
+                                            <span class="badge badge-success">Succès</span>
+                                        <% } else if (history.result === 'Partiel') { %>
+                                            <span class="badge badge-partial">Partiel</span>
+                                        <% } else if (history.result === 'Échec') { %>
+                                            <span class="badge badge-failure">Échec</span>
+                                        <% } else { %>
+                                            <%= history.result %>
+                                        <% } %>
+                                    </td>
+                                    <td><a href="/import_history/<%= history.id %>" class="log-link"><%= history.log %></a></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p class="text-center" id="noHistoryMessage">Aucun historique d'importation disponible.</p>
+                    <table class="table table-hover align-middle" id="importHistoryTable" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>Nom du fichier</th>
+                                <th>Super Admin</th>
+                                <th>Date d'import</th>
+                                <th>Résultat</th>
+                                <th>Log</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody"></tbody>
+                    </table>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const superAdmin = '<%= superAdmin || "Inconnu" %>';
+        const typeImportSelect = document.getElementById('typeImport');
+        const columnsRow = document.getElementById('columnsRow');
+        const namingRule = document.getElementById('namingRule');
+
+        function updateColumnsAndRules() {
+            columnsRow.innerHTML = '';
+            const typeImport = typeImportSelect.value;
+            let columns = [];
+            let ruleText = '';
+
+            if (typeImport === 'import_utilisateurs') {
+                columns = ['birthdate', 'civility', 'email', 'name', 'surname', 'role'];
+                ruleText = 'Le fichier doit être nommé import_utilisateurs.xlsx ou import_utilisateurs.csv pour l\'importation d\'utilisateurs.';
+            } else if (typeImport === 'ajouter_utilisateurs_evenement') {
+                columns = ['id_user', 'name', 'surname', 'email', 'id_event', 'name_event'];
+                ruleText = 'Le fichier doit être nommé ajouter_utilisateurs_evenement.xlsx ou ajouter_utilisateurs_evenement.csv pour attacher des utilisateurs à un événement.';
+            } else if (typeImport === 'ajouter_utilisateurs_organisation') {
+                columns = ['id_user', 'name', 'surname', 'email', 'name_organization', 'code_organization'];
+                ruleText = 'Le fichier doit être nommé ajouter_utilisateurs_organisation.xlsx ou ajouter_utilisateurs_organisation.csv pour rattacher des utilisateurs à une organisation.';
+            }
+
+            columns.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col;
+                columnsRow.appendChild(th);
+            });
+            namingRule.innerHTML = `<strong>Règle de nommage :</strong> ${ruleText}`;
+        }
+
+        updateColumnsAndRules();
+        typeImportSelect.addEventListener('change', updateColumnsAndRules);
+
+        document.querySelector('.custom-file-input').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Choisir un fichier (*.csv, *.xlsx)';
+            document.querySelector('.custom-file-label').textContent = fileName;
+        });
+
+        function addHistoryRow(history) {
+            const tableBody = document.getElementById('historyTableBody');
+            const table = document.getElementById('importHistoryTable');
+            const noHistoryMessage = document.getElementById('noHistoryMessage');
+
+            if (noHistoryMessage) {
+                noHistoryMessage.style.display = 'none';
+                table.style.display = 'table';
+            }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${history.fileName}</td>
+                <td>${history.superAdmin}</td>
+                <td>${new Date(history.importDate).toLocaleString('fr-FR')}</td>
+                <td>
+                    ${history.result === 'Succès' ? '<span class="badge badge-success">Succès</span>' : 
+                     history.result === 'Partiel' ? '<span class="badge badge-partial">Partiel</span>' : 
+                     history.result === 'Échec' ? '<span class="badge badge-failure">Échec</span>' : history.result}
+                </td>
+                <td><a href="/import_history/${history.id}" class="log-link">${history.log}</a></td>
+            `;
+            tableBody.insertBefore(tr, tableBody.firstChild);
+        }
+
+        document.getElementById('importForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const formData = new FormData(form);
+            const fileName = document.querySelector('.custom-file-input').files[0]?.name || 'Inconnu';
+
+            fetch('/import', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        const errorMatch = text.match(/Error: (.+?)(?=<br|\s+at\s+)/);
+                        const errorMessage = errorMatch ? errorMatch[1].trim() : 'Une erreur inconnue est survenue.';
+                        const historyEntry = {
+                            fileName: fileName,
+                            superAdmin: superAdmin,
+                            importDate: new Date().toISOString(),
+                            result: 'Échec',
+                            log: `Erreur: ${errorMessage}`,
+                            id: new Date().getTime()
+                        };
+                        addHistoryRow(historyEntry);
+                        throw new Error(errorMessage);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succès',
+                        text: 'Importation réussie!',
+                        confirmButtonText: 'Importer et filtrer',
+                        customClass: {
+                            confirmButton: 'swal2-confirm'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch('/import_user_data')
+                                .then(response => response.json())
+                                .then(historyData => {
+                                    const latestHistory = historyData[0];
+                                    addHistoryRow(latestHistory);
+                                });
+                        }
+                    });
+                } else {
+                    const historyEntry = {
+                        fileName: fileName,
+                        superAdmin: superAdmin,
+                        importDate: new Date().toISOString(),
+                        result: 'Échec',
+                        log: `Erreur: ${data.error || 'Une erreur est survenue'}`,
+                        id: new Date().getTime()
+                    };
+                    addHistoryRow(historyEntry);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Échec',
+                        text: data.error || 'Une erreur est survenue',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'swal2-confirm'
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: error.message,
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'swal2-confirm'
+                    }
+                });
+            });
+        });
+
+        document.getElementById('filterResult').addEventListener('change', function() {
+            const filterValue = this.value;
+            const rows = document.getElementById('historyTableBody').getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const resultCell = rows[i].getElementsByTagName('td')[3];
+                const resultText = resultCell.textContent || resultCell.innerText;
+                rows[i].style.display = (filterValue === '' || resultText === filterValue) ? '' : 'none';
+            }
+        });
+
+        function deleteOldLogs() {
+            fetch('/delete-old-logs')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('delete-message').style.display = 'block';
+                    document.getElementById('delete-message').textContent = data.message;
+                    setTimeout(() => location.reload(), 2000);
+                })
+                .catch(error => {
+                    document.getElementById('delete-message').style.display = 'block';
+                    document.getElementById('delete-message').style.color = 'red';
+                    document.getElementById('delete-message').textContent = 'Erreur lors de la suppression';
+                });
+        }
+
+        document.getElementById('delete-old-logs-btn').addEventListener('click', deleteOldLogs);
+
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('/get_user_info');
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+                const user = await response.json();
+                document.getElementById('userFullName').textContent = `${user.name || ''} ${user.surname || ''}`.trim() || 'Utilisateur';
+                document.getElementById('userEmail').textContent = user.email || 'Email non disponible';
+            } catch (error) {
+                console.error('Erreur fetchUserInfo:', error);
+                document.getElementById('userFullName').textContent = 'Erreur';
+                document.getElementById('userEmail').textContent = 'Chargement impossible';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchUserInfo();
+            const histories = <%- JSON.stringify(importHistory) %>;
+            if (histories && histories.length > 0) {
+                histories.forEach(history => {
+                    const importDate = history.importDate.toDate ? new Date(history.importDate.toDate()) : new Date(history.importDate);
+                    if (new Date() - importDate > 7 * 24 * 60 * 60 * 1000) {
+                        deleteOldLogs();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

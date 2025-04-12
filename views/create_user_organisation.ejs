@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evenvo | Création Utilisateurs & Organisations</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root {
+            --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
+            --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
+            --gray: #64748B; --light-gray: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --navbar-bg: rgba(162, 217, 206, 0.3); --navbar-hover-bg: rgba(162, 217, 206, 0.4);
+            --navbar-border: rgba(255, 255, 255, 0.2);
+            --navbar-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 20px rgba(13, 148, 136, 0.05);
+            --navbar-hover-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 6px 25px rgba(13, 148, 136, 0.1);
+            --card-border: rgba(13, 148, 136, 0.15); --card-hover-border: rgba(13, 148, 136, 0.4);
+            --card-shadow: 0 6px 15px rgba(190, 190, 190, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+            --card-hover-shadow: 0 12px 28px rgba(13, 148, 136, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+            --sans: 'Hellix', 'Arial', sans-serif;
+            --color-users: #F59E0B;    --color-users-light: #FCD34D;
+            --color-orgs: #A78BFA;     --color-orgs-light: #C4B5FD;
+        }
+        body { font-family: var(--sans); background-color: #F1F5F9; color: var(--dark); min-height: 100vh; margin: 0; padding-top: 90px; }
+
+        /* --- Navbar & Links --- */
+        .navbar { background: var(--navbar-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 0.4rem 1rem; box-shadow: var(--navbar-shadow); border: 1px solid var(--navbar-border); border-radius: 20px; position: fixed; width: 96%; left: 2%; top: 10px; z-index: 1030; display: flex; justify-content: space-between; align-items: center; transition: all 0.4s ease; }
+        .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
+        .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
+        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
+        .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
+        .nav-link.active { color: var(--light) !important; background: var(--navbar-bg) !important; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1) !important; font-weight: 600; box-shadow: none; text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); }
+        .nav-link i { font-size: 1rem; }
+        .dropdown-toggle::after { margin-left: 0.4rem; border-top-color: currentColor; transition: transform 0.3s ease; }
+        .nav-item.show .dropdown-toggle::after, .nav-item.dropdown:hover .dropdown-toggle::after { transform: rotate(180deg); }
+        .dropdown-menu { background: #FFFFFF; /* Changé en blanc uni */ border: 1px solid var(--navbar-border); border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); padding: 0.75rem; margin-top: 0.6rem !important; }
+        .dropdown-item-text strong { color: var(--dark); font-weight: 600; } 
+        .dropdown-item-text small { color: var(--gray); font-size: 0.8rem; display: block; margin-top: 2px; }
+        .dropdown-divider { border-top: 1px solid rgba(0, 0, 0, 0.1); margin: 0.5rem 0; }
+        .dropdown-item { font-size: 0.85rem; color: var(--primary-dark); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease; background: transparent; }
+        .dropdown-item:hover { background: var(--primary); color: var(--light); transform: translateX(3px); box-shadow: none; }
+        .navbar-right { margin-left: auto; }
+
+        /* --- Contenu Principal & Titre --- */
+        .main-content { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+        .page-header { margin-bottom: 2.5rem; text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); font-family: var(--sans); }
+        .page-header p { font-size: 1rem; color: var(--gray); margin-top: 0.5rem; }
+
+        /* --- Cartes --- */
+        .dashboard-card {
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
+            padding: 1.75rem; height: 100%; display: flex; flex-direction: column;
+            box-shadow: var(--card-shadow); transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative; overflow: hidden;
+        }
+        .dashboard-card:hover { transform: translateY(-6px); box-shadow: var(--card-hover-shadow); border-color: var(--card-hover-border); }
+
+        /* Icônes */
+        .card-icon-container { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; position: relative; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); flex-shrink: 0; }
+        .card-icon { font-size: 1.2rem; color: white; position: relative; z-index: 1; animation: iconPulse 2s infinite ease-in-out; }
+        @keyframes iconPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+        .card-icon-container::before { content: ''; position: absolute; width: 150%; height: 100%; background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%); border-radius: 12px; animation: shine 3.5s infinite linear; top: 0; left: -100%; transform: skewX(-25deg); z-index: 0; }
+        @keyframes shine { 0% { left: -125%; } 50% { left: 75%; } 100% { left: 75%; } }
+        .card-icon-container.users { background: linear-gradient(135deg, var(--color-users) 0%, var(--color-users-light) 100%); }
+        .card-icon-container.orgs { background: linear-gradient(135deg, var(--color-orgs) 0%, var(--color-orgs-light) 100%); }
+
+        /* Texte carte */
+        .dashboard-card .card-title { color: var(--dark); font-weight: 600; font-size: 1.15rem; margin-bottom: 0.75rem; }
+        .dashboard-card .card-text { color: var(--gray); font-size: 0.9rem; margin-bottom: 1rem; flex-grow: 1; line-height: 1.6; }
+
+        /* Indicateur de Statut */
+        .status-indicator { display: flex; align-items: center; margin-bottom: 1.5rem; font-size: 0.85rem; font-family: var(--sans); font-weight: 500; color: var(--gray); }
+        .status-dot { width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+        .dashboard-card.users .status-dot { background-color: var(--color-users); }
+        .dashboard-card.orgs .status-dot { background-color: var(--color-orgs); }
+
+        /* Boutons */
+        .btn-custom-action { display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 500; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 25px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.1); transition: all 0.25s ease; text-decoration: none; cursor: pointer; width: 100%; margin-top: auto; }
+        .btn-custom-action i { transition: transform 0.25s ease; }
+        .btn-custom-action i:first-child { margin-right: 0.6rem; }
+        .btn-custom-action i:last-child:not(:first-child) { margin-left: 0.6rem; }
+        .btn-custom-action:hover { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); transform: scale(1.03); }
+        .btn-custom-action:hover i.fa-arrow-right { transform: translateX(4px); }
+
+        /* --- SweetAlert --- */
+        .swal2-popup { border-radius: 12px !important; font-family: var(--sans) !important; }
+        .swal2-title { color: var(--dark) !important; font-weight: 600 !important; }
+        .swal2-html-container { color: var(--gray) !important; }
+        .swal2-confirm, .swal2-cancel { border-radius: 25px !important; padding: 0.6rem 1.5rem !important; font-weight: 500 !important; transition: all 0.25s ease !important; box-shadow: none !important; }
+        .swal2-confirm { background-color: #EF4444 !important; border: 1px solid #EF4444 !important; color: white !important; }
+        .swal2-confirm:hover { background-color: #dc2626 !important; border-color: #dc2626 !important; transform: scale(1.03); }
+        .swal2-cancel { background-color: rgba(100, 116, 139, 0.1) !important; border: 1px solid rgba(100, 116, 139, 0.2) !important; color: var(--gray) !important; }
+        .swal2-cancel:hover { background-color: var(--gray) !important; border-color: var(--gray) !important; color: white !important; transform: scale(1.03); }
+
+        /* --- Responsive --- */
+        @media (max-width: 991.98px) {
+            .navbar-nav { margin-top: 1rem; flex-direction: column; align-items: stretch; width: 100%; }
+            .nav-item { width: 100%; } .nav-link { justify-content: flex-start; width: 100%; margin-bottom: 0.5rem; padding: 0.5rem 1rem; }
+            .navbar-right { display: none; } .dropdown-menu { width: 95%; }
+            .dashboard-card { margin-bottom: 1.5rem; }
+        }
+        @media (max-width: 767.98px) {
+            body { padding-top: 80px; }
+            .navbar { width: 94%; left: 3%; top: 10px; padding: 0.5rem 1rem; border-radius: 15px; }
+            .main-content { padding: 1rem; }
+            .page-header h1 { font-size: 1.5rem; }
+            .dashboard-card { padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem; min-height: auto;}
+            .dashboard-card .card-title { font-size: 1.1rem; }
+            .status-indicator { margin-bottom: 1rem; font-size: 0.8rem;}
+            .row > .col-md-6:last-child .dashboard-card { margin-bottom: 0; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i> <span class="d-lg-none">Accueil</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="/events"><i class="far fa-calendar-alt"></i> Événements</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/create_user_organisation"><i class="fas fa-users"></i> Utilisateurs</a></li>
+                <li class="nav-item"><a class="nav-link" href="/stats_user"><i class="fas fa-chart-line"></i> Statistique</a></li>
+                <li class="nav-item"><a class="nav-link" href="/administration"><i class="fas fa-cog"></i> Administration</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user"></i> <span class="d-lg-none">Profil</span></a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-right d-none d-lg-block"><a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a></div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Création Utilisateurs et Organisations</h1>
+            <p>Choisissez une section pour commencer la création.</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-4 d-flex">
+                <div class="dashboard-card users h-100">
+                    <div class="card-icon-container users">
+                        <i class="fas fa-user-plus card-icon"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Gestion des utilisateurs</h3>
+                        <p class="card-text">Créez, modifiez ou supprimez des comptes utilisateurs individuels.</p>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Comptes individuels</span>
+                    </div>
+                    <a href="/create_user" class="btn btn-custom-action">
+                        Accéder <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4 d-flex">
+                <div class="dashboard-card orgs h-100">
+                    <div class="card-icon-container orgs">
+                        <i class="fas fa-building card-icon"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Gestion des organisations</h3>
+                        <p class="card-text">Créez ou gérez les organisations et leurs membres associés.</p>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Groupes & Membres</span>
+                    </div>
+                    <a href="/create_organisation" class="btn btn-custom-action">
+                         Accéder <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        async function fetchUserInfo() {
+            console.log("fetchUserInfo: Début");
+            try {
+                const response = await fetch('/get_user_info');
+                if (!response.ok) throw new Error(`Erreur HTTP fetchUserInfo: ${response.status}`);
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    const text = await response.text();
+                    throw new TypeError(`Réponse inattendue serveur (pas JSON): ${text.substring(0, 100)}...`);
+                }
+                const user = await response.json();
+                const fullName = `${user.name || ''} ${user.surname || ''}`.trim();
+                const userFullNameEl = document.getElementById('userFullName');
+                const userEmailEl = document.getElementById('userEmail');
+                if (userFullNameEl) userFullNameEl.textContent = fullName || 'Utilisateur';
+                if (userEmailEl) userEmailEl.textContent = user.email || 'Email non disponible';
+                console.log("fetchUserInfo: Infos utilisateur chargées");
+            } catch (error) {
+                console.error('fetchUserInfo: Erreur:', error);
+                const userFullNameEl = document.getElementById('userFullName');
+                const userEmailEl = document.getElementById('userEmail');
+                if (userFullNameEl) userFullNameEl.textContent = 'Erreur';
+                if (userEmailEl) userEmailEl.textContent = 'Chargement impossible';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchUserInfo();
+        });
+    </script>
+</body>
+</html>

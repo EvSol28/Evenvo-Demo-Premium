@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport de l'Événement</title>
+    <style>
+        img.chart-size {
+            max-width: 55%; /* Conserver la taille des camemberts comme demandé */
+            height: auto;
+            margin: 20px auto;
+            display: block;
+        }
+        img.logo-size {
+            max-width: 150px;
+            height: auto;
+            margin: 20px auto;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            padding: 40px;
+            background-color: #212529;
+            color: white;
+        }
+        .content {
+            margin: 30px 50px; /* Augmenter les marges latérales pour plus d'espace */
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        table th {
+            background-color: #212529;
+            color: white;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #f1f1f1;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 12px;
+            color: #777;
+        }
+        .page {
+            page-break-after: always;
+        }
+        .page:last-child {
+            page-break-after: auto;
+        }
+        /* Style pour regrouper deux camemberts par page avec plus d'espace */
+        .chart-row {
+            display: flex;
+            justify-content: space-around; /* Utiliser space-around pour un espacement équilibré */
+            align-items: center;
+            margin-bottom: 250px; /* Conserver l'espace vertical entre les lignes */
+        }
+        .chart-container {
+            flex: 0 0 35%; /* Réduire la largeur des conteneurs pour éviter le débordement */
+            text-align: center;
+            margin: 40px 20px; /* Réduire les marges pour gagner de l'espace */
+        }
+        .chart-container h3 {
+            margin-bottom: 40px; /* Conserver l'espace entre le titre et le camembert */
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <% if (logoBase64) { %>
+            <img src="data:image/png;base64,<%= logoBase64 %>" alt="Logo" class="logo-size">
+        <% } else { %>
+            <p>Logo non disponible</p>
+        <% } %>
+        <h1>Rapport de l'Événement</h1>
+        <p><strong>Nom de l'Événement :</strong> <%= eventName || 'Non spécifié' %></p>
+        <p><strong>Dates :</strong> <%= eventStartDate || 'Non spécifiée' %> - <%= eventEndDate || 'Non spécifiée' %></p>
+        <p><strong>Organisateurs :</strong> <%= organizers || 'Non spécifié' %></p>
+    </div>
+
+    <!-- Liste des Participants -->
+    <div class="content page" id="listeParticipants">
+        <h2>Liste des Participants</h2>
+        <% if (users && users.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Email</th>
+                        <th>Rôle</th>
+                        <th>Présence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach(user => { %>
+                        <tr>
+                            <td><%= user.name || 'Non spécifié' %></td>
+                            <td><%= user.surname || 'Non spécifié' %></td>
+                            <td><%= user.email || 'Non spécifié' %></td>
+                            <td><%= user.role || 'Non spécifié' %></td>
+                            <td><%= (event && event.presence && event.presence[user.id] === true) ? 'Présent' : 'Absent' %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p>Aucun participant trouvé.</p>
+        <% } %>
+    </div>
+
+    <!-- Statistiques Globales -->
+    <div class="content page" id="Statistiquesglobales">
+        <h2>Statistiques Globales</h2>
+        <% if (totalStats && stats && participantRoles && participantRoles.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rôle</th>
+                        <th>Total</th>
+                        <th>Présents</th>
+                        <th>Absents</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% participantRoles.forEach(role => { 
+                        const roleKey = role.toLowerCase();
+                        const totalKey = `total${role.charAt(0).toUpperCase() + role.slice(1)}s`;
+                    %>
+                        <tr>
+                            <td><%= role %></td>
+                            <td><%= totalStats[totalKey] || 0 %></td>
+                            <td><%= stats[roleKey] ? stats[roleKey].present : 0 %></td>
+                            <td><%= stats[roleKey] ? stats[roleKey].absent : 0 %></td>
+                        </tr>
+                    <% }); %>
+                    <tr>
+                        <td><strong>Total</strong></td>
+                        <td><strong><%= participantRoles.reduce((sum, role) => sum + (totalStats[`total${role.charAt(0).toUpperCase() + role.slice(1)}s`] || 0), 0) %></strong></td>
+                        <td><strong><%= totalStats.totalPrésents || 0 %></strong></td>
+                        <td><strong><%= totalStats.totalAbsents || 0 %></strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p>Aucune statistique disponible.</p>
+        <% } %>
+    </div>
+
+    <!-- Graphiques des Présences par Profil (y compris le total) -->
+    <% 
+    // Ajouter le camembert total comme un "rôle" fictif
+    const presenceCharts = [...participantRoles.map(role => ({ role, chart: chartBase64[role.toLowerCase()] })), 
+                           { role: 'Total Présence/Absence', chart: totalPresenceChartBase64 }];
+
+    let currentPage = [];
+    presenceCharts.forEach((item, index) => { 
+        currentPage.push(item);
+        // Afficher une page tous les deux éléments
+        if (currentPage.length === 2) {
+    %>
+        <div class="content page" id="Statistiquesgraphiques">
+            <h2 style="text-align: center; margin-bottom: 30px;">Graphiques des Présences</h2>
+            <div class="chart-row">
+                <% currentPage.forEach(item => { %>
+                    <div class="chart-container">
+                        <h3><%= item.role %></h3>
+                        <img src="data:image/png;base64,<%= item.chart || '' %>" 
+                             alt="<%= item.role %> Graphique" 
+                             class="chart-size">
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    <% 
+        currentPage = [];
+        } 
+    });
+
+    // Gérer les éléments restants (1 élément ou aucun)
+    if (currentPage.length > 0) { %>
+        <div class="content page" id="Statistiquesgraphiques">
+            <h2 style="text-align: center; margin-bottom: 30px;">Graphiques des Présences</h2>
+            <div class="chart-row">
+                <% currentPage.forEach(item => { %>
+                    <div class="chart-container">
+                        <h3><%= item.role %></h3>
+                        <img src="data:image/png;base64,<%= item.chart || '' %>" 
+                             alt="<%= item.role %> Graphique" 
+                             class="chart-size">
+                    </div>
+                <% }); %>
+                <% if (currentPage.length === 1) { %>
+                    <div class="chart-container"></div> <!-- Placeholder pour alignement -->
+                <% } %>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Tableau des Votes -->
+    <% if (voteTable && voteTable.length > 0) { %>
+        <div class="content page" id="TableauVotes">
+            <h2>Tableau des Votes</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Email</th>
+                        <th>Rôle</th>
+                        <th>Choix de Vote</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% voteTable.forEach(userVote => { %>
+                        <tr>
+                            <td><%= userVote.name || 'Inconnu' %></td>
+                            <td><%= userVote.surname || 'Inconnu' %></td>
+                            <td><%= userVote.email || 'Inconnu' %></td>
+                            <td><%= userVote.role || 'Inconnu' %></td>
+                            <td><%= userVote.voteChoice || 'Non voté' %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    <% } else { %>
+        <div class="content page" id="TableauVotes">
+            <p>Aucun vote enregistré.</p>
+        </div>
+    <% } %>
+
+    <!-- Graphiques des Votes par Profil (y compris le total) -->
+    <% 
+    // Ajouter le camembert total des votes comme un "rôle" fictif
+    const voteCharts = [...voteEligibleRoles.map(role => ({ role, chart: voteChartByRoleBase64[role.toLowerCase()] })), 
+                       { role: 'Résultat Total des Votes', chart: voteChartBase64 }];
+
+    currentPage = [];
+    voteCharts.forEach((item, index) => { 
+        currentPage.push(item);
+        // Afficher une page tous les deux éléments
+        if (currentPage.length === 2) {
+    %>
+        <div class="content page" id="GraphiqueVotesParProfil">
+            <h2 style="text-align: center; margin-bottom: 30px;">Graphiques des Votes</h2>
+            <div class="chart-row">
+                <% currentPage.forEach(item => { %>
+                    <div class="chart-container">
+                        <h3><%= item.role %></h3>
+                        <img src="data:image/png;base64,<%= item.chart || '' %>" 
+                             alt="<%= item.role %> Votes Graphique" 
+                             class="chart-size">
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    <% 
+        currentPage = [];
+        } 
+    });
+
+    // Gérer les éléments restants (1 élément ou aucun)
+    if (currentPage.length > 0) { %>
+        <div class="content page" id="GraphiqueVotesParProfil">
+            <h2 style="text-align: center; margin-bottom: 30px;">Graphiques des Votes</h2>
+            <div class="chart-row">
+                <% currentPage.forEach(item => { %>
+                    <div class="chart-container">
+                        <h3><%= item.role %></h3>
+                        <img src="data:image/png;base64,<%= item.chart || '' %>" 
+                             alt="<%= item.role %> Votes Graphique" 
+                             class="chart-size">
+                    </div>
+                <% }); %>
+                <% if (currentPage.length === 1) { %>
+                    <div class="chart-container"></div> <!-- Placeholder pour alignement -->
+                <% } %>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Pied de page -->
+    <footer class="footer">
+        <p>Généré par Evenvo - Rapport PDF 2025 Evenvo©</p>
+    </footer>
+</body>
+</html>

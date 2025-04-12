@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des Événements</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <h1>Liste des Événements</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nom Événement</th>
+                <th>Date Début</th>
+                <th>Date Fin</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+    <% events.forEach(event => { %>
+        <tr onclick="showModal('<%= event.id %>')">
+            <td><%= event.name %></td>
+            <td><%= event.startDate %></td>
+            <td><%= event.endDate %></td>
+            <td><%= event.status %></td>
+        </tr>
+    <% }); %>
+</tbody>
+
+    </table>
+
+    <!-- Modale pour les options de l'événement -->
+    <div class="modal" id="eventModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Options de l'Événement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Que souhaitez-vous faire avec cet événement ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">Supprimer</button>
+                    <button type="button" class="btn btn-primary" onclick="openEvent()">Ouvrir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale de confirmation de suppression -->
+    <div class="modal" id="confirmDeleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation de Suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer cet événement ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteEvent()">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedEventId;
+
+        function showModal(eventId) {
+            selectedEventId = eventId;
+            const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+            modal.show();
+        }
+
+        function confirmDelete() {
+            const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            modal.show();
+        }
+
+        function deleteEvent() {
+            fetch(`/events/delete/${selectedEventId}`, { method: 'DELETE' })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        alert("Échec de la suppression de l'événement.");
+                    }
+                });
+        }
+
+        function openEvent() {
+            window.location.href = `/events/${selectedEventId}`;
+        }
+    </script>
+</body>
+</html>

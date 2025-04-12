@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi Utilisateur - <%= eventName %></title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .table-container {
+            margin-top: 50px;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #f8f9fa;
+        }
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
+        }
+        th {
+            background-color: #212529 !important;
+            color: white !important;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+        }
+        td {
+            text-align: center;
+            vertical-align: middle;
+            padding: 10px;
+        }
+        .btn-info {
+            background-color: #6f42c1;
+            border-color: #6f42c1;
+        }
+        .modal-header {
+            background-color: #6f42c1;
+            color: white;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Inclusion de la bibliothèque QRCode.js -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg" style="background-color: #212529;">
+        <a class="navbar-brand text-white" href="#">NocEvent</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="/dashboard">Tableau de bord</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="#">Suivi Utilisateur</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container table-container">
+        <h1 class="text-center mb-4">Suivi des utilisateurs pour l'événement <%= eventName %></h1>
+
+        <!-- Bouton pour ouvrir le modal -->
+        <div class="text-center mb-4">
+            <button class="btn btn-info" data-toggle="modal" data-target="#createUserModal">Créer un utilisateur</button>
+        </div>
+
+        <!-- Tableau des utilisateurs -->
+        <% if (users.length === 0) { %>
+            <p>Aucun utilisateur associé à cet événement.</p>
+        <% } else { %>
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Email</th>
+                        <th>Rôle</th>
+                        <th>QR Code</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach(user => { %>
+                        <tr>
+                            <td><%= user.id %></td>
+                            <td><%= user.nom %></td>
+                            <td><%= user.prenom %></td>
+                            <td><%= user.email || 'Non renseigné' %></td>
+                            <td><%= user.role %></td>
+                            <td>
+                                <img src="<%= user.qrCode %>" alt="QR Code" width="100" height="100">
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } %>
+
+        <!-- Modal pour créer un utilisateur -->
+        <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createUserModalLabel">Créer un utilisateur</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createUserForm" action="/createUser" method="POST" onsubmit="return validateForm()">
+                            <input type="hidden" name="eventid" value="<%= eventId %>">
+
+                            <div class="form-group">
+                                <label for="nom">Nom :</label>
+                                <input type="text" class="form-control" id="nom" name="nom" required oninput="generateQRCode()">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="prenom">Prénom :</label>
+                                <input type="text" class="form-control" id="prenom" name="prenom" required oninput="generateQRCode()">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email (facultatif) :</label>
+                                <input type="email" class="form-control" id="email" name="email" oninput="generateQRCode()">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="role">Rôle :</label>
+                                <select class="form-control" id="role" name="role" required oninput="generateQRCode()">
+                                    <option value="">Sélectionnez un rôle</option>
+                                    <option value="administrateur">Administrateur</option>
+                                    <option value="membre">Membre</option>
+                                    <option value="journaliste">Journaliste</option>
+                                </select>
+                            </div>
+
+                            <!-- QR Code généré -->
+                            <div class="form-group">
+                                <label for="qrCode">QR Code :</label>
+                                <div id="qrCodeContainer" class="mb-3"></div>
+                                <input type="hidden" id="qrCode" name="qrCode" value="">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Créer l'utilisateur</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function generateQRCode() {
+            const nom = document.getElementById('nom').value;
+            const prenom = document.getElementById('prenom').value;
+            const email = document.getElementById('email').value;
+            const role = document.getElementById('role').value;
+
+            // Créer les données du QR Code (même si certains champs sont vides)
+            const qrCodeData = `Nom: ${nom}, Prénom: ${prenom}, Email: ${email}, Role: ${role}`;
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+            const qrCodeInput = document.getElementById('qrCode');
+
+            // Effacer l'ancien QR Code
+            qrCodeContainer.innerHTML = "";
+
+            // Toujours générer le QR Code si le nom ou le prénom est rempli
+            if (nom || prenom || email || role) {
+                QRCode.toCanvas(qrCodeData, { width: 128 }, function (error, canvas) {
+                    if (!error) {
+                        qrCodeContainer.appendChild(canvas);
+                        qrCodeInput.value = qrCodeData;
+                    } else {
+                        console.error("Erreur lors de la génération du QR Code :", error);
+                    }
+                });
+            }
+        }
+
+        // Validation du formulaire avant soumission
+        function validateForm() {
+            const nom = document.getElementById('nom').value;
+            const prenom = document.getElementById('prenom').value;
+            const role = document.getElementById('role').value;
+
+            // Si un des champs requis n'est pas rempli, on affiche un message d'erreur
+            if (!nom || !prenom || !role) {
+                alert("Tous les champs obligatoires doivent être remplis !");
+                return false;  // Empêche l'envoi du formulaire
+            }
+
+            // Si tout est valide, on affiche le popup de confirmation
+            alert("Utilisateur créé avec succès !");
+            return true;  // Le formulaire est envoyé
+        }
+		document.getElementById('createUserForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Empêche la soumission classique du formulaire
+
+        // Récupérer les données du formulaire
+        const formData = new FormData(this);
+
+        // Créer l'objet de données à envoyer
+        const data = {
+            nom: formData.get('nom'),
+            prenom: formData.get('prenom'),
+            email: formData.get('email'),
+            role: formData.get('role'),
+            qrCode: formData.get('qrCode'),
+            eventid: formData.get('eventid')
+        };
+
+        // Envoyer la requête via AJAX
+        fetch('/createUser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+			
+        })
+        .then(response => response.json())
+        .then(responseData => {
+            // Vérifier si l'utilisateur a été créé avec succès
+            if (responseData.message === 'Utilisateur créé avec succès') {
+                // Afficher une alerte de succès
+                //alert("Utilisateur créé avec succès !");
+                
+                // Fermer le modal avec Bootstrap
+                $('#createUserModal').modal('hide');  // Utilisation de Bootstrap pour fermer le modal
+            } else {
+                // Afficher une erreur
+                alert('Erreur lors de la création de l\'utilisateur');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur AJAX :', error);
+            alert('Une erreur est survenue');
+        });
+    });
+
+    // Fonction pour fermer le modal
+    function closeModal() {
+        $('#createUserModal').modal('hide');  // Fermer le modal avec Bootstrap
+    }
+    </script>
+</body>
+</html>

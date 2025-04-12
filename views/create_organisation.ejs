@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Organisations</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root {
+            --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
+            --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
+            --gray: #64748B; --light-gray: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --navbar-bg: rgba(162, 217, 206, 0.3); --navbar-hover-bg: rgba(162, 217, 206, 0.4);
+            --navbar-border: rgba(255, 255, 255, 0.2);
+            --navbar-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 20px rgba(13, 148, 136, 0.05);
+            --navbar-hover-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 6px 25px rgba(13, 148, 136, 0.1);
+            --card-border: rgba(13, 148, 136, 0.15); --card-hover-border: rgba(13, 148, 136, 0.4);
+            --card-shadow: 0 6px 15px rgba(190, 190, 190, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+            --card-hover-shadow: 0 12px 28px rgba(13, 148, 136, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+            --sans: 'Hellix', 'Arial', sans-serif;
+            --color-danger: #EF4444;
+        }
+        body { font-family: var(--sans); background-color: #F1F5F9; color: var(--dark); min-height: 100vh; margin: 0; padding-top: 90px; }
+        .navbar { background: var(--navbar-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 0.4rem 1rem; box-shadow: var(--navbar-shadow); border: 1px solid var(--navbar-border); border-radius: 20px; position: fixed; width: 96%; left: 2%; top: 10px; z-index: 1030; transition: all 0.4s ease; }
+        .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
+        .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
+        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
+        .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
+        .nav-link.active { color: var(--light) !important; background: var(--navbar-bg) !important; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1) !important; font-weight: 600; box-shadow: none; text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); }
+        .nav-link i { font-size: 1rem; }
+        .dropdown-toggle::after { margin-left: 0.4rem; border-top-color: currentColor; transition: transform 0.3s ease; }
+        .nav-item.show .dropdown-toggle::after, .nav-item.dropdown:hover .dropdown-toggle::after { transform: rotate(180deg); }
+        .dropdown-menu { background: white; border: 1px solid var(--light-gray); border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); padding: 0.75rem; margin-top: 0.6rem !important; }
+        .dropdown-item { font-size: 0.85rem; color: var(--primary-dark); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease; }
+        .dropdown-item:hover { background: var(--primary); color: var(--light); transform: translateX(3px); }
+        .navbar-right { margin-left: auto; }
+        .main-content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+        .page-header { margin-bottom: 2rem; text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
+        .content-block { background: var(--card-bg); border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--card-border); padding: 1.75rem; margin-bottom: 1.5rem; overflow: hidden; transition: all 0.3s ease; }
+        .content-block:hover { border-color: var(--card-hover-border); box-shadow: var(--card-hover-shadow); transform: translateY(-4px); }
+        .content-block h2 { font-size: 1.3rem; font-weight: 600; color: var(--dark); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--light-gray); text-align: left; }
+        .content-block h3 { font-size: 1.15rem; font-weight: 600; color: var(--dark); margin-bottom: 1.5rem; text-align: left; padding-bottom: 0.75rem; border-bottom: 1px solid var(--light-gray); }
+        .btn-custom-action { display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 500; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 25px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.1); transition: all 0.25s ease; text-decoration: none; cursor: pointer; }
+        .btn-custom-action:hover { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); transform: scale(1.03); }
+        .btn-custom-action i, .btn-custom-secondary i, .btn-custom-danger i { margin-right: 0.6rem; }
+        .btn-custom-secondary { display: inline-flex; align-items: center; justify-content: center; background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.2); color: var(--gray); border-radius: 25px; padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 500; transition: all 0.25s ease; border: 1px solid; }
+        .btn-custom-secondary:hover { background: var(--gray); color: white; border-color: var(--gray); box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2); transform: scale(1.03); }
+        .btn-custom-danger { display: inline-flex; align-items: center; justify-content: center; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: var(--color-danger); border-radius: 25px; padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 500; transition: all 0.25s ease; border: 1px solid; }
+        .btn-custom-danger:hover { background: var(--color-danger); color: white; border-color: var(--color-danger); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); transform: scale(1.03); }
+        .create-btn-container { text-align: center; margin-bottom: 1.5rem; }
+        #orgFormContainer { display: none; }
+        #orgForm .form-label { font-weight: 500; font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem; text-align: left; display: block; }
+        #orgForm .form-control { border-radius: 8px; border: 1px solid var(--light-gray); padding: 0.6rem 1rem; font-size: 0.9rem; background-color: rgba(255, 255, 255, 0.7); width: 100%; }
+        #orgForm .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.25); }
+        #orgForm .btn-container { margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem; }
+        .controls-container { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
+        .search-container { flex-grow: 1; max-width: 350px; }
+        .search-container input { width: 100%; border-radius: 20px; font-size: 0.9rem; padding: 0.5rem 1rem; border: 1px solid var(--light-gray); }
+        .search-container input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2); outline: none; }
+        .table-responsive-scrollable { max-height: calc(9 * 3rem); overflow-y: auto; border: 1px solid var(--light-gray); border-radius: 8px; margin-top: 10px; }
+        .table { margin-bottom: 0; border-collapse: separate; border-spacing: 0; width: 100%; }
+        .table thead th { background: var(--navbar-bg) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--primary-dark) !important; font-weight: 600; text-align: left; padding: 0.8rem 1rem; vertical-align: middle; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(13, 148, 136, 0.2) !important; white-space: nowrap; border-right: 1px solid var(--light-gray); }
+        .table thead th:last-child { border-right: none; }
+        .table thead th:first-child { border-top-left-radius: 7px; text-align: center; }
+        .table thead th:last-child { border-top-right-radius: 7px; }
+        .table tbody td { background-color: white; text-align: left; vertical-align: middle; padding: 0.75rem 1rem; font-size: 0.9rem; color: var(--dark); border-bottom: 1px solid var(--light-gray); white-space: nowrap; border-right: 1px solid var(--light-gray); height: 3rem; }
+        .table tbody td:last-child { border-right: none; }
+        .table tbody td:first-child { text-align: center; }
+        .table tbody tr:last-child td { border-bottom: 0; }
+        .table-hover tbody tr:hover td { background-color: #f1f5f9; }
+        .table-hover tbody tr.org-row:hover { cursor: pointer; }
+        .org-name { color: var(--primary-dark); text-decoration: none; font-weight: 500; }
+        .org-name:hover { text-decoration: underline; }
+        .counts-container { text-align: center; margin-top: 1rem; width: 100%; }
+        #totalOrgsCountTile, #totalUsersCountTile { 
+            display: block; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 0.375rem 0.75rem; 
+            font-size: 0.95rem; line-height: 1.5; color: var(--dark); background-color: #fff; 
+            border: 1px solid var(--light-gray); border-radius: 0.25rem; 
+        }
+        #usersTableContainer { display: none; }
+        .users-controls-container { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
+        .users-btn-group { display: flex; gap: 0.5rem; flex-shrink: 0; }
+        .modal-content { border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); background-color: var(--light); }
+        .modal-header { background-color: var(--primary); color: white; border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom: none; padding: 1rem 1.5rem; }
+        .modal-header .btn-close { filter: brightness(0) invert(1); }
+        .modal-title { font-size: 1.1rem; font-weight: 600; }
+        .modal-body { padding: 1.5rem; }
+        .modal-body .table-responsive { max-height: 50vh; }
+        .modal-footer { border-top: 1px solid var(--light-gray); padding: 1rem 1.5rem; display: flex; justify-content: center; gap: 0.75rem; }
+        .modal-footer .btn { min-width: 120px; }
+        .swal2-confirm { background-color: var(--primary) !important; border-color: var(--primary) !important; color: white !important; }
+        .swal2-cancel { background-color: rgba(100, 116, 139, 0.1) !important; border: 1px solid rgba(100, 116, 139, 0.2) !important; color: var(--gray) !important; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i> <span class="d-lg-none">Accueil</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="/events"><i class="far fa-calendar-alt"></i> Événements</a></li>
+                <li class="nav-item"><a class="nav-link" href="/create_user_organisation"><i class="fas fa-users"></i> Utilisateurs</a></li>
+                <li class="nav-item"><a class="nav-link" href="/stats_user"><i class="fas fa-chart-line"></i> Statistique</a></li>
+                <li class="nav-item"><a class="nav-link" href="/administration"><i class="fas fa-cog"></i> Administration</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/create_user_organisation"><i class="fas fa-users-cog"></i> Organisations</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user"></i> <span class="d-lg-none">Profil</span></a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="navbar-right d-none d-lg-block"><a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a></div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Gestion des Organisations</h1>
+        </div>
+
+        <div class="create-btn-container">
+            <button id="createOrgBtn" class="btn btn-custom-action"><i class="fas fa-plus"></i> Créer une organisation</button>
+        </div>
+
+        <div class="content-block" id="orgFormContainer">
+            <h2>Créer une nouvelle organisation</h2>
+            <form id="orgForm">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="orgName" class="form-label">Nom de l'organisation</label>
+                        <input type="text" class="form-control" id="orgName" name="orgName" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="orgCode" class="form-label">Code de l'organisation</label>
+                        <input type="text" class="form-control" id="orgCode" name="orgCode" required>
+                    </div>
+                </div>
+                <div class="btn-container">
+                    <button type="submit" class="btn btn-custom-action"><i class="fas fa-check"></i> Valider</button>
+                    <button type="button" id="cancelBtn" class="btn btn-custom-secondary"><i class="fas fa-times"></i> Annuler</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="content-block">
+            <h2>Liste des organisations</h2>
+            <div class="controls-container">
+                <button id="removeSelectedBtn" class="btn btn-custom-danger" disabled><i class="fas fa-trash-alt"></i> Supprimer la sélection</button>
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par nom ou code...">
+                </div>
+            </div>
+            <div class="table-responsive-scrollable">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th class="text-center"><input class="form-check-input" type="checkbox" id="selectAllOrgCheckbox"></th>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Code</th>
+                            <th>Date de création</th>
+                            <th class="text-end">Nombre d'utilisateurs</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orgTableBody">
+                        <% if (organisations && organisations.length > 0) { %>
+                            <% organisations.forEach(org => { %>
+                                <tr class="org-row" data-id="<%= org.id %>">
+                                    <td class="text-center"><input class="form-check-input org-checkbox" type="checkbox" data-id="<%= org.id %>"></td>
+                                    <td><%= org.id %></td>
+                                    <td><span class="org-name"><%= org.name %></span></td>
+                                    <td><%= org.code %></td>
+                                    <td><%= new Date(org.createdAt).toLocaleDateString('fr-FR') %></td>
+                                    <td class="text-end"><%= org.userCount || 0 %></td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="6" class="text-center text-muted py-4">Aucune organisation trouvée.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+            <div class="counts-container">
+                <span id="totalOrgsCountTile" class="form-control">
+                    Nombre total d'organisations : <span id="totalOrgsCountDynamic"><%- organisations ? organisations.length : 0 %></span>
+                </span>
+            </div>
+        </div>
+
+        <div class="content-block" id="usersTableContainer">
+            <h3 id="usersTableTitle">Utilisateurs rattachés à l'organisation sélectionnée</h3>
+            <div class="users-controls-container">
+                <div class="users-btn-group">
+                    <button id="addUsersBtn" class="btn btn-custom-action"><i class="fas fa-user-plus"></i> Ajouter</button>
+                    <button id="removeUsersBtn" class="btn btn-custom-danger" disabled><i class="fas fa-user-minus"></i> Retirer</button>
+                    <button id="deleteUsersBtn" class="btn btn-custom-danger" disabled><i class="fas fa-trash-alt"></i> Supprimer</button>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="userSearchInput" class="form-control" placeholder="Rechercher par nom ou email...">
+                </div>
+            </div>
+            <div class="table-responsive-scrollable">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th class="text-center"><input class="form-check-input" type="checkbox" id="selectAllUserCheckbox"></th>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody"></tbody>
+                </table>
+            </div>
+            <div class="counts-container">
+                <span id="totalUsersCountTile" class="form-control">
+                    Nombre total d'utilisateurs : <span id="totalUsersCountDynamic">0</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addUserModalLabel">Ajouter des utilisateurs à l'organisation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center"><input class="form-check-input" type="checkbox" id="selectAllModalCheckbox"></th>
+                                        <th>ID</th>
+                                        <th>Nom</th>
+                                        <th>Prénom</th>
+                                        <th>Email</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="modalUserTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-custom-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i> Annuler</button>
+                        <button type="button" class="btn btn-custom-action" id="saveUsersBtn"><i class="fas fa-save me-2"></i> Enregistrer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const createOrgBtn = document.getElementById('createOrgBtn');
+            const orgFormContainer = document.getElementById('orgFormContainer');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const orgForm = document.getElementById('orgForm');
+            const orgTableBody = document.getElementById('orgTableBody');
+            const userTableBody = document.getElementById('userTableBody');
+            const usersTableContainer = document.getElementById('usersTableContainer');
+            const totalOrgsCountDynamic = document.getElementById('totalOrgsCountDynamic');
+            const totalUsersCountDynamic = document.getElementById('totalUsersCountDynamic');
+            const selectAllOrgCheckbox = document.getElementById('selectAllOrgCheckbox');
+            const selectAllUserCheckbox = document.getElementById('selectAllUserCheckbox');
+            const selectAllModalCheckbox = document.getElementById('selectAllModalCheckbox');
+            const removeSelectedBtn = document.getElementById('removeSelectedBtn');
+            const addUsersBtn = document.getElementById('addUsersBtn');
+            const removeUsersBtn = document.getElementById('removeUsersBtn');
+            const deleteUsersBtn = document.getElementById('deleteUsersBtn');
+            const searchInput = document.getElementById('searchInput');
+            const userSearchInput = document.getElementById('userSearchInput');
+            let selectedOrgId = null;
+
+            async function fetchUserInfo() {
+                try {
+                    const response = await fetch('/api/userinfo');
+                    const user = await response.json();
+                    document.getElementById('userFullName').textContent = `${user.name} ${user.surname}`;
+                    document.getElementById('userEmail').textContent = user.email;
+                } catch (error) {
+                    console.error('Erreur chargement info utilisateur:', error);
+                }
+            }
+            fetchUserInfo();
+
+            createOrgBtn.addEventListener('click', () => {
+                orgFormContainer.style.display = 'block';
+                window.scrollTo({ top: orgFormContainer.offsetTop - 100, behavior: 'smooth' });
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                orgFormContainer.style.display = 'none';
+                orgForm.reset();
+            });
+
+            orgForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const orgData = {
+                    name: document.getElementById('orgName').value,
+                    code: document.getElementById('orgCode').value
+                };
+
+                try {
+                    const response = await fetch('/create_organisation', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orgData)
+                    });
+                    const result = await response.json();
+
+                    if (!response.ok) throw new Error(result.error);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succès',
+                        text: 'Organisation créée avec succès'
+                    }).then(() => {
+                        const noOrgRow = orgTableBody.querySelector('tr td[colspan="6"]');
+                        if (noOrgRow) noOrgRow.parentElement.remove();
+
+                        const newRow = document.createElement('tr');
+                        newRow.classList.add('org-row');
+                        newRow.setAttribute('data-id', result.id);
+                        newRow.innerHTML = `
+                            <td class="text-center"><input class="form-check-input org-checkbox" type="checkbox" data-id="${result.id}"></td>
+                            <td>${result.id}</td>
+                            <td><span class="org-name">${orgData.name}</span></td>
+                            <td>${orgData.code}</td>
+                            <td>${new Date().toLocaleDateString('fr-FR')}</td>
+                            <td class="text-end">0</td>
+                        `;
+                        orgTableBody.appendChild(newRow);
+                        orgForm.reset();
+                        orgFormContainer.style.display = 'none';
+                        updateTotalOrgs();
+                    });
+                } catch (error) {
+                    Swal.fire({ icon: 'error', title: 'Erreur', text: error.message });
+                }
+            });
+
+            selectAllOrgCheckbox.addEventListener('change', () => {
+                document.querySelectorAll('.org-checkbox').forEach(cb => cb.checked = selectAllOrgCheckbox.checked);
+                updateRemoveButtonState();
+            });
+
+            selectAllUserCheckbox.addEventListener('change', () => {
+                document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = selectAllUserCheckbox.checked);
+                updateUserButtonsState();
+            });
+
+            selectAllModalCheckbox.addEventListener('change', () => {
+                document.querySelectorAll('.modal-user-checkbox').forEach(cb => cb.checked = selectAllModalCheckbox.checked);
+            });
+
+            removeSelectedBtn.addEventListener('click', async () => {
+                const selectedIds = Array.from(document.querySelectorAll('.org-checkbox:checked')).map(cb => cb.getAttribute('data-id'));
+                if (selectedIds.length === 0) {
+                    Swal.fire({ icon: 'warning', title: 'Attention', text: 'Aucune organisation sélectionnée.' });
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Confirmer la suppression',
+                    text: 'Voulez-vous vraiment supprimer ces organisations ? Les utilisateurs rattachés ne seront pas supprimés.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Oui',
+                    cancelButtonText: 'Non'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await fetch('/delete_organisations', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ orgIds: selectedIds })
+                            });
+                            if (!response.ok) throw new Error('Erreur lors de la suppression');
+                            selectedIds.forEach(id => {
+                                const row = document.querySelector(`.org-row[data-id="${id}"]`);
+                                if (row) row.remove();
+                            });
+                            if (orgTableBody.children.length === 0) {
+                                orgTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Aucune organisation trouvée.</td></tr>';
+                            }
+                            Swal.fire({ icon: 'success', title: 'Succès', text: 'Organisations supprimées.' });
+                            updateTotalOrgs();
+                            usersTableContainer.style.display = 'none';
+                            selectedOrgId = null;
+                        } catch (error) {
+                            Swal.fire({ icon: 'error', title: 'Erreur', text: error.message });
+                        }
+                    }
+                });
+            });
+
+            orgTableBody.addEventListener('click', async (e) => {
+                const row = e.target.closest('.org-row');
+                if (row && !e.target.classList.contains('org-checkbox')) {
+                    selectedOrgId = row.getAttribute('data-id');
+                    usersTableContainer.style.display = 'block';
+                    const orgName = row.querySelector('.org-name').textContent;
+                    document.getElementById('usersTableTitle').textContent = `Utilisateurs rattachés à "${orgName}"`;
+                    window.scrollTo({ top: usersTableContainer.offsetTop - 100, behavior: 'smooth' });
+                    await loadUsers(selectedOrgId);
+                }
+            });
+
+            async function loadUsers(orgId) {
+                try {
+                    const response = await fetch(`/api/getUsersByOrg/${orgId}`);
+                    const users = await response.json();
+                    userTableBody.innerHTML = '';
+                    if (users.length > 0) {
+                        users.forEach(user => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td class="text-center"><input class="form-check-input user-checkbox" type="checkbox" data-id="${user.id}"></td>
+                                <td>${user.id}</td>
+                                <td>${user.name}</td>
+                                <td>${user.surname}</td>
+                                <td>${user.email || '-'}</td>
+                            `;
+                            userTableBody.appendChild(row);
+                        });
+                    } else {
+                        userTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Aucun utilisateur rattaché.</td></tr>';
+                    }
+                    updateTotalUsers(); // Met à jour le compteur après le chargement
+                    updateUserButtonsState();
+                } catch (error) {
+                    console.error('Erreur lors du chargement des utilisateurs :', error);
+                    userTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4">Erreur chargement utilisateurs.</td></tr>';
+                    updateTotalUsers(); // Met à jour même en cas d'erreur
+                }
+            }
+
+            addUsersBtn.addEventListener('click', async () => {
+                const modalUserTableBody = document.getElementById('modalUserTableBody');
+                try {
+                    const response = await fetch('/api/getUsers');
+                    const allUsers = await response.json();
+                    modalUserTableBody.innerHTML = '';
+                    allUsers.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="text-center"><input class="form-check-input modal-user-checkbox" type="checkbox" data-id="${user.id}"></td>
+                            <td>${user.id}</td>
+                            <td>${user.name}</td>
+                            <td>${user.surname}</td>
+                            <td>${user.email || '-'}</td>
+                        `;
+                        modalUserTableBody.appendChild(row);
+                    });
+                    new bootstrap.Modal(document.getElementById('addUserModal')).show();
+                } catch (error) {
+                    console.error('Erreur lors du chargement des utilisateurs :', error);
+                }
+            });
+
+            document.getElementById('saveUsersBtn').addEventListener('click', async () => {
+                const selectedUserIds = Array.from(document.querySelectorAll('.modal-user-checkbox:checked')).map(cb => cb.getAttribute('data-id'));
+                if (selectedUserIds.length === 0) {
+                    Swal.fire({ icon: 'warning', title: 'Attention', text: 'Aucun utilisateur sélectionné.' });
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/add_users_to_org', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orgId: selectedOrgId, userIds: selectedUserIds })
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error);
+
+                    Swal.fire({ icon: 'success', title: 'Succès', text: 'Utilisateurs ajoutés avec succès.' });
+                    bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+
+                    const updatedOrgCounts = result.updatedOrgCounts || {};
+                    for (const [orgId, newCount] of Object.entries(updatedOrgCounts)) {
+                        const row = document.querySelector(`.org-row[data-id="${orgId}"]`);
+                        if (row) row.cells[5].textContent = newCount;
+                    }
+                    await loadUsers(selectedOrgId);
+                } catch (error) {
+                    Swal.fire({ icon: 'error', title: 'Erreur', text: error.message });
+                }
+            });
+
+            removeUsersBtn.addEventListener('click', async () => {
+                const selectedUserIds = Array.from(document.querySelectorAll('.user-checkbox:checked')).map(cb => cb.getAttribute('data-id'));
+                if (selectedUserIds.length === 0) {
+                    Swal.fire({ icon: 'warning', title: 'Attention', text: 'Aucun utilisateur sélectionné.' });
+                    return;
+                }
+
+                Swal.fire({
+                    title: `Retirer ${selectedUserIds.length} utilisateur(s) ?`,
+                    text: "Ils ne seront retirés que de cette organisation.",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Oui, retirer!',
+                    cancelButtonText: 'Annuler'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            const response = await fetch('/remove_users_from_org', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ orgId: selectedOrgId, userIds: selectedUserIds })
+                            });
+                            const result = await response.json();
+                            if (!response.ok) throw new Error(result.error);
+                            Swal.fire({ icon: 'success', title: 'Succès', text: 'Utilisateurs retirés.' });
+                            const updatedOrgCounts = result.updatedOrgCounts || {};
+                            for (const [orgId, newCount] of Object.entries(updatedOrgCounts)) {
+                                const row = document.querySelector(`.org-row[data-id="${orgId}"]`);
+                                if (row) row.cells[5].textContent = newCount;
+                            }
+                            await loadUsers(selectedOrgId);
+                        } catch (error) {
+                            Swal.fire({ icon: 'error', title: 'Erreur', text: error.message });
+                        }
+                    }
+                });
+            });
+
+            deleteUsersBtn.addEventListener('click', async () => {
+                const selectedUserIds = Array.from(document.querySelectorAll('.user-checkbox:checked')).map(cb => cb.getAttribute('data-id'));
+                if (selectedUserIds.length === 0) {
+                    Swal.fire({ icon: 'warning', title: 'Attention', text: 'Aucun utilisateur sélectionné.' });
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/checkUserOrgs/${selectedOrgId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userIds: selectedUserIds })
+                    });
+                    const userOrgs = await response.json();
+
+                    const usersToDelete = userOrgs.filter(u => u.orgs.length === 1 && u.orgs[0] === selectedOrgId).map(u => u.userId);
+                    const usersWithOtherOrgs = userOrgs.filter(u => u.orgs.length > 1);
+
+                    if (usersWithOtherOrgs.length > 0) {
+                        const orgIds = [...new Set(usersWithOtherOrgs.flatMap(u => u.orgs.filter(o => o !== selectedOrgId)))];
+                        const orgResponse = await fetch('/api/getOrgNames', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ orgIds })
+                        });
+                        const orgNamesData = await orgResponse.json();
+                        const orgNames = usersWithOtherOrgs.map(u => 
+                            u.orgs.filter(o => o !== selectedOrgId).map(id => orgNamesData[id] || id).join(', ')
+                        ).join('; ');
+
+                        Swal.fire({
+                            title: 'Attention',
+                            text: `Certains utilisateurs sont rattachés à d'autres organisations (${orgNames}). Voulez-vous supprimer uniquement ceux qui ne sont rattachés qu'à cette organisation ?`,
+                            icon: 'info',
+                            confirmButtonText: 'Continuer',
+                            showCancelButton: true,
+                            cancelButtonText: 'Annuler'
+                        }).then(async (result) => {
+                            if (result.isConfirmed && usersToDelete.length > 0) {
+                                await deleteUsersFromCreateOrg(usersToDelete);
+                            } else if (usersToDelete.length === 0) {
+                                Swal.fire({ icon: 'info', title: 'Aucun utilisateur à supprimer', text: 'Tous les utilisateurs sélectionnés sont rattachés à d’autres organisations.' });
+                            }
+                        });
+                    } else if (usersToDelete.length > 0) {
+                        Swal.fire({
+                            title: 'Confirmer la suppression',
+                            text: 'Voulez-vous vraiment supprimer ces utilisateurs ?',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Oui',
+                            cancelButtonText: 'Non'
+                        }).then(async (result) => {
+                            if (result.isConfirmed) {
+                                await deleteUsersFromCreateOrg(usersToDelete);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erreur lors de la vérification des utilisateurs :', error);
+                    Swal.fire({ icon: 'error', title: 'Erreur', text: 'Une erreur est survenue.' });
+                }
+            });
+
+            async function deleteUsersFromCreateOrg(userIds) {
+                try {
+                    const response = await fetch('/delete_users_from_create_org', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orgId: selectedOrgId, userIds })
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error);
+                    Swal.fire({ icon: 'success', title: 'Succès', text: result.message });
+                    const updatedOrgCounts = result.updatedOrgCounts || {};
+                    for (const [orgId, newCount] of Object.entries(updatedOrgCounts)) {
+                        const row = document.querySelector(`.org-row[data-id="${orgId}"]`);
+                        if (row) row.cells[5].textContent = newCount;
+                    }
+                    await loadUsers(selectedOrgId);
+                } catch (error) {
+                    Swal.fire({ icon: 'error', title: 'Erreur', text: error.message });
+                }
+            }
+
+            searchInput.addEventListener('input', () => {
+                const filter = searchInput.value.toLowerCase();
+                document.querySelectorAll('.org-row').forEach(row => {
+                    const name = row.cells[2].textContent.toLowerCase();
+                    const code = row.cells[3].textContent.toLowerCase();
+                    row.style.display = (name.includes(filter) || code.includes(filter)) ? '' : 'none';
+                });
+                updateTotalOrgs();
+            });
+
+            userSearchInput.addEventListener('input', () => {
+                const filter = userSearchInput.value.toLowerCase();
+                document.querySelectorAll('#userTableBody tr').forEach(row => {
+                    const name = row.cells[2]?.textContent.toLowerCase() || '';
+                    const email = row.cells[4]?.textContent.toLowerCase() || '';
+                    row.style.display = (name.includes(filter) || email.includes(filter)) ? '' : 'none';
+                });
+                updateTotalUsers();
+            });
+
+            function updateTotalOrgs() {
+                const visibleRows = Array.from(orgTableBody.querySelectorAll('.org-row')).filter(row => row.style.display !== 'none');
+                totalOrgsCountDynamic.textContent = visibleRows.length;
+            }
+
+            function updateTotalUsers() {
+                const visibleRows = Array.from(userTableBody.querySelectorAll('tr'))
+                    .filter(row => row.style.display !== 'none' && row.querySelectorAll('td').length > 1); // Exclut les lignes avec un seul <td>
+                totalUsersCountDynamic.textContent = visibleRows.length;
+            }
+
+            function updateRemoveButtonState() {
+                const checked = document.querySelectorAll('.org-checkbox:checked').length > 0;
+                removeSelectedBtn.disabled = !checked;
+            }
+
+            function updateUserButtonsState() {
+                const checked = document.querySelectorAll('.user-checkbox:checked').length > 0;
+                removeUsersBtn.disabled = !checked;
+                deleteUsersBtn.disabled = !checked;
+            }
+
+            orgTableBody.addEventListener('change', (e) => {
+                if (e.target.classList.contains('org-checkbox')) updateRemoveButtonState();
+            });
+
+            userTableBody.addEventListener('change', (e) => {
+                if (e.target.classList.contains('user-checkbox')) updateUserButtonsState();
+            });
+
+            updateRemoveButtonState();
+            updateUserButtonsState();
+        });
+    </script>
+</body>
+</html>

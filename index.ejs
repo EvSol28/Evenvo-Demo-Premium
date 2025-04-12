@@ -1,0 +1,21 @@
+<h2>Créer un Utilisateur</h2>
+
+<form action="/users" method="POST">
+    <% if (eventId) { %>
+        <input type="hidden" name="eventId" value="<%= eventId %>">
+    <% } %>
+    <label for="nom">Nom:</label>
+    <input type="text" id="nom" name="nom" required>
+
+    <label for="prenom">Prénom:</label>
+    <input type="text" id="prenom" name="prenom" required>
+
+    <label for="role">Rôle:</label>
+    <select id="role" name="role" required>
+        <option value="administrateur">Administrateur</option>
+        <option value="journaliste">Journaliste</option>
+        <option value="membre">Membre</option>
+    </select>
+
+    <button type="submit">Créer Utilisateur</button>
+</form>

@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistiques Utilisateurs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root {
+            --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
+            --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
+            --gray: #64748B; --light-gray: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --navbar-bg: rgba(162, 217, 206, 0.3); --navbar-hover-bg: rgba(162, 217, 206, 0.4);
+            --navbar-border: rgba(255, 255, 255, 0.2);
+            --navbar-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 20px rgba(13, 148, 136, 0.05);
+            --navbar-hover-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 6px 25px rgba(13, 148, 136, 0.1);
+            --card-border: rgba(13, 148, 136, 0.15); --card-hover-border: rgba(13, 148, 136, 0.4);
+            --card-shadow: 0 6px 15px rgba(190, 190, 190, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+            --card-hover-shadow: 0 12px 28px rgba(13, 148, 136, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+            --sans: 'Hellix', 'Arial', sans-serif;
+            --color-present: #4BC0C0; --color-absent: #F7464A; --color-abstain: #FFCE56;
+            --color-no-vote: #adb5bd; --color-invited: #5EEAD4; --color-not-invited: #e2e8f0;
+            --color-total: #64748B; --color-success: #198754; --color-danger: #dc3545;
+            --color-secondary: #6c757d; --color-oui: #4BC0C0; --color-non: #F7464A;
+        }
+        body { font-family: var(--sans); background-color: #F1F5F9; color: var(--dark); min-height: 100vh; margin: 0; padding-top: 120px; }
+
+        /* --- Navbar & Links --- */
+        .navbar { background: var(--navbar-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 0.4rem 1rem; box-shadow: var(--navbar-shadow); border: 1px solid var(--navbar-border); border-radius: 20px; position: fixed; width: 96%; left: 2%; top: 10px; z-index: 1030; display: flex; justify-content: space-between; align-items: center; transition: all 0.4s ease; }
+        .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
+        .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
+        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
+        .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
+        .nav-link.active { color: var(--light) !important; background: var(--navbar-bg) !important; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1) !important; font-weight: 600; box-shadow: none; text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); }
+        .nav-link i { font-size: 1rem; }
+        .dropdown-toggle::after { margin-left: 0.4rem; border-top-color: currentColor; transition: transform 0.3s ease; }
+        .nav-item.show .dropdown-toggle::after, .nav-item.dropdown:hover .dropdown-toggle::after { transform: rotate(180deg); }
+        .dropdown-menu { background: white; border: 1px solid var(--light-gray); border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); padding: 0.75rem; margin-top: 0.6rem !important; }
+        .dropdown-item-text strong { color: var(--dark); font-weight: 600; }
+        .dropdown-item-text small { color: var(--gray); font-size: 0.8rem; display: block; margin-top: 2px; }
+        .dropdown-divider { border-top: 1px solid rgba(0, 0, 0, 0.1); margin: 0.5rem 0; }
+        .dropdown-item { font-size: 0.85rem; color: var(--primary-dark); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease; background: transparent; }
+        .dropdown-item:hover { background: var(--primary); color: var(--light); transform: translateX(3px); box-shadow: none; }
+        .navbar-right { margin-left: auto; }
+
+        /* --- Contenu Principal --- */
+        .main-content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+        .page-header { margin-bottom: 3rem; text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
+        .page-header p { font-size: 1rem; color: var(--gray); margin-top: 0.5rem; }
+
+        /* --- Blocs de Contenu --- */
+        .content-block { background: var(--card-bg); border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--card-border); padding: 1.75rem; margin-bottom: 1.5rem; overflow: hidden; transition: all 0.3s ease; }
+        .content-block:hover { border-color: var(--card-hover-border); box-shadow: var(--card-hover-shadow); transform: translateY(-4px); }
+        .content-block h2 { font-size: 1.3rem; font-weight: 600; color: var(--dark); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--light-gray); }
+        .content-block h3 { font-size: 1.1rem; font-weight: 600; color: var(--primary-dark); margin-bottom: 1rem; text-align: center; }
+
+        /* --- Tableau --- */
+        .table-responsive-scrollable { 
+            max-height: calc(2.5rem * 9 + 2.5rem); /* Hauteur pour 9 lignes + en-tête */
+            overflow-y: auto; border: 1px solid var(--light-gray); border-radius: 8px; margin-top: 10px; 
+        }
+        .table { margin-bottom: 0; border-collapse: collapse; width: 100%; }
+        .table thead th { 
+            background: var(--navbar-bg) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); 
+            color: var(--primary-dark) !important; font-weight: 600; text-align: left; padding: 0.8rem 1rem; 
+            vertical-align: middle; position: sticky; top: 0; z-index: 5; border-bottom: 1px solid rgba(13, 148, 136, 0.2) !important; 
+            white-space: nowrap; border-right: 1px solid var(--light-gray); 
+        }
+        .table thead th:last-child { border-right: none; }
+        .table tbody td { 
+            background-color: white; text-align: left; vertical-align: middle; padding: 0.75rem 1rem; 
+            font-size: 0.9rem; color: var(--dark); border-bottom: 1px solid var(--light-gray); 
+            border-right: 1px solid var(--light-gray); 
+        }
+        .table tbody td:last-child { border-right: none; }
+        .table tbody tr:last-child td { border-bottom: 0; }
+        .table-hover tbody tr:hover { background-color: #f1f5f9; cursor: pointer; }
+        .table tbody tr.selected td { background-color: #E2E8F0; }
+
+        /* --- Styles spécifiques pour le tableau des stats utilisateur --- */
+        #userStats .table-responsive-scrollable { 
+            max-height: calc(2.5rem * 6 + 2.5rem); /* Hauteur pour 6 lignes + en-tête */
+            overflow-y: auto; 
+        }
+        #userStats .table th { 
+            background: var(--navbar-bg) !important; 
+            backdrop-filter: blur(8px); 
+            -webkit-backdrop-filter: blur(8px); 
+            color: var(--primary-dark) !important; 
+            border-right: 1px solid var(--light-gray); 
+        }
+        #userStats .table th:last-child { border-right: none; }
+        #userStats .table td { 
+            border-right: 1px solid var(--light-gray); 
+            background-color: white; 
+        }
+        #userStats .table td:last-child { border-right: none; }
+
+        /* --- Badges --- */
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 0.4em 0.8em;
+            border-radius: 15px;
+            min-width: 80px;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.25s ease;
+            user-select: none;
+            background: transparent;
+            border: 1px solid;
+            margin: 0 0.25rem;
+        }
+        .badge-success {
+            color: var(--color-oui);
+            border-color: rgba(75, 192, 192, 0.2);
+            background: rgba(75, 192, 192, 0.08);
+        }
+        .badge-success:hover {
+            background: var(--color-oui);
+            color: white;
+            border-color: var(--color-oui);
+            box-shadow: 0 2px 5px rgba(75, 192, 192, 0.3);
+            transform: scale(1.03);
+        }
+        .badge-danger {
+            color: var(--color-non);
+            border-color: rgba(247, 70, 74, 0.2);
+            background: rgba(247, 70, 74, 0.08);
+        }
+        .badge-danger:hover {
+            background: var(--color-non);
+            color: white;
+            border-color: var(--color-non);
+            box-shadow: 0 2px 5px rgba(247, 70, 74, 0.3);
+            transform: scale(1.03);
+        }
+        .badge-warning {
+            color: var(--color-abstain);
+            border-color: rgba(255, 206, 86, 0.2);
+            background: rgba(255, 206, 86, 0.08);
+        }
+        .badge-warning:hover {
+            background: var(--color-abstain);
+            color: white;
+            border-color: var(--color-abstain);
+            box-shadow: 0 2px 5px rgba(255, 206, 86, 0.3);
+            transform: scale(1.03);
+        }
+        .badge-secondary {
+            color: var(--color-no-vote);
+            border-color: rgba(173, 181, 189, 0.2);
+            background: rgba(173, 181, 189, 0.08);
+        }
+        .badge-secondary:hover {
+            background: var(--color-no-vote);
+            color: white;
+            border-color: var(--color-no-vote);
+            box-shadow: 0 2px 5px rgba(173, 181, 189, 0.3);
+            transform: scale(1.03);
+        }
+        .badge-total {
+            color: var(--color-total);
+            border-color: rgba(100, 116, 139, 0.2);
+            background: rgba(100, 116, 139, 0.08);
+        }
+        .badge-total:hover {
+            background: var(--color-total);
+            color: white;
+            border-color: var(--color-total);
+            box-shadow: 0 2px 5px rgba(100, 116, 139, 0.3);
+            transform: scale(1.03);
+        }
+
+        /* --- Graphiques --- */
+        .chart-section { margin-top: 2rem; }
+        .chart-container { 
+            position: relative; max-width: 350px; height: 300px; margin: 1rem auto; 
+            background: transparent; border: 1px solid var(--card-border); border-radius: 15px; 
+            padding: 10px; transition: all 0.3s ease; 
+        }
+        .chart-container:hover { border-color: var(--card-hover-border); box-shadow: var(--card-hover-shadow); }
+        .chart-container canvas { display: block; width: 100% !important; height: 100% !important; }
+        .chart-stats { 
+            margin-top: 0.5rem; margin-bottom: 0; font-size: 0.9rem; font-weight: 500; 
+            color: var(--gray); line-height: 1.4; text-align: center; 
+        }
+
+        /* --- Nombre total d'utilisateurs et événements dans un carreau --- */
+        .counts-container { 
+            text-align: center; 
+            margin-top: 1rem; 
+            width: 100%; /* Prend toute la largeur du conteneur parent */
+        }
+        #globalUsersCount, #userEventsCount { 
+            display: block; /* Changé de inline-block à block pour occuper toute la largeur */
+            width: 100%; /* S'étend à la largeur du conteneur */
+            box-sizing: border-box; /* Inclut padding et bordure dans la largeur */
+            margin: 0 auto; /* Centre le carreau */
+            padding: 0.375rem 0.75rem; /* Padding par défaut du form-control */
+            font-size: 0.95rem; /* Taille de police cohérente */
+            line-height: 1.5; /* Hauteur de ligne cohérente */
+            color: var(--dark); /* Changé de --gray à --dark pour correspondre au tableau */
+            background-color: #fff; /* Fond blanc */
+            border: 1px solid var(--light-gray); /* Bordure légère */
+            border-radius: 0.25rem; /* Coins arrondis */
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i> <span class="d-lg-none">Accueil</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="/events"><i class="far fa-calendar-alt"></i> Événements</a></li>
+                <li class="nav-item"><a class="nav-link" href="/create_user_organisation"><i class="fas fa-users"></i> Utilisateurs</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/stats_user"><i class="fas fa-chart-line"></i> Statistique</a></li>
+                <li class="nav-item"><a class="nav-link" href="/administration"><i class="fas fa-cog"></i> Administration</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user"></i> <span class="d-lg-none">Profil</span></a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-right d-none d-lg-block"><a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a></div>
+    </nav>
+
+    <!-- Contenu Principal -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Statistiques globales des Utilisateurs</h1>
+            <p>Sélectionnez un utilisateur pour consulter ses statistiques détaillées.</p>
+        </div>
+
+        <!-- Tableau des utilisateurs -->
+        <div class="content-block">
+            <h2>Liste des Collaborateurs</h2>
+            <div class="table-responsive-scrollable">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Civilité</th>
+                            <th>Date de naissance</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (typeof users !== 'undefined' && users.length > 0) { %>
+                            <% users.forEach(user => { %>
+                                <tr class="user-row"
+                                    data-id="<%= user.id %>"
+                                    data-name="<%= user.name %>"
+                                    data-surname="<%= user.surname %>">
+                                    <td><%= user.id %></td>
+                                    <td><%= user.name %></td>
+                                    <td><%= user.surname %></td>
+                                    <td><%= user.civility %></td>
+                                    <td><%= user.birthdate ? new Date(user.birthdate).toLocaleDateString('fr-FR') : '-' %></td>
+                                    <td><%= user.email || '-' %></td>
+                                    <td><%= user.role %></td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">Aucun collaborateur trouvé.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Nombre total d'utilisateurs dans un carreau -->
+            <div class="counts-container">
+                <span id="globalUsersCount" class="form-control">
+                    Nombre total de collaborateurs : <%= typeof users !== 'undefined' ? users.length : 0 %>
+                </span>
+            </div>
+        </div>
+
+        <!-- Section Statistiques -->
+        <div class="content-block chart-section" id="statsContainer">
+            <h2 id="statsTitle">Statistiques Utilisateur</h2>
+            <div id="userStats">
+                <p class="text-center text-muted">Sélectionnez un utilisateur dans la liste pour voir ses statistiques.</p>
+            </div>
+            <!-- Nombre total d'événements dans un carreau -->
+            <div class="counts-container">
+                <span id="userEventsCount" class="form-control" style="display: none;">
+                    Nombre total d'événements associés : <span id="eventCountValue">0</span>
+                </span>
+            </div>
+            <div class="row g-4 mt-3 justify-content-center">
+                <div class="col-lg-4 col-md-6">
+                    <h3>Invitations</h3>
+                    <div class="chart-container"><canvas id="invitationChart"></canvas></div>
+                    <p id="invitationStats" class="chart-stats">Chargement...</p>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h3>Présence</h3>
+                    <div class="chart-container"><canvas id="presenceChart"></canvas></div>
+                    <p id="presenceStats" class="chart-stats">Chargement...</p>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h3>Votes</h3>
+                    <div class="chart-container"><canvas id="voteChart"></canvas></div>
+                    <p id="voteStats" class="chart-stats">Chargement...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('/get_user_info');
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+                const user = await response.json();
+                const fullName = `${user.name || ''} ${user.surname || ''}`.trim();
+                document.getElementById('userFullName').textContent = fullName || 'Utilisateur';
+                document.getElementById('userEmail').textContent = user.email || 'Email non disponible';
+            } catch (error) {
+                console.error('Erreur fetchUserInfo:', error);
+                document.getElementById('userFullName').textContent = 'Erreur';
+                document.getElementById('userEmail').textContent = 'Indisponible';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchUserInfo();
+
+            const userRows = document.querySelectorAll('.user-row');
+            const statsContainer = document.getElementById('statsContainer');
+            const userStatsDiv = document.getElementById('userStats');
+            const statsTitle = document.getElementById('statsTitle');
+            const userEventsCount = document.getElementById('userEventsCount');
+            const eventCountValue = document.getElementById('eventCountValue');
+            let invitationChart, presenceChart, voteChart;
+
+            if (statsContainer) statsContainer.style.display = 'none';
+
+            userRows.forEach(row => {
+                row.addEventListener('click', async () => {
+                    userRows.forEach(r => r.classList.remove('selected'));
+                    row.classList.add('selected');
+                    const userId = row.dataset.id;
+                    const userName = row.dataset.name;
+                    const userSurname = row.dataset.surname;
+
+                    statsTitle.textContent = `Statistiques : ${userName} ${userSurname}`;
+                    userStatsDiv.innerHTML = `<p class="text-center text-muted py-3">Chargement...</p>`;
+                    destroyCharts();
+                    statsContainer.style.display = 'block';
+                    userEventsCount.style.display = 'none'; // Masquer par défaut
+                    window.scrollTo({ top: statsContainer.offsetTop - 100, behavior: 'smooth' });
+
+                    try {
+                        const response = await fetch(`/api/user_stats?userId=${userId}`);
+                        if (!response.ok) throw new Error(`Erreur ${response.status}`);
+                        const stats = await response.json();
+                        displayUserStats(stats);
+                        renderCharts(stats);
+                    } catch (error) {
+                        console.error('Erreur chargement stats:', error);
+                        userStatsDiv.innerHTML = `<p class="text-center text-danger py-3">Erreur chargement stats.</p>`;
+                        destroyCharts();
+                        userEventsCount.style.display = 'none';
+                    }
+                });
+            });
+
+            function displayUserStats(stats) {
+                let tableHTML = `
+                    <div class="table-responsive-scrollable">
+                        <table class="table table-sm table-bordered table-hover align-middle">
+                            <thead><tr><th>ID Événement</th><th>Nom</th><th>Présence</th><th>Vote</th></tr></thead>
+                            <tbody>`;
+                const eventCount = stats.events && stats.events.length > 0 ? stats.events.length : 0;
+                if (stats.events && stats.events.length > 0) {
+                    stats.events.forEach(event => {
+                        const presenceBadgeClass = event.presence === true ? 'badge-success' : event.presence === false ? 'badge-danger' : 'badge-secondary';
+                        const presenceText = event.presence === true ? 'Présence' : event.presence === false ? 'Absence' : 'N/D';
+                        let voteBadgeClass = 'badge-secondary';
+                        let voteText = 'Non voté';
+                        if (event.vote === 'Oui') { voteBadgeClass = 'badge-success'; voteText = 'Oui'; }
+                        else if (event.vote === 'Non') { voteBadgeClass = 'badge-danger'; voteText = 'Non'; }
+                        else if (event.vote === "S'abstenir") { voteBadgeClass = 'badge-warning'; voteText = 'Abstention'; }
+
+                        tableHTML += `<tr>
+                                        <td>${event.eventId || '-'}</td>
+                                        <td>${event.name || 'N/A'}</td>
+                                        <td><span class="badge ${presenceBadgeClass}">${presenceText}</span></td>
+                                        <td><span class="badge ${voteBadgeClass}">${voteText}</span></td>
+                                     </tr>`;
+                    });
+                } else {
+                    tableHTML += '<tr><td colspan="4" class="text-center text-muted py-3">Aucun événement associé.</td></tr>';
+                }
+                tableHTML += '</tbody></table></div>';
+                userStatsDiv.innerHTML = tableHTML;
+
+                // Mise à jour du carreau pour le nombre d'événements
+                eventCountValue.textContent = eventCount;
+                userEventsCount.style.display = 'block'; // Afficher en block pour pleine largeur
+            }
+
+            function destroyCharts() {
+                if (invitationChart) invitationChart.destroy();
+                if (presenceChart) presenceChart.destroy();
+                if (voteChart) voteChart.destroy();
+                invitationChart = null; presenceChart = null; voteChart = null;
+                ['invitationChart', 'presenceChart', 'voteChart'].forEach(id => {
+                    const canvas = document.getElementById(id);
+                    if (canvas) { const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); }
+                });
+            }
+
+            const commonPieConfigCode1 = (chartDataValues, chartLabels) => ({
+                type: 'doughnut',
+                data: { 
+                    labels: chartLabels, 
+                    datasets: [{ 
+                        data: chartDataValues, 
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.08)',  // Présents/Invités (transparent)
+                            'rgba(247, 70, 74, 0.08)'     // Absents/Non invités (transparent)
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 0.5)',   // Bordure Présents/Invités
+                            'rgba(247, 70, 74, 0.5)'     // Bordure Absents/Non invités
+                        ],
+                        borderWidth: 1.5,
+                        hoverBackgroundColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(247, 70, 74, 1)'
+                        ],
+                        hoverBorderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(247, 70, 74, 1)'
+                        ],
+                        borderRadius: 5,
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: { 
+                        legend: { 
+                            display: true, 
+                            position: 'bottom', 
+                            labels: { 
+                                padding: 15, 
+                                font: { size: 12 }, 
+                                color: 'var(--gray)',
+                                boxWidth: 20,
+                                usePointStyle: true
+                            } 
+                        }, 
+                        tooltip: { 
+                            enabled: true, 
+                            callbacks: { 
+                                label: function(context) { 
+                                    let l = context.label || ''; 
+                                    if (l) l += ': '; 
+                                    if (context.parsed !== null) { 
+                                        const t = context.dataset.data.reduce((a, b) => a + b, 0); 
+                                        const p = t > 0 ? Math.round((context.parsed / t) * 100) : 0; 
+                                        l += `${context.parsed} (${p}%)`; 
+                                    } 
+                                    return l; 
+                                } 
+                            } 
+                        } 
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true
+                    }
+                }
+            });
+
+            const votePieConfigCode2 = (chartDataValues, chartLabels) => ({
+                type: 'doughnut',
+                data: { 
+                    labels: chartLabels, 
+                    datasets: [{ 
+                        data: chartDataValues, 
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.08)',  // Oui
+                            'rgba(247, 70, 74, 0.08)',   // Non
+                            'rgba(255, 206, 86, 0.08)',  // Abstention
+                            'rgba(108, 117, 125, 0.08)'  // Non voté
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 0.5)',
+                            'rgba(247, 70, 74, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(108, 117, 125, 0.5)'
+                        ],
+                        borderWidth: 1.5,
+                        hoverBackgroundColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(247, 70, 74, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(108, 117, 125, 1)'
+                        ],
+                        hoverBorderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(247, 70, 74, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(108, 117, 125, 1)'
+                        ],
+                        borderRadius: 5,
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: { 
+                        legend: { 
+                            display: true, 
+                            position: 'bottom', 
+                            labels: { 
+                                padding: 15, 
+                                font: { size: 12 }, 
+                                color: 'var(--gray)',
+                                boxWidth: 20,
+                                usePointStyle: true
+                            } 
+                        }, 
+                        tooltip: { 
+                            enabled: true, 
+                            callbacks: { 
+                                label: function(context) { 
+                                    let l = context.label || ''; 
+                                    if (l) l += ': '; 
+                                    if (context.parsed !== null) { 
+                                        const t = context.dataset.data.reduce((a, b) => a + b, 0); 
+                                        const p = t > 0 ? Math.round((context.parsed / t) * 100) : 0; 
+                                        l += `${context.parsed} (${p}%)`; 
+                                    } 
+                                    return l; 
+                                } 
+                            } 
+                        } 
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true
+                    }
+                }
+            });
+
+            function renderCharts(stats) {
+                destroyCharts();
+
+                // Graphique Invitation
+                const totalEvents = stats.totalEvents || 0;
+                const invitedEvents = stats.events.length;
+                const notInvitedEvents = totalEvents - invitedEvents;
+                const invitationStatsElement = document.getElementById('invitationStats');
+                if (invitationStatsElement) {
+                    if (totalEvents > 0) {
+                        const percInvited = Math.round((invitedEvents / totalEvents) * 100);
+                        invitationStatsElement.innerHTML = `
+                            <span class="badge badge-success">Invité: ${invitedEvents} (${percInvited}%)</span>
+                            <span class="badge badge-danger">Non invité: ${notInvitedEvents}</span>
+                            <span class="badge badge-total">Total: ${totalEvents}</span>
+                        `;
+                    } else {
+                        invitationStatsElement.textContent = "Aucune donnée.";
+                    }
+                }
+                invitationChart = new Chart(document.getElementById('invitationChart'), 
+                    commonPieConfigCode1(
+                        [invitedEvents, notInvitedEvents],
+                        ['Invité', 'Non invité']
+                    )
+                );
+
+                // Graphique Présence
+                const presentCount = stats.events.filter(e => e.presence).length;
+                const absentCount = invitedEvents - presentCount;
+                const presenceStatsElement = document.getElementById('presenceStats');
+                if (presenceStatsElement) {
+                    if (invitedEvents > 0) {
+                        const percPresent = Math.round((presentCount / invitedEvents) * 100);
+                        presenceStatsElement.innerHTML = `
+                            <span class="badge badge-success">Présence: ${presentCount} (${percPresent}%)</span>
+                            <span class="badge badge-danger">Absence: ${absentCount}</span>
+                            <span class="badge badge-total">Total: ${invitedEvents}</span>
+                        `;
+                    } else {
+                        presenceStatsElement.textContent = "Aucune donnée.";
+                    }
+                }
+                presenceChart = new Chart(document.getElementById('presenceChart'), 
+                    commonPieConfigCode1(
+                        [presentCount, absentCount],
+                        ['Présence', 'Absence']
+                    )
+                );
+
+                // Graphique Vote
+                const voteStats = { Oui: 0, Non: 0, "Abstention": 0, "Non voté": 0 };
+                stats.events.forEach(event => {
+                    const vote = event.presence && event.vote ? (event.vote === "S'abstenir" ? "Abstention" : event.vote) : 'Non voté';
+                    voteStats[vote]++;
+                });
+                const totalVotes = voteStats.Oui + voteStats.Non + voteStats.Abstention + voteStats["Non voté"];
+                const voteStatsElement = document.getElementById('voteStats');
+                if (voteStatsElement) {
+                    if (totalVotes > 0) {
+                        const percOui = Math.round((voteStats.Oui / totalVotes) * 100);
+                        voteStatsElement.innerHTML = `
+                            <span class="badge badge-success">Oui: ${voteStats.Oui} (${percOui}%)</span>
+                            <span class="badge badge-danger">Non: ${voteStats.Non}</span>
+                            <span class="badge badge-warning">Abstention: ${voteStats.Abstention}</span>
+                            <span class="badge badge-secondary">Non voté: ${voteStats["Non voté"]}</span>
+                            <span class="badge badge-total">Total: ${totalVotes}</span>
+                        `;
+                    } else {
+                        voteStatsElement.textContent = "Aucune donnée.";
+                    }
+                }
+                voteChart = new Chart(document.getElementById('voteChart'), 
+                    votePieConfigCode2(
+                        [voteStats.Oui, voteStats.Non, voteStats.Abstention, voteStats["Non voté"]],
+                        ['Oui', 'Non', 'Abstention', 'Non voté']
+                    )
+                );
+            }
+        });
+    </script>
+</body>
+</html>

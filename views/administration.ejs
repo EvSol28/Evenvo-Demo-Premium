@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evenvo | Administration</title> <%# Titre mis à jour %>
+    <%# Favicon (Optionnel) %>
+    <%# <link rel="icon" href="/path/to/favicon.ico" type="image/x-icon"> %>
+
+    <%# Liens CSS (Bootstrap 5, Font Awesome 6, SweetAlert2) %>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <%# Styles CSS (Copiés du code de référence) %>
+    <style>
+        /* === Styles Base === */
+        :root {
+            --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
+            --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
+            --gray: #64748B; --light-gray: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --navbar-bg: rgba(162, 217, 206, 0.3); --navbar-hover-bg: rgba(162, 217, 206, 0.4);
+            --navbar-border: rgba(255, 255, 255, 0.2);
+            --navbar-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 20px rgba(13, 148, 136, 0.05);
+            --navbar-hover-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 6px 25px rgba(13, 148, 136, 0.1);
+            --card-border: rgba(13, 148, 136, 0.15); --card-hover-border: rgba(13, 148, 136, 0.4);
+            --card-shadow: 0 6px 15px rgba(190, 190, 190, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+            --card-hover-shadow: 0 12px 28px rgba(13, 148, 136, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+            --sans: 'Hellix', 'Arial', sans-serif;
+            /* Couleurs spécifiques pour les icônes/cartes de cette page */
+            --color-superadmin: #EF4444; --color-superadmin-light: #FCA5A5; /* Rouge/Rose */
+            --color-roles: #A78BFA;      --color-roles-light: #C4B5FD;      /* Accent (Violet) */
+            --color-import: #22D3EE;     --color-import-light: #67E8F9;     /* Secondary (Cyan) */
+            --color-export: #F59E0B;     --color-export-light: #FCD34D;     /* Utilisateurs (Orange) */
+        }
+        body { font-family: var(--sans); background-color: #F1F5F9; color: var(--dark); min-height: 100vh; margin: 0; padding-top: 90px; }
+
+        /* --- Navbar & Links --- */
+        .navbar { background: var(--navbar-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 0.4rem 1rem; box-shadow: var(--navbar-shadow); border: 1px solid var(--navbar-border); border-radius: 20px; position: fixed; width: 96%; left: 2%; top: 10px; z-index: 1030; display: flex; justify-content: space-between; align-items: center; transition: all 0.4s ease; }
+        .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
+        .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
+        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
+        .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
+        .nav-link.active { color: var(--light) !important; background: var(--navbar-bg) !important; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1) !important; font-weight: 600; box-shadow: none; text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); }
+        .nav-link i { font-size: 1rem; }
+        .dropdown-toggle::after { margin-left: 0.4rem; border-top-color: currentColor; transition: transform 0.3s ease; }
+        .nav-item.show .dropdown-toggle::after, .nav-item.dropdown:hover .dropdown-toggle::after { transform: rotate(180deg); }
+        .dropdown-menu { background: white; border: 1px solid var(--light-gray); border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); padding: 0.75rem; margin-top: 0.6rem !important; }
+        .dropdown-item-text strong { color: var(--dark); font-weight: 600; } .dropdown-item-text small { color: var(--gray); font-size: 0.8rem; display: block; margin-top: 2px; }
+        .dropdown-divider { border-top: 1px solid rgba(0, 0, 0, 0.1); margin: 0.5rem 0; }
+        .dropdown-item { font-size: 0.85rem; color: var(--primary-dark); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease; background: transparent; }
+        .dropdown-item:hover { background: var(--primary); color: var(--light); transform: translateX(3px); box-shadow: none; }
+        .navbar-right { margin-left: auto; }
+
+        /* --- Contenu Principal & Titre --- */
+        .main-content { padding: 2rem; max-width: 1400px; /* Limité comme le dashboard */ margin: 0 auto; }
+        .page-header { margin-bottom: 2.5rem; /* Comme dashboard */ text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
+
+        /* --- Cartes (Style Dashboard) --- */
+        .dashboard-card {
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
+            padding: 1.75rem; height: 100%;
+            display: flex; flex-direction: column;
+            box-shadow: var(--card-shadow); transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative; overflow: hidden;
+             min-height: 260px; /* Hauteur minimale pour alignement */
+        }
+        .dashboard-card:hover { transform: translateY(-6px); box-shadow: var(--card-hover-shadow); border-color: var(--card-hover-border); }
+        .card-icon-container { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; position: relative; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); flex-shrink: 0; }
+        .card-icon { font-size: 1.2rem; color: white; position: relative; z-index: 1; animation: iconPulse 2s infinite ease-in-out; }
+        @keyframes iconPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+        .card-icon-container::before { content: ''; position: absolute; width: 150%; height: 100%; background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%); border-radius: 12px; animation: shine 3.5s infinite linear; top: 0; left: -100%; transform: skewX(-25deg); z-index: 0; }
+        @keyframes shine { 0% { left: -125%; } 50% { left: 75%; } 100% { left: 75%; } }
+        /* Couleurs spécifiques pour cette page */
+        .card-icon-container.superadmin { background: linear-gradient(135deg, var(--color-superadmin) 0%, var(--color-superadmin-light) 100%); }
+        .card-icon-container.roles { background: linear-gradient(135deg, var(--color-roles) 0%, var(--color-roles-light) 100%); }
+        .card-icon-container.import { background: linear-gradient(135deg, var(--color-import) 0%, var(--color-import-light) 100%); }
+        .card-icon-container.export { background: linear-gradient(135deg, var(--color-export) 0%, var(--color-export-light) 100%); }
+
+        .dashboard-card .card-title { color: var(--dark); font-weight: 600; font-size: 1.15rem; margin-bottom: 0.75rem; }
+        .dashboard-card .card-text { color: var(--gray); font-size: 0.9rem; margin-bottom: 1.5rem; flex-grow: 1; line-height: 1.6; } /* flex-grow pousse le bouton en bas */
+        .status-indicator { display: flex; align-items: center; margin-bottom: 1.5rem; font-size: 0.85rem; font-weight: 500; color: var(--gray); }
+        .status-dot { width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+        .dashboard-card.superadmin .status-dot { background-color: var(--color-superadmin); }
+        .dashboard-card.roles .status-dot { background-color: var(--color-roles); }
+        .dashboard-card.import .status-dot { background-color: var(--color-import); }
+        .dashboard-card.export .status-dot { background-color: var(--color-export); }
+		.page-header p { font-size: 1rem; color: var(--gray); margin-top: 0.5rem; }
+
+        /* Boutons */
+        .btn-custom-action { display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 500; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 25px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.1); transition: all 0.25s ease; text-decoration: none; cursor: pointer; width: 100%; margin-top: auto; }
+        .btn-custom-action i { transition: transform 0.25s ease; }
+        .btn-custom-action i:first-child { margin-right: 0.6rem; }
+        .btn-custom-action i:last-child:not(:first-child) { margin-left: 0.6rem; }
+        .btn-custom-action:hover { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); transform: scale(1.03); }
+        .btn-custom-action:hover i.fa-arrow-right { transform: translateX(4px); }
+
+        /* --- SweetAlert --- */
+        /* ... (styles SweetAlert inchangés) ... */
+
+        /* --- Responsive --- */
+        @media (max-width: 991.98px) { /* ... */ }
+        @media (max-width: 767.98px) { /* ... */ }
+    </style>
+</head>
+<body>
+
+    <%# Navbar (Style tableau de bord, lien Administration actif) %>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i> <span class="d-lg-none">Accueil</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="/events"><i class="far fa-calendar-alt"></i> Événements</a></li>
+                <li class="nav-item"><a class="nav-link" href="/create_user_organisation"><i class="fas fa-users"></i> Utilisateurs</a></li>
+                <li class="nav-item"><a class="nav-link" href="/stats_user"><i class="fas fa-chart-line"></i> Statistique</a></li>
+                <%# Lien Administration actif %>
+                <li class="nav-item"><a class="nav-link active" href="/administration"><i class="fas fa-cog"></i> Administration</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user"></i> <span class="d-lg-none">Profil</span></a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-right d-none d-lg-block"><a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a></div>
+    </nav>
+
+    <!-- Contenu Principal -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Administration</h1>
+             <p>Gérez les paramètres globaux et les accès.</p> <%# Sous-titre adapté %>
+        </div>
+
+        <%# Row pour les cartes d'administration %>
+        <div class="row g-4">
+            <%# Carte Creation Super Admin %>
+            <div class="col-sm-6 col-lg-3 d-flex">
+                <div class="dashboard-card superadmin h-100"> <%# Classe de couleur ajoutée %>
+                    <div class="card-icon-container superadmin">
+                        <i class="fas fa-user-shield card-icon"></i> <%# Icône différente si souhaité %>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Super Admin</h3>
+                        <p class="card-text">Créez ou gérez les comptes administrateurs principaux.</p>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Administrateurs principaux</span>
+                    </div>
+                    <a href="/create_superadmin" class="btn btn-custom-action">
+                        Gérer <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <%# Carte Creation Roles %>
+            <div class="col-sm-6 col-lg-3 d-flex">
+                <div class="dashboard-card roles h-100">
+                    <div class="card-icon-container roles">
+                        <i class="fas fa-user-tag card-icon"></i> <%# Icône différente %>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Rôles</h3>
+                        <p class="card-text">Définissez les différents rôles utilisateurs et leurs permissions.</p>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Gestion des rôles</span>
+                    </div>
+                    <a href="/create_role" class="btn btn-custom-action">
+                        Gérer <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <%# Carte Import %>
+            <div class="col-sm-6 col-lg-3 d-flex">
+                <div class="dashboard-card import h-100">
+                    <div class="card-icon-container import">
+                        <i class="fas fa-file-import card-icon"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Import Données</h3>
+                        <p class="card-text">Importez des listes d'utilisateurs, d'événements ou d'organisations.</p>
+                    </div>
+                     <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Importation</span>
+                    </div>
+                    <a href="/import_user" id="importBtn" class="btn btn-custom-action">
+                        Accéder <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <%# Carte Export %>
+            <div class="col-sm-6 col-lg-3 d-flex">
+                <div class="dashboard-card export h-100">
+                    <div class="card-icon-container export">
+                        <i class="fas fa-file-export card-icon"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Export Données</h3>
+                        <p class="card-text">Exportez des listes d'utilisateurs, d'événements ou d'organisations.</p>
+                    </div>
+                     <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Exportation</span>
+                    </div>
+                    <a href="/export_user" id="exportBtn" class="btn btn-custom-action">
+                        Accéder <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div> <%# Fin .row %>
+    </div> <%# Fin .main-content %>
+
+    <%# Liens JS (Bootstrap 5 Bundle, SweetAlert2) %>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <%# Script pour récupérer les infos utilisateur (essentiel pour la navbar) %>
+    <script>
+        async function fetchUserInfo() {
+             console.log("fetchUserInfo: Début");
+             try {
+                 const response = await fetch('/get_user_info');
+                 if (!response.ok) throw new Error(`Erreur HTTP fetchUserInfo: ${response.status}`);
+                 const contentType = response.headers.get("content-type");
+                 if (!contentType || !contentType.includes("application/json")) {
+                     const text = await response.text();
+                     throw new TypeError(`Réponse inattendue serveur (pas JSON): ${text.substring(0, 100)}...`);
+                 }
+                 const user = await response.json();
+                 const fullName = `${user.name || ''} ${user.surname || ''}`.trim();
+                 const userFullNameEl = document.getElementById('userFullName');
+                 const userEmailEl = document.getElementById('userEmail');
+                 if (userFullNameEl) userFullNameEl.textContent = fullName || 'Utilisateur';
+                 if (userEmailEl) userEmailEl.textContent = user.email || 'Email non disponible';
+                 console.log("fetchUserInfo: Infos utilisateur chargées");
+             } catch (error) {
+                 console.error('fetchUserInfo: Erreur:', error);
+                 const userFullNameEl = document.getElementById('userFullName');
+                 const userEmailEl = document.getElementById('userEmail');
+                 if (userFullNameEl) userFullNameEl.textContent = 'Erreur';
+                 if (userEmailEl) userEmailEl.textContent = 'Chargement impossible';
+             }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchUserInfo(); // Appeler la fonction au chargement pour la navbar
+        });
+    </script>
+
+</body>
+</html>

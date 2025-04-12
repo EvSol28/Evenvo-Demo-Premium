@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Rôles - <%= typeof eventName !== 'undefined' ? eventName : 'Événement' %></title>
+    <link rel="icon" href="/path/to/favicon.ico" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        /* === Styles Base === */
+        :root {
+            --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
+            --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
+            --gray: #64748B; --light-gray: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --navbar-bg: rgba(162, 217, 206, 0.3); --navbar-hover-bg: rgba(162, 217, 206, 0.4);
+            --navbar-border: rgba(255, 255, 255, 0.2);
+            --navbar-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 20px rgba(13, 148, 136, 0.05);
+            --navbar-hover-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 6px 25px rgba(13, 148, 136, 0.1);
+            --card-border: rgba(13, 148, 136, 0.15); --card-hover-border: rgba(13, 148, 136, 0.4);
+            --card-shadow: 0 6px 15px rgba(190, 190, 190, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+            --card-hover-shadow: 0 12px 28px rgba(13, 148, 136, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+            --sans: 'Hellix', 'Arial', sans-serif;
+            --color-success: #198754;
+        }
+        body { font-family: var(--sans); background-color: #F1F5F9; color: var(--dark); min-height: 100vh; margin: 0; padding-top: 90px; }
+
+        /* --- Navbar & Links --- */
+        .navbar { background: var(--navbar-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 0.4rem 1rem; box-shadow: var(--navbar-shadow); border: 1px solid var(--navbar-border); border-radius: 20px; position: fixed; width: 96%; left: 2%; top: 10px; z-index: 1030; display: flex; justify-content: space-between; align-items: center; transition: all 0.4s ease; }
+        .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
+        .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
+        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
+        .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
+        .nav-link.active { color: var(--light) !important; background: var(--navbar-bg) !important; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1) !important; font-weight: 600; box-shadow: none; text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); }
+        .nav-link i { font-size: 1rem; }
+        .dropdown-toggle::after { margin-left: 0.4rem; border-top-color: currentColor; transition: transform 0.3s ease; }
+        .nav-item.show .dropdown-toggle::after, .nav-item.dropdown:hover .dropdown-toggle::after { transform: rotate(180deg); }
+        .dropdown-menu { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid var(--navbar-border); border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); padding: 0.75rem; margin-top: 0.6rem !important; }
+        .dropdown-item-text strong { color: var(--dark); font-weight: 600; } .dropdown-item-text small { color: var(--gray); font-size: 0.8rem; display: block; margin-top: 2px; }
+        .dropdown-divider { border-top: 1px solid rgba(0, 0, 0, 0.1); margin: 0.5rem 0; }
+        .dropdown-item { font-size: 0.85rem; color: var(--primary-dark); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease; background: transparent; }
+        .dropdown-item:hover { background: var(--primary); color: var(--light); transform: translateX(3px); box-shadow: none; }
+        .navbar-right { margin-left: auto; }
+
+        /* --- Contenu Principal & Titre --- */
+        .main-content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+        .page-header { margin-bottom: 3rem; text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); font-family: var(--sans); margin-bottom: 1rem; }
+        .page-header .event-subtitle { color: var(--gray); font-size: 1.1rem; margin-top: 0.5rem; margin-bottom: 2rem; }
+
+        /* --- Style Carte Contenu --- */
+        .content-card { background: var(--card-bg); border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--card-border); padding: 1.75rem; overflow: hidden; transition: all 0.3s ease; }
+        .content-card:hover { border-color: var(--card-hover-border); box-shadow: var(--card-hover-shadow); transform: translateY(-4px); }
+        .content-card h2 { font-size: 1.3rem; font-weight: 600; color: var(--dark); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--light-gray); }
+
+        /* --- Tableau Style --- */
+        .table { margin-bottom: 0; border-collapse: separate; border-spacing: 0; width: 100%; max-width: 800px; }
+        .table thead th { background: var(--navbar-bg) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--primary-dark) !important; font-weight: 600; text-align: left; padding: 0.8rem 1rem; vertical-align: middle; position: sticky; top: 0; z-index: 5; border-bottom: 1px solid rgba(13, 148, 136, 0.2) !important; white-space: nowrap; border-right: 1px solid var(--light-gray); }
+        .table thead th:last-child { border-right: none; }
+        .table thead th:first-child { border-top-left-radius: 7px; }
+        .table thead th:last-child { border-top-right-radius: 7px; }
+        .table tbody td { background-color: white; text-align: left; vertical-align: middle; padding: 0.75rem 1rem; font-size: 0.9rem; color: var(--dark); border-bottom: 1px solid var(--light-gray); border-right: 1px solid var(--light-gray); }
+        .table tbody td:last-child { border-right: none; }
+        .table tbody tr:last-child td { border-bottom: 0; }
+        .table-hover tbody tr:hover td { background-color: #f1f5f9; }
+        .table-responsive { max-height: 50vh; overflow-y: auto; border: 1px solid var(--light-gray); border-radius: 8px; margin: 0 auto; max-width: 800px; }
+        td .form-switch { display: inline-flex; padding-left: 0; }
+
+        /* --- SweetAlert --- */
+        .swal2-popup { border-radius: 12px !important; font-family: var(--sans) !important; }
+        .swal2-title { color: var(--dark) !important; font-weight: 600 !important; }
+        .swal2-html-container { color: var(--gray) !important; text-align: center !important; margin-top: 0.5em !important; }
+        .swal2-confirm, .swal2-cancel { border-radius: 25px !important; padding: 0.6rem 1.5rem !important; font-weight: 500 !important; transition: all 0.25s ease !important; box-shadow: none !important; }
+        .swal2-confirm { background-color: var(--primary) !important; border: 1px solid var(--primary) !important; color: white !important; }
+        .swal2-confirm:hover { background-color: var(--primary-dark) !important; border-color: var(--primary-dark) !important; transform: scale(1.03); }
+        .swal2-cancel { background-color: rgba(100, 116, 139, 0.1) !important; border: 1px solid rgba(100, 116, 139, 0.2) !important; color: var(--gray) !important; }
+        .swal2-cancel:hover { background-color: var(--gray) !important; border-color: var(--gray) !important; color: white !important; transform: scale(1.03); }
+
+        /* --- Responsive --- */
+        @media (max-width: 991.98px) {
+            .navbar-nav { flex-direction: column; align-items: stretch; width: 100%; }
+            .nav-link { justify-content: flex-start; width: 100%; padding: 0.7rem 1rem; }
+            .navbar-right { display: none; }
+        }
+        @media (max-width: 767.98px) {
+            body { padding-top: 80px; }
+            .navbar { width: 94%; left: 3%; }
+            .main-content { padding: 1rem; }
+            .content-card { padding: 1.25rem; }
+            .page-header h1 { font-size: 1.5rem; }
+            .table { max-width: 100%; }
+            .table-responsive { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i></a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>"><i class="far fa-calendar-alt"></i> Événement</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_utilisateur"><i class="fas fa-users"></i> Participants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_presence"><i class="fas fa-clipboard-check"></i> Présences</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_vote"><i class="fas fa-vote-yea"></i> Vote</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/gestion_event"><i class="fas fa-cog"></i> Gestion</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/gestion_event_role?eventId=<%= eventId %>"><i class="fas fa-user-shield"></i> Rôles</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user"></i></a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-right d-none d-lg-block"><a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a></div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Gestion des Rôles et du Vote</h1>
+            <% if (typeof eventName !== 'undefined' && eventName) { %>
+                <p class="event-subtitle">Événement : <%= eventName %></p>
+            <% } %>
+        </div>
+
+        <div class="content-card">
+            <h2>Droits de vote par rôle</h2>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nom du Rôle</th>
+                            <th scope="col" class="text-center">Vote Autorisé</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (typeof roles !== 'undefined' && roles.length > 0) { %>
+                            <% roles.forEach(role => { %>
+                                <tr data-role-id="<%= role.id %>">
+                                    <td><%= role.incrementedId %></td>
+                                    <td><%= role.name %></td>
+                                    <td class="text-center">
+                                        <div class="form-check form-switch d-inline-block">
+                                            <input class="form-check-input vote-switch" type="checkbox" role="switch"
+                                                   id="voteSwitch-<%= role.id %>"
+                                                   data-role-id="<%= role.id %>"
+                                                   <%= role.voteEnabled ? 'checked' : '' %>>
+                                            <label class="form-check-label visually-hidden" for="voteSwitch-<%= role.id %>">
+                                                Activer le vote pour <%= role.name %>
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">Aucun rôle trouvé pour cet événement.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('/get_user_info');
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) { const text = await response.text(); console.warn(`Réponse inattendue /get_user_info: ${text.substring(0,100)}...`); throw new TypeError(`Format invalide.`); }
+                const user = await response.json();
+                const fullName = `${user.name || ''} ${user.surname || ''}`.trim();
+                const userFullNameEl = document.getElementById('userFullName');
+                const userEmailEl = document.getElementById('userEmail');
+                if (userFullNameEl) userFullNameEl.textContent = fullName || 'Utilisateur';
+                if (userEmailEl) userEmailEl.textContent = user.email || 'Email non disponible';
+            } catch (error) {
+                console.error('Erreur fetchUserInfo:', error);
+                const userFullNameEl = document.getElementById('userFullName'); const userEmailEl = document.getElementById('userEmail');
+                if (userFullNameEl) userFullNameEl.textContent = 'Erreur'; if (userEmailEl) userEmailEl.textContent = 'Indisponible';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchUserInfo();
+
+            const eventId = '<%= eventId %>';
+
+            if (!eventId || eventId === 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'ID de l\'événement manquant.',
+                });
+                return;
+            }
+
+            document.querySelectorAll('.vote-switch').forEach(switchElement => {
+                switchElement.addEventListener('change', function() {
+                    const roleId = this.getAttribute('data-role-id');
+                    const voteEnabled = this.checked;
+
+                    fetch('/update_role_settings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            eventId: eventId,
+                            roleId: roleId,
+                            mobileAccess: true,
+                            voteEnabled: voteEnabled
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Erreur HTTP ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Succès',
+                                text: 'Paramètres de vote mis à jour.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            throw new Error(data.message || 'Erreur inconnue');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erreur',
+                            text: `Une erreur est survenue : ${error.message}`,
+                        });
+                        this.checked = !voteEnabled;
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
