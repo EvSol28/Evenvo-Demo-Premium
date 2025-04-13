@@ -2187,7 +2187,7 @@ async function generateFooterImage() {
     ctx.fillStyle = '#777';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Généré par Evenvo - Rapport PDF 2025 Evenvo©', canvas.width / 2, canvas.height / 2);
+    ctx.fillText("© 2025 Evenvo. Généré par Evenvo - Rapport d'événement", canvas.width / 2, canvas.height / 2);
     return canvas.toDataURL('image/png').split(',')[1];
 }
 
@@ -2918,7 +2918,7 @@ app.get('/generate-qrcodes/:eventId', async (req, res) => {
         }
 
         const textYPosition = 130;
-        doc.fillColor('white')
+        doc.fillColor('black')
             .fontSize(18)
             .text('Les badges des invités', pageMargin, textYPosition, { 
                 width: contentWidth,
@@ -2999,7 +2999,7 @@ app.get('/generate-qrcodes/:eventId', async (req, res) => {
                     doc.image(logoPath, logoX, logoY, { width: logoSize, height: logoSize });
                 }
 
-                const footerText = 'NocEvent by CodEvent©';
+                const footerText = 'NocEvent by Evenvo©';
                 const footerX = startX + 20;
                 const footerY = startY + badgeHeight - 20;
                 doc.fontSize(9).text(footerText, footerX, footerY, {
@@ -4315,6 +4315,15 @@ app.post('/create_role', async (req, res) => {
     }
 
     try {
+        // Vérifier si un rôle avec le même nom existe déjà (insensible à la casse)
+        const rolesSnapshot = await firestore.collection('roles')
+            .where('name', '==', roleName)
+            .get();
+
+        if (!rolesSnapshot.empty) {
+            return res.status(400).json({ error: 'Un rôle avec ce nom existe déjà' });
+        }
+
         const incrementedId = await getNextIncrementedId();
         await firestore.collection('roles').doc(incrementedId.toString()).set({
             name: roleName,

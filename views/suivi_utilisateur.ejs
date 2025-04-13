@@ -32,7 +32,7 @@
         .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
         .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
         .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
-        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
+        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transitionContinuation: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
         .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
         .nav-link.active {
             color: var(--light) !important;
@@ -106,12 +106,12 @@
         .modal-body p strong { color: var(--dark); min-width: 120px; display: inline-block; }
         .modal-footer {
             border-top: 1px solid var(--light-gray);
-            padding: 1rem 1.5rem,
-            display: flex,
-            justify-content: center,
-            align-items: center,
-            gap: 0.75rem,
-            flex-wrap: wrap,
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
         }
         .modal-footer .btn { min-width: 100px; }
         .btn-custom-secondary { display: inline-flex; align-items: center; justify-content: center; background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.2); color: var(--gray); border-radius: 25px; padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 500; transition: all 0.25s ease; border: 1px solid; }
@@ -155,8 +155,8 @@
         }
 		
 		.subtitle-gray {
-    color: var(--gray); /* #64748B */
-}
+		    color: var(--gray); /* #64748B */
+		}
     </style>
 </head>
 <body>

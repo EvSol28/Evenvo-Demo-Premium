@@ -60,9 +60,7 @@
             text-decoration: none;
             cursor: pointer;
         }
-        .btn-custom-action .btn-text {
-            margin-left: 0.5rem; /* Espace entre icône et texte */
-        }
+        .btn-custom-action i { margin-right: 0.5rem; } /* Espace entre icône et texte */
         .btn-custom-action:hover {
             background: var(--primary);
             color: white;
@@ -70,10 +68,50 @@
             box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
             transform: scale(1.03);
         }
-        .btn-custom-secondary { display: inline-flex; align-items: center; justify-content: center; background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.2); color: var(--gray); border-radius: 25px; padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 500; transition: all 0.25s ease; border: 1px solid; }
-        .btn-custom-secondary:hover { background: var(--gray); color: white; border-color: var(--gray); box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2); transform: scale(1.03); }
-        .btn-custom-danger { display: inline-flex; align-items: center; justify-content: center; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: var(--color-danger); border-radius: 25px; padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 500; transition: all 0.25s ease; border: 1px solid; }
-        .btn-custom-danger:hover { background: var(--color-danger); color: white; border-color: var(--color-danger); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); transform: scale(1.03); }
+        .btn-custom-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(100, 116, 139, 0.1);
+            border-color: rgba(100, 116, 139, 0.2);
+            color: var(--gray);
+            border-radius: 25px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.25s ease;
+            border: 1px solid;
+        }
+        .btn-custom-secondary i { margin-right: 0.5rem; } /* Espace entre icône et texte */
+        .btn-custom-secondary:hover {
+            background: var(--gray);
+            color: white;
+            border-color: var(--gray);
+            box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2);
+            transform: scale(1.03);
+        }
+        .btn-custom-danger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.2);
+            color: var(--color-danger);
+            border-radius: 25px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.25s ease;
+            border: 1px solid;
+        }
+        .btn-custom-danger i { margin-right: 0.5rem; } /* Espace entre icône et texte */
+        .btn-custom-danger:hover {
+            background: var(--color-danger);
+            color: white;
+            border-color: var(--color-danger);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+            transform: scale(1.03);
+        }
         .create-btn-container { text-align: center; margin-bottom: 1.5rem; }
         #superAdminFormContainer { display: none; }
         #superAdminForm .form-label { font-weight: 500; font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem; text-align: left; display: block; }
@@ -103,8 +141,24 @@
         .modal-body { padding: 1.5rem; }
         .modal-footer { border-top: 1px solid var(--light-gray); padding: 1rem 1.5rem; display: flex; justify-content: space-between; gap: 0.75rem; }
         .modal-footer .btn { min-width: 120px; }
-        .swal2-confirm { background-color: var(--primary) !important; border-color: var(--primary) !important; color: white !important; }
-        .swal2-cancel { background-color: rgba(100, 116, 139, 0.1) !important; border: 1px solid rgba(100, 116, 139, 0.2) !important; color: var(--gray) !important; }
+        /* SweetAlert2 Confirm Button Styling */
+        .swal2-confirm {
+            background-color: rgba(94, 234, 212, 0.2) !important; /* Vert clair transparent */
+            border: 1px solid var(--primary-dark) !important; /* Bordure vert foncé */
+            color: var(--primary-dark) !important;
+            transition: all 0.25s ease !important;
+        }
+        .swal2-confirm:hover {
+            background-color: var(--primary-dark) !important; /* Fond vert foncé au survol */
+            color: white !important;
+            border-color: var(--primary-dark) !important;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25) !important;
+        }
+        .swal2-cancel { 
+            background-color: rgba(100, 116, 139, 0.1) !important; 
+            border: 1px solid rgba(100, 116, 139, 0.2) !important; 
+            color: var(--gray) !important; 
+        }
     </style>
 </head>
 
@@ -143,7 +197,7 @@
         <!-- Create Button -->
         <div class="create-btn-container">
             <button id="createSuperAdminBtn" class="btn btn-custom-action">
-                <i class="fas fa-user-plus"></i> <span class="btn-text">Créer un super administrateur</span>
+                <i class="fas fa-user-plus"></i> <span>Créer un super administrateur</span>
             </button>
         </div>
 
@@ -195,8 +249,12 @@
                     </div>
                 </div>
                 <div class="btn-container">
-                    <button type="submit" class="btn btn-custom-action"><i class="fas fa-check"></i> Valider</button>
-                    <button type="button" id="cancelBtn" class="btn btn-custom-secondary"><i class="fas fa-times"></i> Annuler</button>
+                    <button type="submit" class="btn btn-custom-action">
+                        <i class="fas fa-check"></i> <span>Valider</span>
+                    </button>
+                    <button type="button" id="cancelBtn" class="btn btn-custom-secondary">
+                        <i class="fas fa-times"></i> <span>Annuler</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -268,9 +326,15 @@
                     <p><strong>Rôle :</strong> <span id="modalRole"></span></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-custom-action" id="editSuperAdminBtn"><i class="fas fa-edit"></i> Modifier</button>
-                    <button type="button" class="btn btn-custom-danger" id="suppSuperAdminBtn"><i class="fas fa-trash-alt"></i> Supprimer</button>
-                    <button type="button" class="btn btn-custom-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> Fermer</button>
+                    <button type="button" class="btn btn-custom-action">
+                        <i class="fas fa-edit"></i> <span>Modifier</span>
+                    </button>
+                    <button type="button" class="btn btn-custom-danger" id="suppSuperAdminBtn">
+                        <i class="fas fa-trash-alt"></i> <span>Supprimer</span>
+                    </button>
+                    <button type="button" class="btn btn-custom-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> <span>Fermer</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -332,8 +396,12 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-custom-secondary" data-bs-dismiss="modal"><i class="fas fa-times"></i> Annuler</button>
-                    <button type="button" class="btn btn-custom-action" id="saveEditBtn"><i class="fas fa-save"></i> Enregistrer</button>
+                    <button type="button" class="btn btn-custom-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> <span>Annuler</span>
+                    </button>
+                    <button type="button" class="btn btn-custom-action" id="saveEditBtn">
+                        <i class="fas fa-save"></i> <span>Enregistrer</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -346,7 +414,7 @@
         // Fetch User Info for Navbar
         async function fetchUserInfo() {
             try {
-                const response = await fetch('/get_user_info'); // Uniformisé avec page 2
+                const response = await fetch('/get_user_info');
                 if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
                 const user = await response.json();
                 const fullName = `${user.name || ''} ${user.surname || ''}`.trim();
@@ -366,7 +434,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            fetchUserInfo(); // Appel initial au chargement de la page
+            fetchUserInfo();
 
             const superAdminFormContainer = document.getElementById('superAdminFormContainer');
             const createSuperAdminBtn = document.getElementById('createSuperAdminBtn');
