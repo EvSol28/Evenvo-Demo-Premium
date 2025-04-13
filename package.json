@@ -40,6 +40,7 @@
     "puppeteer": "^24.6.1",
     "qrcode": "^1.5.4",
     "react-google-charts": "^5.2.1",
+    "sweetalert2": "^11.6.13",
     "web-streams-polyfill": "^4.0.0"
   }
 }
