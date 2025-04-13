@@ -14,7 +14,6 @@ const QRCode = require('qrcode');
 const puppeteer = require('puppeteer');
 const router = express.Router();  // Créer un router pour définir les routes
 const { jsPDF } = require("jspdf");
-const htmlPdf = require('html-pdf');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const logoPath = path.join(__dirname, 'assets', 'logo.png');  // Assurez-vous que le chemin est correct
 const logoBuffer = fs.readFileSync(logoPath);
@@ -25,7 +24,6 @@ const { createCanvas } = require('canvas');
 const Chart = require('chart.js/auto');
 const axios = require('axios');
 const templatePathQr = path.join(__dirname, 'views', 'pdf_template_QR.ejs');
-const XLSX = require('xlsx');
 const crypto = require('crypto');
 const { createObjectCsvWriter } = require('csv-writer');
 const util = require('util');
@@ -2177,6 +2175,8 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
     const eventId = req.params.eventId;
 
     try {
+        console.log('Démarrage de la génération du PDF pour l\'événement :', eventId);
+
         const event = await getEventDetails(eventId);
         if (!event) {
             console.error('Événement introuvable pour l\'ID :', eventId);
@@ -2212,7 +2212,7 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Aucun utilisateur trouvé.' });
         }
 
-        console.log('Utilisateurs récupérés :', users);
+        console.log('Utilisateurs récupérés :', users.length);
 
         const rolesSnapshot = await firestore.collection('roles').get();
         const roles = rolesSnapshot.docs.map(doc => ({
@@ -2221,7 +2221,7 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
             incrementedId: doc.data().incrementedId
         }));
 
-        console.log('Rôles récupérés :', roles);
+        console.log('Rôles récupérés :', roles.length);
 
         const roleVoteSettings = event.roleVoteSettings || {};
         roles.forEach(role => {
@@ -2278,7 +2278,7 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
                             position: 'top',
                             labels: {
                                 font: {
-                                    size: 20 // Augmenter la taille de la police des labels de la légende
+                                    size: 20
                                 }
                             }
                         } 
@@ -2286,6 +2286,7 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
                     aspectRatio: 1.3
                 }
             });
+            console.log(`Graphique généré pour le rôle ${roleKey}`);
         }
 
         const totalPresenceChartBase64 = await generateChartBase64({
@@ -2301,7 +2302,7 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
                         position: 'top',
                         labels: {
                             font: {
-                                size: 20 // Augmenter la taille de la police des labels de la légende
+                                size: 20
                             }
                         }
                     } 
@@ -2309,10 +2310,11 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
                 aspectRatio: 1.3
             }
         });
+        console.log('Graphique total de présence généré');
 
         const voteSnapshot = await firestore.collection('votes').where('eventId', '==', eventId).get();
         const votes = voteSnapshot.docs.map(doc => doc.data());
-        console.log('Votes récupérés :', votes);
+        console.log('Votes récupérés :', votes.length);
 
         const voteEligibleUsers = users.filter(user => {
             const roleInfo = roles.find(r => r.name.toLowerCase() === user.role.toLowerCase());
@@ -2320,7 +2322,7 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
             console.log(`Utilisateur ${user.id} (${user.role}) - Éligible au vote : ${isEligible}`);
             return isEligible;
         });
-        console.log('Utilisateurs éligibles au vote :', voteEligibleUsers);
+        console.log('Utilisateurs éligibles au vote :', voteEligibleUsers.length);
 
         const voteEligibleRoles = [...new Set(voteEligibleUsers.map(user => user.role))];
         console.log('Rôles éligibles au vote :', voteEligibleRoles);
@@ -2332,7 +2334,7 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
                 voteChoice: userVote ? userVote.choice : 'Non voté'
             };
         });
-        console.log('Utilisateurs avec votes :', usersWithVotes);
+        console.log('Utilisateurs avec votes :', usersWithVotes.length);
 
         const voteStatsByRole = voteEligibleRoles.reduce((acc, role) => {
             const roleKey = role.toLowerCase();
@@ -2366,7 +2368,7 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
                             position: 'top',
                             labels: {
                                 font: {
-                                    size: 20 // Augmenter la taille de la police des labels de la légende
+                                    size: 20
                                 }
                             }
                         } 
@@ -2374,6 +2376,7 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
                     aspectRatio: 1.3
                 }
             });
+            console.log(`Graphique de vote généré pour le rôle ${roleKey}`);
         }
         console.log('Graphiques des votes par rôle générés :', Object.keys(voteChartByRoleBase64));
 
@@ -2399,7 +2402,7 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
                         position: 'top',
                         labels: {
                             font: {
-                                size: 20 // Augmenter la taille de la police des labels de la légende
+                                size: 20
                             }
                         }
                     } 
@@ -2412,6 +2415,7 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
         const logoPath = path.join(__dirname, 'assets', 'logo.png');
         const logoBuffer = fs.readFileSync(logoPath);
         const logoBase64 = logoBuffer.toString('base64');
+        console.log('Logo chargé');
 
         const htmlContent = await ejs.renderFile(path.join(__dirname, 'views', 'pdf_template.ejs'), {
             eventName: event.name,
@@ -2432,22 +2436,61 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
             participantRoles,
             voteEligibleRoles
         });
+        console.log('Template EJS rendu avec succès');
 
-        htmlPdf.create(htmlContent, { format: 'A4', orientation: 'portrait', border: '10mm' }).toStream((err, stream) => {
-            if (err) {
-                console.error('Erreur lors de la génération du PDF :', err);
-                return res.status(500).json({ success: false, message: 'Erreur lors de la génération du PDF.' });
-            }
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename=event_${eventId}_suivi_presence.pdf`);
-            stream.pipe(res);
+        // Génération du PDF avec Puppeteer
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-accelerated-2d-canvas', '--no-first-run', '--no-zygote', '--single-process']
         });
+        const page = await browser.newPage();
+
+        // Ajouter un style de base pour stabiliser le rendu
+        const styledHtmlContent = `
+            <html>
+                <head>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+                        img { max-width: 100%; height: auto; }
+                        .footer { position: relative; margin-top: 20px; }
+                        .page { page-break-after: always; margin-bottom: 20px; }
+                    </style>
+                </head>
+                <body>${htmlContent}</body>
+            </html>
+        `;
+        await page.setContent(styledHtmlContent, { waitUntil: 'networkidle0', timeout: 60000 });
+        console.log('Contenu HTML chargé dans Puppeteer');
+
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            printBackground: true,
+            margin: {
+                top: '10mm',
+                bottom: '10mm',
+                left: '10mm',
+                right: '10mm'
+            }
+        });
+        console.log('PDF généré, taille du buffer :', pdfBuffer.length);
+
+        // Sauvegarder le PDF localement pour débogage
+        fs.writeFileSync(`test_${eventId}.pdf`, pdfBuffer);
+        console.log('PDF sauvegardé localement :', `test_${eventId}.pdf`);
+
+        await browser.close();
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=event_${eventId}_suivi_presence.pdf`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.send(pdfBuffer);
+        console.log('PDF envoyé au client');
+
     } catch (error) {
-        console.error('Erreur lors de l\'exportation du PDF :', error.message);
-        res.status(500).json({ success: false, message: 'Erreur serveur.' });
+        console.error('Erreur lors de l\'exportation du PDF :', error);
+        res.status(500).json({ success: false, message: 'Erreur serveur lors de la génération du PDF.', error: error.message });
     }
 });
-
 
 app.post('/toggle-vote', async (req, res) => {
     try {
