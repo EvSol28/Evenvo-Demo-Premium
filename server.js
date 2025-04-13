@@ -2171,6 +2171,26 @@ async function getUsersForEvent(eventId) {
 }
 
 
+
+
+
+
+
+
+// Fonction pour générer l'image du pied de page
+async function generateFooterImage() {
+    const canvas = createCanvas(400, 30);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = '12px Arial';
+    ctx.fillStyle = '#777';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Généré par Evenvo - Rapport PDF 2025 Evenvo©', canvas.width / 2, canvas.height / 2);
+    return canvas.toDataURL('image/png').split(',')[1];
+}
+
 router.get('/event/:eventId/export-pdf', async (req, res) => {
     const eventId = req.params.eventId;
     let browser;
@@ -2274,11 +2294,20 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
                 },
                 options: { 
                     responsive: true, 
-                    plugins: { legend: { position: 'top', labels: { font: { size: 10 } } } },
-                    aspectRatio: 1
+                    plugins: { 
+                        legend: { 
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 20
+                                }
+                            }
+                        } 
+                    }, 
+                    aspectRatio: 1.3
                 },
-                width: 300,
-                height: 300
+                width: 600,
+                height: 600
             });
             console.log(`Graphique généré pour le rôle ${roleKey}`);
         }
@@ -2291,11 +2320,20 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
             },
             options: { 
                 responsive: true, 
-                plugins: { legend: { position: 'top', labels: { font: { size: 10 } } } },
-                aspectRatio: 1
+                plugins: { 
+                    legend: { 
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 20
+                            }
+                        }
+                    } 
+                }, 
+                aspectRatio: 1.3
             },
-            width: 300,
-            height: 300
+            width: 600,
+            height: 600
         });
         console.log('Graphique total de présence généré');
 
@@ -2350,11 +2388,20 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
                 },
                 options: { 
                     responsive: true, 
-                    plugins: { legend: { position: 'top', labels: { font: { size: 10 } } } },
-                    aspectRatio: 1
+                    plugins: { 
+                        legend: { 
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 20
+                                }
+                            }
+                        } 
+                    }, 
+                    aspectRatio: 1.3
                 },
-                width: 300,
-                height: 300
+                width: 600,
+                height: 600
             });
             console.log(`Graphique de vote généré pour le rôle ${roleKey}`);
         }
@@ -2376,11 +2423,20 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
             },
             options: { 
                 responsive: true, 
-                plugins: { legend: { position: 'top', labels: { font: { size: 10 } } } },
-                aspectRatio: 1
+                plugins: { 
+                    legend: { 
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 20
+                            }
+                        }
+                    } 
+                }, 
+                aspectRatio: 1.3
             },
-            width: 300,
-            height: 300
+            width: 600,
+            height: 600
         });
         console.log('Graphique total des votes généré');
 
@@ -2388,6 +2444,9 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
         const logoBuffer = fs.readFileSync(logoPath);
         const logoBase64 = logoBuffer.toString('base64');
         console.log('Logo chargé');
+
+        const footerImageBase64 = await generateFooterImage();
+        console.log('Image de pied de page générée');
 
         const htmlContent = await ejs.renderFile(path.join(__dirname, 'views', 'pdf_template.ejs'), {
             eventName: event.name,
@@ -2406,7 +2465,8 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
             voteChartByRoleBase64,
             roles,
             participantRoles,
-            voteEligibleRoles
+            voteEligibleRoles,
+            footerImageBase64
         });
         console.log('Template EJS rendu, taille HTML :', htmlContent.length);
 
@@ -2432,18 +2492,18 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
-            margin: { top: '10mm', bottom: '10mm', left: '10mm', right: '10mm' },
+            margin: { top: '10mm', bottom: '15mm', left: '10mm', right: '10mm' },
             preferCSSPageSize: true
         });
         console.log('PDF généré, taille du buffer :', pdfBuffer.length);
 
-        fs.writeFileSync(`test_${eventId}.pdf`, pdfBuffer);
-        console.log('PDF sauvegardé localement :', `test_${eventId}.pdf`);
+        // Suppression de l'étape de sauvegarde locale
+        // fs.writeFileSync(`test_${eventId}.pdf`, pdfBuffer);
+        // console.log('PDF sauvegardé localement :', `test_${eventId}.pdf`);
 
         await browser.close();
         browser = null;
 
-        // En-têtes optimisés
         res.set({
             'Content-Type': 'application/pdf',
             'Content-Disposition': `attachment; filename="event_${eventId}_suivi_presence.pdf"`,
@@ -2456,13 +2516,9 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
             'Accept-Ranges': 'bytes'
         });
 
-        // Log des en-têtes envoyés
         console.log('En-têtes envoyés :', res.getHeaders());
-
-        // Vérification du buffer
         console.log('Buffer valide :', Buffer.isBuffer(pdfBuffer), 'Taille :', pdfBuffer.length);
 
-        // Envoyer le PDF
         res.status(200).end(pdfBuffer);
         console.log('PDF envoyé au client');
 
