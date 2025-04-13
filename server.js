@@ -2909,7 +2909,7 @@ app.get('/generate-qrcodes/:eventId', async (req, res) => {
         const pageMargin = 50;
         const contentWidth = pageWidth - pageMargin * 2;
 
-        doc.rect(pageMargin, 20, contentWidth, headerHeight).fill('#212529');
+        doc.rect(pageMargin, 20, contentWidth, headerHeight).fill('#B2D8D8');
         if (logoPath) {
             const logoSize = 70;
             const logoX = (pageWidth - logoSize) / 2;
