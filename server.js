@@ -2173,6 +2173,7 @@ async function getUsersForEvent(eventId) {
 
 router.get('/event/:eventId/export-pdf', async (req, res) => {
     const eventId = req.params.eventId;
+    let browser;
 
     try {
         console.log('Démarrage de la génération du PDF pour l\'événement :', eventId);
@@ -2273,18 +2274,11 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
                 },
                 options: { 
                     responsive: true, 
-                    plugins: { 
-                        legend: { 
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 20
-                                }
-                            }
-                        } 
-                    }, 
-                    aspectRatio: 1.3
-                }
+                    plugins: { legend: { position: 'top', labels: { font: { size: 10 } } } },
+                    aspectRatio: 1
+                },
+                width: 300,
+                height: 300
             });
             console.log(`Graphique généré pour le rôle ${roleKey}`);
         }
@@ -2297,18 +2291,11 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
             },
             options: { 
                 responsive: true, 
-                plugins: { 
-                    legend: { 
-                        position: 'top',
-                        labels: {
-                            font: {
-                                size: 20
-                            }
-                        }
-                    } 
-                }, 
-                aspectRatio: 1.3
-            }
+                plugins: { legend: { position: 'top', labels: { font: { size: 10 } } } },
+                aspectRatio: 1
+            },
+            width: 300,
+            height: 300
         });
         console.log('Graphique total de présence généré');
 
@@ -2363,22 +2350,14 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
                 },
                 options: { 
                     responsive: true, 
-                    plugins: { 
-                        legend: { 
-                            position: 'top',
-                            labels: {
-                                font: {
-                                    size: 20
-                                }
-                            }
-                        } 
-                    }, 
-                    aspectRatio: 1.3
-                }
+                    plugins: { legend: { position: 'top', labels: { font: { size: 10 } } } },
+                    aspectRatio: 1
+                },
+                width: 300,
+                height: 300
             });
             console.log(`Graphique de vote généré pour le rôle ${roleKey}`);
         }
-        console.log('Graphiques des votes par rôle générés :', Object.keys(voteChartByRoleBase64));
 
         const voteStats = usersWithVotes.reduce((acc, user) => {
             acc[user.voteChoice] = (acc[user.voteChoice] || 0) + 1;
@@ -2397,20 +2376,13 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
             },
             options: { 
                 responsive: true, 
-                plugins: { 
-                    legend: { 
-                        position: 'top',
-                        labels: {
-                            font: {
-                                size: 20
-                            }
-                        }
-                    } 
-                }, 
-                aspectRatio: 1.3
-            }
+                plugins: { legend: { position: 'top', labels: { font: { size: 10 } } } },
+                aspectRatio: 1
+            },
+            width: 300,
+            height: 300
         });
-        console.log('Graphique total des votes généré :', voteChartData);
+        console.log('Graphique total des votes généré');
 
         const logoPath = path.join(__dirname, 'assets', 'logo.png');
         const logoBuffer = fs.readFileSync(logoPath);
@@ -2436,61 +2408,73 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
             participantRoles,
             voteEligibleRoles
         });
-        console.log('Template EJS rendu avec succès');
+        console.log('Template EJS rendu, taille HTML :', htmlContent.length);
 
-        // Génération du PDF avec Puppeteer
-        const browser = await puppeteer.launch({
+        browser = await puppeteer.launch({
             headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-accelerated-2d-canvas', '--no-first-run', '--no-zygote', '--single-process']
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-first-run',
+                '--no-zygote',
+                '--disable-gpu'
+            ],
+            timeout: 120000
         });
         const page = await browser.newPage();
 
-        // Ajouter un style de base pour stabiliser le rendu
-        const styledHtmlContent = `
-            <html>
-                <head>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-                        img { max-width: 100%; height: auto; }
-                        .footer { position: relative; margin-top: 20px; }
-                        .page { page-break-after: always; margin-bottom: 20px; }
-                    </style>
-                </head>
-                <body>${htmlContent}</body>
-            </html>
-        `;
-        await page.setContent(styledHtmlContent, { waitUntil: 'networkidle0', timeout: 60000 });
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0', timeout: 120000 });
         console.log('Contenu HTML chargé dans Puppeteer');
 
+        await page.emulateMediaType('print');
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
-            margin: {
-                top: '10mm',
-                bottom: '10mm',
-                left: '10mm',
-                right: '10mm'
-            }
+            margin: { top: '10mm', bottom: '10mm', left: '10mm', right: '10mm' },
+            preferCSSPageSize: true
         });
         console.log('PDF généré, taille du buffer :', pdfBuffer.length);
 
-        // Sauvegarder le PDF localement pour débogage
         fs.writeFileSync(`test_${eventId}.pdf`, pdfBuffer);
         console.log('PDF sauvegardé localement :', `test_${eventId}.pdf`);
 
         await browser.close();
+        browser = null;
 
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=event_${eventId}_suivi_presence.pdf`);
-        res.setHeader('Content-Length', pdfBuffer.length);
-        res.send(pdfBuffer);
+        // En-têtes optimisés
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="event_${eventId}_suivi_presence.pdf"`,
+            'Content-Length': pdfBuffer.length,
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'Content-Transfer-Encoding': 'binary',
+            'Content-Encoding': 'identity',
+            'Accept-Ranges': 'bytes'
+        });
+
+        // Log des en-têtes envoyés
+        console.log('En-têtes envoyés :', res.getHeaders());
+
+        // Vérification du buffer
+        console.log('Buffer valide :', Buffer.isBuffer(pdfBuffer), 'Taille :', pdfBuffer.length);
+
+        // Envoyer le PDF
+        res.status(200).end(pdfBuffer);
         console.log('PDF envoyé au client');
 
     } catch (error) {
         console.error('Erreur lors de l\'exportation du PDF :', error);
-        res.status(500).json({ success: false, message: 'Erreur serveur lors de la génération du PDF.', error: error.message });
+        if (browser) {
+            await browser.close();
+        }
+        res.status(500).json({ success: false, message: 'Erreur serveur.', error: error.message });
     }
 });
+
 
 app.post('/toggle-vote', async (req, res) => {
     try {
