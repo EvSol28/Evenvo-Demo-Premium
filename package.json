@@ -13,7 +13,7 @@
   "dependencies": {
     "axios": "^1.7.9",
     "body-parser": "^1.20.3",
-    "canvas": "^2.11.2",
+    "canvas": "^3.1.0",
     "chardet": "^2.1.0",
     "chart.js": "^4.4.8",
     "chartjs-node-canvas": "^5.0.0",
@@ -40,8 +40,6 @@
     "puppeteer": "^24.6.1",
     "qrcode": "^1.5.4",
     "react-google-charts": "^5.2.1",
-    "sweetalert2": "^11.6.13",
-    "web-streams-polyfill": "^4.0.0",
-    "xlsx": "^0.18.5"
+    "web-streams-polyfill": "^4.0.0"
   }
 }
