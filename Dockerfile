@@ -25,8 +25,8 @@ RUN npm install
 # Copie le reste du code
 COPY . .
 
-# Expose le port (remplace 3000 par le port de ton app si différent)
-EXPOSE 3000
+# Expose le port (remplace 4000 par le port de ton app si différent)
+EXPOSE 4000
 
 # Commande pour démarrer l’app
 CMD ["node", "server.js"]
