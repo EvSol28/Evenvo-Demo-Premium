@@ -1,4 +1,3 @@
- 
 # Utilise une image Node.js officielle
 FROM node:22.14.0
 
