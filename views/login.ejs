@@ -7,7 +7,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
-        /* Styles inchangés */
         :root {
             --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
             --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
@@ -28,7 +27,8 @@
             --dark-text-swal: #1E293B; --gray-text-swal: #64748B;
             --light-gray-border-swal: #e2e8f0;
             --error-button-bg: rgba(239, 68, 68, 0.1); /* Rouge transparent */
-            --error-button-border: #B91C1C; /* Rouge foncé */
+            --error-button-border: #B91C1C; /* Rouge foncé pour bordure */
+            --error-button-hover: #EF4444; /* Rouge standard pour survol */
         }
 
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -148,22 +148,51 @@
         .swal2-html-container, .swal2-input-label, .swal2-input { color: var(--gray-text-swal) !important; }
         .swal2-input { border-color: var(--light-gray-border-swal) !important; border-radius: 8px !important; }
         .swal2-input:focus { border-color: var(--primary-success) !important; box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.25) !important; }
-        .swal2-confirm, .swal2-cancel { border-radius: 25px !important; padding: 0.6rem 1.5rem !important; font-weight: 500 !important; transition: all 0.25s ease !important; box-shadow: none !important; border: 1px solid transparent !important; }
-        .swal2-confirm.swal-confirm-button-success { background: rgba(13, 148, 136, 0.08) !important; border: 1px solid rgba(13, 148, 136, 0.2) !important; color: var(--primary-success) !important; box-shadow: none !important; }
-        /* Style personnalisé pour le bouton OK en cas d'erreur */
-        .swal2-confirm.swal2-styled.swal2-default-outline:not(.swal-confirm-button-success) { 
-            background-color: var(--error-button-bg) !important; 
-            border: 1px solid var(--error-button-border) !important; 
-            color: var(--error-button-border) !important; 
+        .swal2-confirm, .swal2-cancel {
+            border-radius: 8px !important; /* Coins légèrement arrondis */
+            padding: 0.6rem 1.2rem !important; /* Padding réduit pour un bouton plus petit */
+            font-weight: 500 !important;
+            font-size: 0.9rem !important; /* Texte légèrement plus petit */
+            transition: all 0.25s ease !important;
+            box-shadow: none !important;
+            min-width: 80px !important; /* Largeur minimale réduite pour un bouton plus petit */
+            text-align: center !important;
         }
-        .swal2-confirm.swal2-styled.swal2-default-outline:not(.swal-confirm-button-success):hover { 
-            background-color: rgba(239, 68, 68, 0.2) !important; 
-            border-color: #991B1B !important; 
-            color: #991B1B !important; 
-            transform: scale(1.03); 
+        /* Bouton OK pour succès */
+        .swal2-confirm.swal-confirm-button-success {
+            background-color: rgba(94, 234, 212, 0.2) !important; /* Vert clair transparent */
+            border: 1px solid var(--primary-dark) !important; /* Bordure vert foncé */
+            color: var(--primary-dark) !important;
         }
-        .swal2-cancel.swal2-styled.swal2-default-outline { background-color: rgba(100, 116, 139, 0.1) !important; border: 1px solid rgba(100, 116, 139, 0.2) !important; color: var(--gray-text-swal) !important; }
-        .swal2-cancel.swal2-styled.swal2-default-outline:hover { background-color: var(--gray-text-swal) !important; border-color: var(--gray-text-swal) !important; color: white !important; transform: scale(1.03); }
+        .swal2-confirm.swal-confirm-button-success:hover {
+            background-color: var(--primary-dark) !important; /* Fond vert foncé au survol */
+            color: white !important;
+            border-color: var(--primary-dark) !important;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25) !important;
+        }
+        /* Bouton OK pour erreur */
+        .swal2-confirm.swal2-styled.swal2-default-outline:not(.swal-confirm-button-success) {
+            background-color: var(--error-button-bg) !important; /* Rouge transparent */
+            border: 1px solid var(--error-button-border) !important; /* Bordure rouge foncé */
+            color: var(--error-button-border) !important;
+        }
+        .swal2-confirm.swal2-styled.swal2-default-outline:not(.swal-confirm-button-success):hover {
+            background-color: var(--error-button-hover) !important; /* Rouge standard au survol */
+            color: white !important;
+            border-color: var(--error-button-hover) !important;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25) !important;
+        }
+        .swal2-cancel.swal2-styled.swal2-default-outline {
+            background-color: rgba(100, 116, 139, 0.1) !important;
+            border: 1px solid rgba(100, 116, 139, 0.2) !important;
+            color: var(--gray-text-swal) !important;
+        }
+        .swal2-cancel.swal2-styled.swal2-default-outline:hover {
+            background-color: var(--gray-text-swal) !important;
+            border-color: var(--gray-text-swal) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25) !important;
+        }
     </style>
 </head>
 <body>
