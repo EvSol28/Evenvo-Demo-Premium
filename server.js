@@ -3201,42 +3201,79 @@ async function initializeDefaultSuperAdmin() {
   }
 }
 
-// Mettre à jour la route delete_superadmin pour utiliser la liste dynamique
+
+// Fonction pour récupérer les trois premiers super administrateurs protégés
+async function getProtectedSuperAdmins() {
+    try {
+        const snapshot = await firestore
+            .collection('super_admin')
+            .orderBy('createdAt', 'asc')
+            .limit(3)
+            .get();
+        const protectedAdmins = snapshot.docs.map(doc => doc.id);
+        console.log('Admins protégés récupérés :', protectedAdmins);
+        return protectedAdmins;
+    } catch (error) {
+        console.error('Erreur lors de la récupération des admins protégés :', error);
+        return [];
+    }
+}
+
+
+// Route pour supprimer des super administrateurs
+// Route pour supprimer des super administrateurs
 app.post('/delete_superadmin', async (req, res) => {
-  const { superAdminIds } = req.body;
+    const { superAdminIds } = req.body;
 
-  if (!superAdminIds || !Array.isArray(superAdminIds) || superAdminIds.length === 0) {
-    return res.status(400).json({ error: "Il faut une liste d’IDs." });
-  }
-
-  try {
-    const snapshot = await admin.firestore().collection('super_admin').get();
-    const totalSuperAdmins = snapshot.size;
-
-    for (const id of superAdminIds) {
-      if (global.PROTECTED_SUPERADMINS.includes(id)) {
-        return res.status(403).json({ error: "Vous ne pouvez pas supprimer cet administrateur protégé !" });
-      }
+    // Vérifier si la liste d'IDs est valide
+    if (!superAdminIds || !Array.isArray(superAdminIds) || superAdminIds.length === 0) {
+        return res.status(400).json({ error: "Il faut une liste d'IDs." });
     }
 
-    if (totalSuperAdmins - superAdminIds.length < 1) { // Minimum 1 pour commencer
-      return res.status(403).json({ error: "Il doit toujours y avoir au moins 1 super administrateur !" });
-    }
+    try {
+        // Vérifier si l'utilisateur essaie de supprimer son propre compte
+        if (superAdminIds.includes(req.session.userId)) {
+            return res.status(403).json({ error: "Vous ne pouvez pas supprimer votre propre compte car vous êtes connecté avec celui-ci." });
+        }
 
-    const batch = admin.firestore().batch();
-    for (const id of superAdminIds) {
-      const superAdminRef = admin.firestore().collection('super_admin').doc(id);
-      batch.delete(superAdminRef);
-      await admin.auth().deleteUser(id).catch(err => console.log(`Utilisateur ${id} non supprimé dans Auth : ${err}`));
-    }
+        // Compter le nombre total de super admins
+        const snapshot = await firestore.collection('super_admin').get();
+        const totalSuperAdmins = snapshot.size;
 
-    await batch.commit();
-    res.status(200).json({ message: "Super administrateurs supprimés avec succès." });
-  } catch (error) {
-    console.error("Erreur :", error);
-    res.status(500).json({ error: "Erreur lors de la suppression." });
-  }
+        // Vérifier qu'il restera au moins 1 super admin
+        if (totalSuperAdmins - superAdminIds.length < 1) {
+            return res.status(403).json({ error: "Il doit toujours y avoir au moins 1 super administrateur !" });
+        }
+
+        // Récupérer les admins protégés
+        const protectedAdmins = await getProtectedSuperAdmins();
+        if (protectedAdmins.length === 0) {
+            console.warn("Aucun admin protégé trouvé, vérifiez Firestore.");
+        }
+
+        // Vérifier si un ID est protégé
+        for (const id of superAdminIds) {
+            if (protectedAdmins.includes(id)) {
+                return res.status(403).json({ error: "Vous ne pouvez pas supprimer cet administrateur protégé !" });
+            }
+        }
+
+        // Supprimer les super admins
+        const batch = firestore.batch();
+        for (const id of superAdminIds) {
+            const superAdminRef = firestore.collection('super_admin').doc(id);
+            batch.delete(superAdminRef);
+            await admin.auth().deleteUser(id).catch(err => console.log(`Utilisateur ${id} non supprimé dans Auth : ${err}`));
+        }
+
+        await batch.commit();
+        res.status(200).json({ message: "Super administrateurs supprimés avec succès." });
+    } catch (error) {
+        console.error("Erreur lors de la suppression :", error);
+        res.status(500).json({ error: "Erreur lors de la suppression : " + error.message });
+    }
 });
+
 
 // Lancer l’initialisation au démarrage
 initializeDefaultSuperAdmin().then(() => {

@@ -60,7 +60,7 @@
             text-decoration: none;
             cursor: pointer;
         }
-        .btn-custom-action i { margin-right: 0.5rem; } /* Espace entre icône et texte */
+        .btn-custom-action i { margin-right: 0.5rem; }
         .btn-custom-action:hover {
             background: var(--primary);
             color: white;
@@ -82,7 +82,7 @@
             transition: all 0.25s ease;
             border: 1px solid;
         }
-        .btn-custom-secondary i { margin-right: 0.5rem; } /* Espace entre icône et texte */
+        .btn-custom-secondary i { margin-right: 0.5rem; }
         .btn-custom-secondary:hover {
             background: var(--gray);
             color: white;
@@ -104,7 +104,7 @@
             transition: all 0.25s ease;
             border: 1px solid;
         }
-        .btn-custom-danger i { margin-right: 0.5rem; } /* Espace entre icône et texte */
+        .btn-custom-danger i { margin-right: 0.5rem; }
         .btn-custom-danger:hover {
             background: var(--color-danger);
             color: white;
@@ -141,15 +141,14 @@
         .modal-body { padding: 1.5rem; }
         .modal-footer { border-top: 1px solid var(--light-gray); padding: 1rem 1.5rem; display: flex; justify-content: space-between; gap: 0.75rem; }
         .modal-footer .btn { min-width: 120px; }
-        /* SweetAlert2 Confirm Button Styling */
         .swal2-confirm {
-            background-color: rgba(94, 234, 212, 0.2) !important; /* Vert clair transparent */
-            border: 1px solid var(--primary-dark) !important; /* Bordure vert foncé */
+            background-color: rgba(94, 234, 212, 0.2) !important;
+            border: 1px solid var(--primary-dark) !important;
             color: var(--primary-dark) !important;
             transition: all 0.25s ease !important;
         }
         .swal2-confirm:hover {
-            background-color: var(--primary-dark) !important; /* Fond vert foncé au survol */
+            background-color: var(--primary-dark) !important;
             color: white !important;
             border-color: var(--primary-dark) !important;
             box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25) !important;
@@ -283,8 +282,8 @@
                     <tbody>
                         <% if (superAdmins && superAdmins.length > 0) { %>
                             <% superAdmins.forEach(superAdmin => { %>
-                                <tr class="superAdmin-row" data-id="<%= superAdmin.id %>">
-                                    <td><%= superAdmin.id %></td>
+                                <tr class="superAdmin-row" data-id="<%= superAdmin.uid %>">
+                                    <td><%= superAdmin.uid %></td>
                                     <td><%= superAdmin.name %></td>
                                     <td><%= superAdmin.surname %></td>
                                     <td><%= superAdmin.civility %></td>
@@ -326,7 +325,7 @@
                     <p><strong>Rôle :</strong> <span id="modalRole"></span></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-custom-action">
+                    <button type="button" class="btn btn-custom-action" id="editSuperAdminBtn">
                         <i class="fas fa-edit"></i> <span>Modifier</span>
                     </button>
                     <button type="button" class="btn btn-custom-danger" id="suppSuperAdminBtn">
@@ -483,7 +482,7 @@
                     });
                     const result = await response.json();
 
-                    if (!response.ok) throw new Error(result.error);
+                    if (!response.ok) throw new Error(result.error || 'Erreur lors de la création');
 
                     Swal.fire({
                         icon: 'success',
@@ -535,6 +534,10 @@
             // Delete Super Admin
             document.getElementById('suppSuperAdminBtn').addEventListener('click', async () => {
                 const superAdminId = document.getElementById('SuperAdminDetailModal').getAttribute('data-superadmin-id');
+                if (!superAdminId) {
+                    Swal.fire({ icon: 'error', title: 'Erreur', text: "Identifiant du super administrateur manquant." });
+                    return;
+                }
                 Swal.fire({
                     title: 'Confirmer la suppression',
                     text: 'Voulez-vous vraiment supprimer ce super administrateur ?',
@@ -550,17 +553,33 @@
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ superAdminIds: [superAdminId] })
                             });
-                            if (!response.ok) throw new Error('Erreur lors de la suppression');
+                            const result = await response.json();
+                            if (!response.ok) {
+                                if (result.error === "Vous ne pouvez pas supprimer votre propre compte car vous êtes connecté avec celui-ci.") {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Erreur',
+                                        text: "Vous ne pouvez pas supprimer ce compte car vous êtes connecté avec celui-ci."
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Erreur',
+                                        text: result.error || "Erreur lors de la suppression"
+                                    });
+                                }
+                                return;
+                            }
                             const row = table.querySelector(`tr[data-id="${superAdminId}"]`);
                             if (row) row.remove();
                             if (table.children.length === 0) {
                                 table.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">Aucun super administrateur trouvé.</td></tr>';
                             }
-                            Swal.fire({ icon: 'success', title: 'Succès', text: 'Super administrateur supprimé.' });
+                            Swal.fire({ icon: 'success', title: 'Succès', text: "Super administrateur supprimé." });
                             updateTotalSuperAdmins();
                             detailModal.hide();
                         } catch (error) {
-                            Swal.fire({ icon: 'error', title: 'Erreur', text: error.message });
+                            Swal.fire({ icon: 'error', title: 'Erreur', text: error.message || "Erreur lors de la suppression" });
                         }
                     }
                 });
@@ -573,7 +592,9 @@
                 document.getElementById('editName').value = row.cells[1].textContent;
                 document.getElementById('editSurname').value = row.cells[2].textContent;
                 document.getElementById('editCivility').value = row.cells[3].textContent;
-                document.getElementById('editBirthdate').value = row.cells[4].textContent.split('/').reverse().join('-');
+                const dateParts = row.cells[4].textContent.split('/');
+                const formattedDate = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+                document.getElementById('editBirthdate').value = formattedDate;
                 document.getElementById('editEmail').value = row.cells[5].textContent;
                 document.getElementById('editRole').value = row.cells[6].textContent;
                 document.getElementById('editSuperAdminForm').setAttribute('data-superadmin-id', superAdminId);
@@ -594,7 +615,7 @@
                     confirmPassword: document.getElementById('editConfirmPassword').value.trim()
                 };
 
-                if (updatedData.password !== updatedData.confirmPassword) {
+                if (updatedData.password && updatedData.password !== updatedData.confirmPassword) {
                     Swal.fire({ icon: 'error', title: 'Erreur', text: 'Les mots de passe ne correspondent pas.' });
                     return;
                 }
@@ -605,7 +626,8 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(updatedData)
                     });
-                    if (!response.ok) throw new Error('Erreur lors de la mise à jour');
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || 'Erreur lors de la mise à jour');
                     const row = table.querySelector(`tr[data-id="${superAdminId}"]`);
                     row.cells[1].textContent = updatedData.name;
                     row.cells[2].textContent = updatedData.surname;
