@@ -839,28 +839,8 @@ async function addUser(userData) {
 
 
 // Route pour afficher le formulaire de création d'utilisateur
-app.get('/create_user', requireAuth, async (req, res) => {
-    try {
-        // Récupérer les utilisateurs depuis la collection 'users'
-        const usersSnapshot = await firestore.collection('users').get();
-        const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        // Récupérer les rôles depuis la collection 'roles'
-        const rolesSnapshot = await firestore.collection('roles').get();
-        const roles = rolesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        // Rendre la vue avec les utilisateurs et les rôles
-        res.render('create_user', { users, roles });
-    } catch (error) {
-        console.error('Erreur lors de la récupération des données :', error);
-        res.status(500).send('Erreur serveur');
-    }
-});
-
-
-// Route pour créer un utilisateur
 app.post('/create_user', requireAuth, async (req, res) => {
-    const { name, surname, email, role, civility, birthdate } = req.body;
+    const { name, surname, email, phone, role, civility, birthdate } = req.body;
 
     console.log('Rôle reçu dans /create_user:', role);
     if (!name || !surname || !role || !civility || !birthdate) {
@@ -878,7 +858,6 @@ app.post('/create_user', requireAuth, async (req, res) => {
             return res.status(400).json({ error: 'Rôle invalide' });
         }
 
-        // Vérification de l'email
         if (email) {
             const emailCheck = await firestore.collection('users').where('email', '==', email).get();
             if (!emailCheck.empty) {
@@ -887,7 +866,7 @@ app.post('/create_user', requireAuth, async (req, res) => {
             }
         }
 
-        const qrContent = JSON.stringify({ name, surname, role, email: email || null });
+        const qrContent = JSON.stringify({ name, surname, role, email: email || null, phone: phone || null });
         const nextId = await getNextUserId();
         const createdAt = new Date().toISOString();
 
@@ -899,6 +878,7 @@ app.post('/create_user', requireAuth, async (req, res) => {
             birthdate,
             role,
             email: email || null,
+            phone: phone || null,
             qrCode: qrContent,
             createdAt
         };
@@ -910,6 +890,19 @@ app.post('/create_user', requireAuth, async (req, res) => {
     } catch (error) {
         console.error('Erreur lors de la création:', error);
         res.status(500).json({ error: 'Erreur serveur' });
+    }
+});
+
+app.get('/create_user', requireAuth, async (req, res) => {
+    try {
+        const usersSnapshot = await firestore.collection('users').get();
+        const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const rolesSnapshot = await firestore.collection('roles').get();
+        const roles = rolesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        res.render('create_user', { users, roles });
+    } catch (error) {
+        console.error('Erreur lors de la récupération des données :', error);
+        res.status(500).send('Erreur serveur');
     }
 });
 

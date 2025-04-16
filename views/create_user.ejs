@@ -25,8 +25,6 @@
             --color-danger: #EF4444;
         }
         body { font-family: var(--sans); background-color: #F1F5F9; color: var(--dark); min-height: 100vh; margin: 0; padding-top: 90px; }
-
-        /* --- Navbar & Links --- */
         .navbar { background: var(--navbar-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 0.4rem 1rem; box-shadow: var(--navbar-shadow); border: 1px solid var(--navbar-border); border-radius: 20px; position: fixed; width: 96%; left: 2%; top: 10px; z-index: 1030; display: flex; justify-content: space-between; align-items: center; transition: all 0.4s ease; }
         .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
         .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
@@ -45,18 +43,12 @@
         .dropdown-item { font-size: 0.85rem; color: var(--primary-dark); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease; background: transparent; }
         .dropdown-item:hover { background: var(--primary); color: var(--light); transform: translateX(3px); box-shadow: none; }
         .navbar-right { margin-left: auto; }
-
-        /* --- Contenu Principal & Titre --- */
         .main-content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
         .page-header { margin-bottom: 2rem; text-align: center; }
         .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
-
-        /* --- Blocs de Contenu --- */
         .content-block { background: var(--card-bg); border-radius: 16px; box-shadow: var(--card-shadow); border: 1px solid var(--card-border); padding: 1.75rem; margin-bottom: 1.5rem; overflow: hidden; transition: all 0.3s ease; }
         .content-block:hover { border-color: var(--card-hover-border); box-shadow: var(--card-hover-shadow); transform: translateY(-4px); }
         .content-block h2 { font-size: 1.3rem; font-weight: 600; color: var(--dark); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--light-gray); }
-
-        /* --- Boutons --- */
         .btn-custom-action { display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 500; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 25px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.1); transition: all 0.25s ease; text-decoration: none; cursor: pointer; }
         .btn-custom-action i { margin-right: 0.6rem; }
         .btn-custom-action:hover { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); transform: scale(1.03); }
@@ -66,8 +58,6 @@
         .btn-custom-danger i { margin-right: 0.6rem; }
         .btn-custom-danger:hover { background: var(--color-danger); color: white; border-color: var(--color-danger); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); transform: scale(1.03); }
         .create-user-btn-container { text-align: center; margin-bottom: 1.5rem; }
-
-        /* --- Formulaire --- */
         #userFormContainer { display: none; }
         #userForm .form-label { font-weight: 500; font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem; text-align: left; display: block; }
         #userForm .form-control, #userForm .form-select { border-radius: 8px; border: 1px solid var(--light-gray); padding: 0.6rem 1rem; font-size: 0.9rem; background-color: rgba(255, 255, 255, 0.7); width: 100%; }
@@ -75,22 +65,20 @@
         #userForm .qr-code-container { margin-top: 1.5rem; text-align: center; }
         #userForm .qr-code-container h5 { font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem; }
         #userForm .btn-container { margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem; }
-
-        /* --- Tableau --- */
         .controls-container { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
         .search-container { flex-grow: 1; max-width: 350px; order: 2; }
         .search-container input { width: 100%; border-radius: 20px; font-size: 0.9rem; padding: 0.5rem 1rem; border: 1px solid var(--light-gray); }
         .search-container input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2); outline: none; }
         #removeSelectedBtn { flex-shrink: 0; order: 1; }
         .table-responsive-scrollable { 
-            max-height: calc(48px + (10 * 48px)); /* Hauteur entête (48px) + 10 lignes (48px chacune) */
+            max-height: calc(48px + (10 * 48px));
             overflow-y: auto; 
             border: 1px solid var(--light-gray); 
             border-radius: 8px; 
             margin-top: 10px; 
         }
         .table { margin-bottom: 0; border-collapse: separate; border-spacing: 0; width: 100%; }
-        .table thead th { background: var(--navbar-bg) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--primary-dark) !important; font-weight: 600; text-align: left; padding: 0.8rem 1 ACHATrem; vertical-align: middle; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(13, 148, 136, 0.2) !important; cursor: pointer; white-space: nowrap; transition: background-color 0.2s ease; height: 48px; }
+        .table thead th { background: var(--navbar-bg) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--primary-dark) !important; font-weight: 600; text-align: left; padding: 0.8rem 1rem; vertical-align: middle; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid rgba(13, 148, 136, 0.2) !important; cursor: pointer; white-space: nowrap; transition: background-color 0.2s ease; height: 48px; }
         .table thead th:hover { background: rgba(13, 148, 136, 0.1) !important; }
         .table thead th:first-child { border-top-left-radius: 7px; text-align: center; }
         .table thead th:last-child { border-top-right-radius: 7px; }
@@ -104,8 +92,6 @@
         .arrow.desc { border-top: 7px solid var(--primary-dark); border-bottom: none; }
         th[data-tri="none"] .arrow { opacity: 0.2; border-top: 3.5px solid var(--primary-dark); border-bottom: 3.5px solid var(--primary-dark); }
         th:hover .arrow { opacity: 1; }
-
-        /* --- Nombre total d'utilisateurs dans un carreau --- */
         .counts-container { 
             text-align: center; 
             margin-top: 1rem; 
@@ -119,13 +105,11 @@
             padding: 0.375rem 0.75rem; 
             font-size: 0.95rem; 
             line-height: 1.5; 
-            color: var(--dark); /* Même couleur que les données du tableau */
+            color: var(--dark);
             background-color: #fff; 
             border: 1px solid var(--light-gray); 
             border-radius: 0.25rem; 
         }
-
-        /* --- Modals --- */
         .modal-content { border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); background-color: var(--light); }
         .modal-header { background-color: var(--primary); color: white; border-top-left-radius: 11px; border-top-right-radius: 11px; border-bottom: none; padding: 1rem 1.5rem; }
         .modal-header .btn-close { filter: brightness(0) invert(1); }
@@ -140,8 +124,6 @@
         .modal-body .form-control:focus, .modal-body .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.25); }
         .modal-footer { border-top: 1px solid var(--light-gray); padding: 1rem 1.5rem; display: flex; justify-content: center; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
         .modal-footer .btn { min-width: 120px; }
-
-        /* --- SweetAlert --- */
         .swal2-popup { border-radius: 12px !important; font-family: var(--sans) !important; }
         .swal2-title { color: var(--dark) !important; font-weight: 600 !important; }
         .swal2-html-container { color: var(--gray) !important; }
@@ -152,8 +134,6 @@
         .swal2-cancel:hover { background-color: var(--gray) !important; border-color: var(--gray) !important; color: white !important; transform: scale(1.03); }
         .swal2-popup.swal2-warning .swal2-confirm { background-color: var(--color-danger) !important; border-color: var(--color-danger) !important; }
         .swal2-popup.swal2-warning .swal2-confirm:hover { background-color: #dc2626 !important; border-color: #dc2626 !important; }
-
-        /* --- Responsive --- */
         @media (max-width: 991.98px) {
             .navbar-nav { margin-top: 1rem; flex-direction: column; align-items: stretch; width: 100%; }
             .nav-item { width: 100%; } .nav-link { justify-content: flex-start; width: 100%; margin-bottom: 0.5rem; padding: 0.5rem 1rem; }
@@ -173,9 +153,7 @@
         }
     </style>
 </head>
-
 <body>
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
         <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
@@ -199,19 +177,13 @@
         </div>
         <div class="navbar-right d-none d-lg-block"><a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a></div>
     </nav>
-
-    <!-- Contenu Principal -->
     <div class="main-content">
         <div class="page-header">
             <h1>Gestion des Utilisateurs</h1>
         </div>
-
-        <!-- Bouton Créer un utilisateur -->
         <div class="create-user-btn-container">
             <button id="createUserBtn" class="btn btn-custom-action"><i class="fas fa-user-plus"></i> Créer un utilisateur</button>
         </div>
-
-        <!-- Formulaire de création d'utilisateur -->
         <div class="content-block" id="userFormContainer">
             <h2>Créer un nouvel utilisateur</h2>
             <form id="userForm">
@@ -248,8 +220,14 @@
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label for="email" class="form-label">Email (Optionnel)</label>
+                        <label for="email" class="form-label">Email</label>
                         <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="phone" class="form-label">Numéro de téléphone (Optionnel)</label>
+                        <input type="tel" class="form-control" id="phone" name="phone">
                     </div>
                 </div>
                 <div class="qr-code-container text-center">
@@ -262,8 +240,6 @@
                 </div>
             </form>
         </div>
-
-        <!-- Table des utilisateurs -->
         <div class="content-block">
             <h2>Liste des utilisateurs</h2>
             <div class="controls-container">
@@ -283,6 +259,7 @@
                             <th data-tri="none" data-column="civility">Civilité <span class="arrow"></span></th>
                             <th data-tri="none" data-column="birthdate">Né(e) le <span class="arrow"></span></th>
                             <th data-tri="none" data-column="email">Email <span class="arrow"></span></th>
+                            <th data-tri="none" data-column="phone">Téléphone <span class="arrow"></span></th>
                             <th data-tri="none" data-column="role">Rôle <span class="arrow"></span></th>
                             <th data-tri="none" data-column="createdAt">Créé le <span class="arrow"></span></th>
                             <th data-tri="none" data-column="updatedAt">Modifié le <span class="arrow"></span></th>
@@ -291,7 +268,7 @@
                     <tbody>
                         <% if (users && users.length > 0) { %>
                             <% users.forEach(user => { %>
-                                <tr class="user-row" data-id="<%= user.id %>" data-name="<%= user.name %>" data-surname="<%= user.surname %>" data-civility="<%= user.civility %>" data-birthdate="<%= user.birthdate %>" data-email="<%= user.email %>" data-role="<%= user.role %>" data-createdAt="<%= user.createdAt %>" data-updatedAt="<%= user.updatedAt %>">
+                                <tr class="user-row" data-id="<%= user.id %>" data-name="<%= user.name %>" data-surname="<%= user.surname %>" data-civility="<%= user.civility %>" data-birthdate="<%= user.birthdate %>" data-email="<%= user.email %>" data-phone="<%= user.phone %>" data-role="<%= user.role %>" data-createdAt="<%= user.createdAt %>" data-updatedAt="<%= user.updatedAt %>">
                                     <td class="text-center"><input class="form-check-input user-checkbox" type="checkbox" data-id="<%= user.id %>"></td>
                                     <td><%= user.id %></td>
                                     <td><%= user.name %></td>
@@ -299,6 +276,7 @@
                                     <td><%= user.civility %></td>
                                     <td><%= user.birthdate ? new Date(user.birthdate).toLocaleDateString('fr-FR') : '-' %></td>
                                     <td><%= user.email || '-' %></td>
+                                    <td><%= user.phone || '-' %></td>
                                     <td><%= user.role %></td>
                                     <td><%= user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR') : '-' %></td>
                                     <td><%= user.updatedAt ? new Date(user.updatedAt).toLocaleDateString('fr-FR') : '-' %></td>
@@ -306,21 +284,18 @@
                             <% }) %>
                         <% } else { %>
                             <tr>
-                                <td colspan="10" class="text-center text-muted py-4">Aucun utilisateur trouvé.</td>
+                                <td colspan="11" class="text-center text-muted py-4">Aucun utilisateur trouvé.</td>
                             </tr>
                         <% } %>
                     </tbody>
                 </table>
             </div>
-            <!-- Nombre total d'utilisateurs dans un carreau -->
             <div class="counts-container">
                 <span id="totalUsersCountTile" class="form-control">
                     Nombre total d'utilisateurs : <span id="totalUsersCountDynamic"><%- users && users.length > 0 ? users.length : 0 %></span>
                 </span>
             </div>
         </div>
-
-        <!-- Modal pour afficher les détails d'un utilisateur -->
         <div class="modal fade" id="userDetailModal" tabindex="-1" aria-labelledby="userDetailModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -334,6 +309,7 @@
                         <div class="info-row"><strong>Civilité :</strong> <span id="modalCivility"></span></div>
                         <div class="info-row"><strong>Date de naissance :</strong> <span id="modalBirthdate"></span></div>
                         <div class="info-row"><strong>Email :</strong> <span id="modalEmail"></span></div>
+                        <div class="info-row"><strong>Téléphone :</strong> <span id="modalPhone"></span></div>
                         <div class="info-row"><strong>Rôle :</strong> <span id="modalRole"></span></div>
                         <div class="text-center">
                             <img id="modalQRCode" alt="QR Code" style="max-width: 150px; height: auto;" />
@@ -346,8 +322,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Modal pour modifier un utilisateur -->
         <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -387,8 +361,12 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="editEmail" class="form-label">Email (Optionnel)</label>
+                                <label for="editEmail" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="editEmail" name="email">
+                            </div>
+                            <div class="mb-3">
+                                <label for="editPhone" class="form-label">Numéro de téléphone (Optionnel)</label>
+                                <input type="tel" class="form-control" id="editPhone" name="phone">
                             </div>
                         </form>
                     </div>
@@ -400,13 +378,10 @@
             </div>
         </div>
     </div>
-
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Définir les variables globales
         const createUserBtn = document.getElementById('createUserBtn');
         const userFormContainer = document.getElementById('userFormContainer');
         const cancelBtn = document.getElementById('cancelBtn');
@@ -414,30 +389,27 @@
         const surnameInput = document.getElementById('surname');
         const roleInput = document.getElementById('role');
         const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
         const qrCodeCanvas = document.getElementById('qrcodeCanvas');
         const userForm = document.getElementById('userForm');
         const tableBody = document.querySelector('table tbody');
-
-        // Fonction pour générer le QR Code
         function generateQRCode() {
             const name = nameInput.value.trim() || "Non fourni";
             const surname = surnameInput.value.trim() || "Non fourni";
             const role = roleInput.value.trim() || "Non fourni";
             const email = emailInput.value.trim() || "Non fourni";
-            const qrContent = JSON.stringify({ name, surname, role, email });
+            const phone = phoneInput.value.trim() || "Non fourni";
+            const qrContent = JSON.stringify({ name, surname, role, email, phone });
             QRCode.toCanvas(qrCodeCanvas, qrContent, { width: 150, height: 150 }, function (error) {
                 if (error) console.error("Erreur QR Code:", error);
             });
         }
-
-        // Gestion de l'affichage du formulaire
         createUserBtn.addEventListener('click', () => {
             userFormContainer.style.display = 'block';
             localStorage.setItem('formVisible', 'true');
             generateQRCode();
             window.scrollTo({ top: userFormContainer.offsetTop - 100, behavior: 'smooth' });
         });
-
         cancelBtn.addEventListener('click', () => {
             userFormContainer.style.display = 'none';
             localStorage.setItem('formVisible', 'false');
@@ -445,32 +417,26 @@
             const context = qrCodeCanvas.getContext('2d');
             context.clearRect(0, 0, qrCodeCanvas.width, qrCodeCanvas.height);
         });
-
         document.querySelectorAll('a[href="/dashboard"]').forEach(link => {
             link.addEventListener('click', () => {
                 localStorage.removeItem('formVisible');
                 userFormContainer.style.display = 'none';
             });
         });
-
-        // Gestion des événements DOM
         document.addEventListener('DOMContentLoaded', () => {
             const formVisible = localStorage.getItem('formVisible');
             userFormContainer.style.display = formVisible === 'true' ? 'block' : 'none';
-
             const headers = document.querySelectorAll('th[data-column]');
             const searchInput = document.getElementById('searchInput');
             const totalUsersCountDynamic = document.getElementById('totalUsersCountDynamic');
             const selectAllCheckbox = document.getElementById('selectAllCheckbox');
             const removeSelectedBtn = document.getElementById('removeSelectedBtn');
-
             function updateTotalUsers() {
                 const userRows = tableBody.querySelectorAll('tr.user-row');
                 const visibleUserRows = Array.from(userRows).filter(row => row.style.display !== 'none');
                 totalUsersCountDynamic.textContent = visibleUserRows.length;
             }
             updateTotalUsers();
-
             function sortTable(n, type, direction) {
                 const rows = Array.from(tableBody.rows);
                 const sortedRows = rows.sort((a, b) => {
@@ -491,7 +457,6 @@
                 updateTotalUsers();
                 syncCheckboxes();
             }
-
             function resetArrows() {
                 headers.forEach(header => {
                     header.setAttribute('data-tri', 'none');
@@ -499,7 +464,6 @@
                     if (arrow) arrow.className = 'arrow';
                 });
             }
-
             headers.forEach(header => {
                 header.addEventListener('click', () => {
                     const column = header.getAttribute('data-column');
@@ -509,7 +473,6 @@
                     header.setAttribute('data-tri', newDirection);
                     const arrow = header.querySelector('.arrow');
                     arrow.className = `arrow ${newDirection}`;
-
                     let columnIndex = -1;
                     let type = 'string';
                     switch (column) {
@@ -519,14 +482,14 @@
                         case 'civility': columnIndex = 3; break;
                         case 'birthdate': columnIndex = 4; type = 'date'; break;
                         case 'email': columnIndex = 5; break;
-                        case 'role': columnIndex = 6; break;
-                        case 'createdAt': columnIndex = 7; type = 'date'; break;
-                        case 'updatedAt': columnIndex = 8; type = 'date'; break;
+                        case 'phone': columnIndex = 6; break;
+                        case 'role': columnIndex = 7; break;
+                        case 'createdAt': columnIndex = 8; type = 'date'; break;
+                        case 'updatedAt': columnIndex = 9; type = 'date'; break;
                     }
                     sortTable(columnIndex, type, newDirection);
                 });
             });
-
             searchInput.addEventListener('input', () => {
                 const filter = searchInput.value.toLowerCase();
                 const rows = tableBody.querySelectorAll('tr.user-row');
@@ -538,38 +501,31 @@
                 updateTotalUsers();
                 syncCheckboxes();
             });
-
             selectAllCheckbox.addEventListener('change', () => {
                 const checkboxes = tableBody.querySelectorAll('.user-checkbox');
                 checkboxes.forEach(checkbox => checkbox.checked = selectAllCheckbox.checked);
                 updateRemoveButtonState();
             });
-
             function syncCheckboxes() {
                 const checkboxes = tableBody.querySelectorAll('.user-checkbox');
                 const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
                 selectAllCheckbox.checked = allChecked;
                 updateRemoveButtonState();
             }
-
             function updateRemoveButtonState() {
                 const checkedCheckboxes = tableBody.querySelectorAll('.user-checkbox:checked');
                 removeSelectedBtn.disabled = checkedCheckboxes.length === 0;
             }
-
             tableBody.addEventListener('change', (e) => {
                 if (e.target.classList.contains('user-checkbox')) syncCheckboxes();
             });
-
             removeSelectedBtn.addEventListener('click', async () => {
                 const checkedCheckboxes = tableBody.querySelectorAll('.user-checkbox:checked');
                 if (checkedCheckboxes.length === 0) {
                     Swal.fire({ icon: 'warning', title: 'Attention', text: 'Aucun utilisateur sélectionné.' });
                     return;
                 }
-
                 const userIds = Array.from(checkedCheckboxes).map(checkbox => checkbox.getAttribute('data-id'));
-
                 Swal.fire({
                     title: 'Confirmer la suppression ?',
                     text: "Cette action est irréversible.",
@@ -587,12 +543,10 @@
                             });
                             if (!response.ok) throw new Error(await response.text());
                             const result = await response.json();
-
                             checkedCheckboxes.forEach(checkbox => checkbox.closest('tr').remove());
                             if (tableBody.children.length === 0) {
-                                tableBody.innerHTML = '<tr><td colspan="10" class="text-center text-muted py-4">Aucun utilisateur trouvé.</td></tr>';
+                                tableBody.innerHTML = '<tr><td colspan="11" class="text-center text-muted py-4">Aucun utilisateur trouvé.</td></tr>';
                             }
-
                             Swal.fire({ icon: 'success', title: 'Succès', text: result.message || 'Utilisateurs supprimés.' });
                             updateTotalUsers();
                             selectAllCheckbox.checked = false;
@@ -603,13 +557,10 @@
                     }
                 });
             });
-
-            // Validation et soumission du formulaire
             function validateEmail(email) {
-                const re = /^[a-zA-Z0.9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
                 return re.test(email);
             }
-
             async function checkEmailExists(email) {
                 try {
                     const response = await fetch(`/api/check-email?email=${encodeURIComponent(email)}`);
@@ -620,7 +571,6 @@
                     return false;
                 }
             }
-
             userForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const formData = new FormData(userForm);
@@ -630,14 +580,13 @@
                     civility: formData.get('civility'),
                     birthdate: formData.get('birthdate'),
                     role: formData.get('role'),
-                    email: formData.get('email') || null
+                    email: formData.get('email') || null,
+                    phone: formData.get('phone') || null
                 };
-
                 if (userData.email && !validateEmail(userData.email)) {
                     Swal.fire({ icon: 'error', title: 'Erreur', text: "Email invalide." });
                     return;
                 }
-
                 if (userData.email) {
                     const emailExists = await checkEmailExists(userData.email);
                     if (emailExists) {
@@ -645,7 +594,6 @@
                         return;
                     }
                 }
-
                 try {
                     const response = await fetch('/create_user', {
                         method: 'POST',
@@ -654,7 +602,6 @@
                     });
                     const result = await response.json();
                     if (!response.ok) throw new Error(result.error || 'Erreur inconnue');
-
                     Swal.fire({
                         icon: 'success',
                         title: 'Succès',
@@ -669,6 +616,7 @@
                         newRow.setAttribute('data-civility', userData.civility);
                         newRow.setAttribute('data-birthdate', userData.birthdate);
                         newRow.setAttribute('data-email', userData.email);
+                        newRow.setAttribute('data-phone', userData.phone);
                         newRow.setAttribute('data-role', userData.role);
                         newRow.setAttribute('data-createdAt', createdAt);
                         newRow.setAttribute('data-updatedAt', '');
@@ -680,11 +628,12 @@
                             <td>${userData.civility}</td>
                             <td>${userData.birthdate ? new Date(userData.birthdate).toLocaleDateString('fr-FR') : '-'}</td>
                             <td>${userData.email || '-'}</td>
+                            <td>${userData.phone || '-'}</td>
                             <td>${userData.role}</td>
                             <td data-raw-date="${createdAt}">${new Date(createdAt).toLocaleDateString('fr-FR')}</td>
                             <td data-raw-date="">-</td>
                         `;
-                        if (tableBody.querySelector('tr td[colspan="10"]')) tableBody.innerHTML = '';
+                        if (tableBody.querySelector('tr td[colspan="11"]')) tableBody.innerHTML = '';
                         tableBody.prepend(newRow);
                         userForm.reset();
                         userFormContainer.style.display = 'none';
@@ -695,44 +644,38 @@
                     Swal.fire({ icon: 'error', title: 'Erreur', text: error.message || 'Erreur création.' });
                 }
             });
-
-            // Gestion des clics sur les lignes
             tableBody.addEventListener('click', function (e) {
                 const row = e.target.closest('.user-row');
                 if (row && !e.target.classList.contains('user-checkbox')) {
                     document.querySelectorAll('.user-row').forEach(r => r.classList.remove('selected'));
                     row.classList.add('selected');
-
                     const userId = row.getAttribute('data-id');
                     const userName = row.getAttribute('data-name');
                     const userSurname = row.getAttribute('data-surname');
                     const userCivility = row.getAttribute('data-civility');
                     const userBirthdate = row.getAttribute('data-birthdate');
                     const userEmail = row.getAttribute('data-email');
+                    const userPhone = row.getAttribute('data-phone');
                     const userRole = row.getAttribute('data-role');
-
                     document.getElementById('modalName').innerText = userName;
                     document.getElementById('modalSurname').innerText = userSurname;
                     document.getElementById('modalCivility').innerText = userCivility;
                     document.getElementById('modalBirthdate').innerText = userBirthdate ? new Date(userBirthdate).toLocaleDateString('fr-FR') : '-';
                     document.getElementById('modalEmail').innerText = userEmail || '-';
+                    document.getElementById('modalPhone').innerText = userPhone || '-';
                     document.getElementById('modalRole').innerText = userRole;
-
-                    const qrCodeData = `ID: ${userId}, Nom: ${userName}, Prénom: ${userSurname}`;
+                    const qrCodeData = `ID: ${userId}, Nom: ${userName}, Prénom: ${userSurname}, Téléphone: ${userPhone || '-'}`;
                     QRCode.toDataURL(qrCodeData, { width: 150, height: 150 }, (err, url) => {
                         if (err) console.error('Erreur QR:', err);
                         else document.getElementById('modalQRCode').src = url;
                     });
-
                     const userDetailModal = new bootstrap.Modal(document.getElementById('userDetailModal'));
                     userDetailModal.show();
                 }
             });
-
             const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
             const editUserBtn = document.getElementById('editUserBtn');
             const saveEditBtn = document.getElementById('saveEditBtn');
-
             editUserBtn.addEventListener('click', () => {
                 const row = document.querySelector('.user-row.selected');
                 if (row) {
@@ -742,17 +685,16 @@
                     document.getElementById('editBirthdate').value = row.getAttribute('data-birthdate');
                     document.getElementById('editRole').value = row.getAttribute('data-role');
                     document.getElementById('editEmail').value = row.getAttribute('data-email') || '';
+                    document.getElementById('editPhone').value = row.getAttribute('data-phone') || '';
                     editUserModal.show();
                 }
             });
-
             saveEditBtn.addEventListener('click', async () => {
                 const selectedRow = document.querySelector('.user-row.selected');
                 if (!selectedRow) {
                     Swal.fire({ icon: 'warning', title: 'Avertissement', text: 'Veuillez sélectionner un utilisateur.' });
                     return;
                 }
-
                 const editedUser = {
                     id: selectedRow.getAttribute('data-id'),
                     name: document.getElementById('editName').value,
@@ -760,9 +702,9 @@
                     civility: document.getElementById('editCivility').value,
                     birthdate: document.getElementById('editBirthdate').value,
                     role: document.getElementById('editRole').value,
-                    email: document.getElementById('editEmail').value || null
+                    email: document.getElementById('editEmail').value || null,
+                    phone: document.getElementById('editPhone').value || null
                 };
-
                 try {
                     const response = await fetch('/update_user', {
                         method: 'POST',
@@ -771,17 +713,16 @@
                     });
                     if (!response.ok) throw new Error(await response.text());
                     const result = await response.json();
-
                     const cells = selectedRow.querySelectorAll('td');
                     cells[2].textContent = editedUser.name;
                     cells[3].textContent = editedUser.surname;
                     cells[4].textContent = editedUser.civility;
                     cells[5].textContent = editedUser.birthdate ? new Date(editedUser.birthdate).toLocaleDateString('fr-FR') : '-';
                     cells[6].textContent = editedUser.email || '-';
-                    cells[7].textContent = editedUser.role;
-                    cells[9].textContent = result.updatedAt ? new Date(result.updatedAt).toLocaleDateString('fr-FR') : '-';
+                    cells[7].textContent = editedUser.phone || '-';
+                    cells[8].textContent = editedUser.role;
+                    cells[10].textContent = result.updatedAt ? new Date(result.updatedAt).toLocaleDateString('fr-FR') : '-';
                     selectedRow.setAttribute('data-updatedAt', result.updatedAt);
-
                     Swal.fire({ icon: 'success', title: 'Succès', text: 'Utilisateur mis à jour.' });
                     editUserModal.hide();
                     updateTotalUsers();
@@ -789,13 +730,11 @@
                     Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur mise à jour.' });
                 }
             });
-
             nameInput.addEventListener('input', generateQRCode);
             surnameInput.addEventListener('input', generateQRCode);
             emailInput.addEventListener('input', generateQRCode);
+            phoneInput.addEventListener('input', generateQRCode);
             roleInput.addEventListener('input', generateQRCode);
-
-            // Charger les infos utilisateur dans la navbar
             async function fetchUserInfo() {
                 try {
                     const response = await fetch('/get_user_info');
