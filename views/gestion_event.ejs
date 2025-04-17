@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion de l'Événement - <%= typeof eventName !== 'undefined' ? eventName : 'Administration' %></title>
+    <title>Gestion de l'Évènement - <%= typeof eventName !== 'undefined' ? eventName : 'Administration' %></title>
     <%# Favicon (Optionnel) %>
     <%# <link rel="icon" href="/path/to/favicon.ico" type="image/x-icon"> %>
 
@@ -262,7 +262,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mx-auto">
                  <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i></a></li>
-                 <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>"><i class="far fa-calendar-alt"></i> Événement</a></li>
+                 <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>"><i class="far fa-calendar-alt"></i> Évènement</a></li>
                  <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_utilisateur"><i class="fas fa-users"></i> Participants</a></li>
                  <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_presence"><i class="fas fa-clipboard-check"></i> Présences</a></li>
                  <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_vote"><i class="fas fa-vote-yea"></i> Vote</a></li>
@@ -283,8 +283,8 @@
     <!-- Contenu principal -->
     <div class="main-content">
         <div class="page-header">
-            <h1>Gestion d'événement</h1>
-            <p class="subtitle-gray"><%= typeof event !== 'undefined' && event ? event.name : "Nom de l'événement" %></p>
+            <h1>Gestion d'évènement</h1>
+            <p class="subtitle-gray"><%= typeof event !== 'undefined' && event ? event.name : "Nom de l'évènement" %></p>
         </div>
 
         <%# Première ligne de 4 cartes %>
@@ -352,7 +352,7 @@
                  <div class="dashboard-card report">
                      <div class="card-icon-container report"> <i class="fas fa-file-pdf card-icon"></i> </div>
                      <div>
-                         <h5 class="card-title">Rapport d'événement</h5>
+                         <h5 class="card-title">Rapport d'évènement</h5>
                          <p class="card-text">Téléchargez le rapport PDF de l'événement.</p>
                      </div>
                      <div class="status-indicator">

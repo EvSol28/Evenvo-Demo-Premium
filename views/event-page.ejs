@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion de l'Événement - <%= typeof eventName !== 'undefined' ? eventName : 'Administration' %></title>
-    <%# Favicon (Optionnel) %>
-    <%# <link rel="icon" href="/path/to/favicon.ico" type="image/x-icon"> %>
+    <title>Evenvo | Détails de l'Événement</title>
+    <!-- Favicon -->
+    <!-- <link rel="icon" href="/assets/favicon.ico" type="image/x-icon"> -->
 
-    <%# Liens CSS (Bootstrap 5, Font Awesome 6, SweetAlert2) %>
+    <!-- Liens CSS (Bootstrap 5 + Font Awesome) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-    <%# Styles CSS combinés %>
+    <!-- Styles CSS -->
     <style>
         /* === Styles Base === */
         :root {
@@ -28,12 +27,12 @@
             --card-shadow: 0 6px 15px rgba(190, 190, 190, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
             --card-hover-shadow: 0 12px 28px rgba(13, 148, 136, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.03);
             --sans: 'Hellix', 'Arial', sans-serif;
-            --color-quorum: #22D3EE; --color-quorum-light: #7ff1ff;
-            --color-roles: #A78BFA; --color-roles-light: #d8ceff;
-            --color-qrcode: #F59E0B; --color-qrcode-light: #ffe094;
-            --color-report: #FF69B4; --color-report-light: #ffcce0;
-            --color-logo: #0D9488; --color-logo-light: #5EEAD4;
-            --color-success: #198754; --color-warning: #ffc107; --color-info: #0dcaf0;
+            /* Couleurs spécifiques aux icônes/cartes */
+            --color-events: #0D9488;
+            --color-users: #F59E0B;
+            --color-vote: #FF69B4;
+            --color-gestion: #A78BFA;
+            --color-presence: #22D3EE;
         }
         body { font-family: var(--sans); background-color: #F1F5F9; color: var(--dark); min-height: 100vh; margin: 0; padding-top: 90px; }
 
@@ -43,192 +42,104 @@
         .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
         .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
         .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
-        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
+        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
         .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
-        .nav-link.active { color: var(--light) !important; background: var(--navbar-bg) !important; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1) !important; font-weight: 600; box-shadow: none; text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); }
+        .nav-link.active {
+            color: var(--light) !important; background: var(--navbar-bg) !important; backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.1) !important; font-weight: 600;
+            box-shadow: none; text-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+        }
         .nav-link i { font-size: 1rem; }
         .dropdown-toggle::after { margin-left: 0.4rem; border-top-color: currentColor; transition: transform 0.3s ease; }
         .nav-item.show .dropdown-toggle::after, .nav-item.dropdown:hover .dropdown-toggle::after { transform: rotate(180deg); }
-        .dropdown-menu { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid var(--navbar-border); border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); padding: 0.75rem; margin-top: 0.6rem !important; }
-        .dropdown-item-text strong { color: var(--dark); font-weight: 600; } .dropdown-item-text small { color: var(--gray); font-size: 0.8rem; display: block; margin-top: 2px; }
+        .dropdown-menu { background: #FFFFFF; border: 1px solid var(--navbar-border); border-radius: 12px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); padding: 0.75rem; margin-top: 0.6rem !important; }
+        .dropdown-item-text strong { color: var(--dark); font-weight: 600; } 
+        .dropdown-item-text small { color: var(--gray); font-size: 0.8rem; display: block; margin-top: 2px; }
         .dropdown-divider { border-top: 1px solid rgba(0, 0, 0, 0.1); margin: 0.5rem 0; }
         .dropdown-item { font-size: 0.85rem; color: var(--primary-dark); font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s ease; background: transparent; }
         .dropdown-item:hover { background: var(--primary); color: var(--light); transform: translateX(3px); box-shadow: none; }
         .navbar-right { margin-left: auto; }
 
-        /* --- Contenu Principal & Titre --- */
+        /* --- Contenu Principal & Titre Centré --- */
         .main-content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
-        .page-header { margin-bottom: 2.5rem; text-align: center; }
-        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); font-family: var(--sans); }
+        .page-header { margin-bottom: 2rem; text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
         .page-header p { font-size: 1rem; color: var(--gray); margin-top: 0.5rem; }
-        .page-header .event-subtitle { color: var(--gray); font-size: 1.1rem; margin-top: 0.25rem; }
 
-        /* --- Cartes de Gestion --- */
-        .row.g-4 { align-items: stretch; } /* Uniformise la hauteur des carreaux dans une ligne */
-        .dashboard-card { 
-            background: var(--card-bg); 
-            border-radius: 16px; 
-            box-shadow: var(--card-shadow); 
-            border: 1px solid var(--card-border); 
-            padding: 1.75rem; 
-            overflow: hidden; 
-            transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); 
-            display: flex; 
-            flex-direction: column; 
-            min-height: 240px;
-            justify-content: space-between;
-            height: 100%; /* S'étend à la hauteur de la grille */
+        /* --- Cartes (dashboard-card) --- */
+        .dashboard-card {
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
+            padding: 1.75rem; height: 100%; display: flex; flex-direction: column;
+            box-shadow: var(--card-shadow); transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative; overflow: hidden;
         }
-        .dashboard-card:hover { border-color: var(--card-hover-border); box-shadow: var(--card-hover-shadow); transform: translateY(-6px); }
-        .dashboard-card .card-body { padding: 0; flex-grow: 1; display: flex; flex-direction: column; }
-
-        /* Style Icône Carte */
-        .card-icon-container { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; position: relative; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); flex-shrink: 0; }
+        .dashboard-card:hover { transform: translateY(-6px); box-shadow: var(--card-hover-shadow); border-color: var(--card-hover-border); }
+        .card-icon-container {
+            width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1rem; position: relative; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
         .card-icon { font-size: 1.2rem; color: white; position: relative; z-index: 1; animation: iconPulse 2s infinite ease-in-out; }
         @keyframes iconPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
         .card-icon-container::before { content: ''; position: absolute; width: 150%; height: 100%; background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%); border-radius: 12px; animation: shine 3.5s infinite linear; top: 0; left: -100%; transform: skewX(-25deg); z-index: 0; }
         @keyframes shine { 0% { left: -125%; } 50% { left: 75%; } 100% { left: 75%; } }
-        .card-icon-container.quorum { background: linear-gradient(135deg, var(--color-logo) 0%, var(--color-logo-light) 100%); }
-        .card-icon-container.roles { background: linear-gradient(135deg, var(--color-roles) 0%, var(--color-roles-light) 100%); }
-        .card-icon-container.qrcode { background: linear-gradient(135deg, var(--color-qrcode) 0%, var(--color-qrcode-light) 100%); }
-        .card-icon-container.report { background: linear-gradient(135deg, var(--color-report) 0%, var(--color-report-light) 100%); }
-        .card-icon-container.logo { background: linear-gradient(135deg, var(--color-quorum) 0%, var(--color-quorum-light) 100%); }
+        .card-icon-container.users { background: linear-gradient(135deg, var(--color-users), #FCD34D); }
+        .card-icon-container.presence { background: linear-gradient(135deg, var(--color-presence), #67E8F9); }
+        .card-icon-container.vote { background: linear-gradient(135deg, var(--color-vote), #FFC0CB); }
+        .card-icon-container.gestion { background: linear-gradient(135deg, var(--color-gestion), #C4B5FD); }
+        .dashboard-card .card-title { color: var(--dark); font-weight: 600; font-size: 1.15rem; margin-bottom: 0.75rem; }
+        .dashboard-card .card-text { color: var(--gray); font-size: 0.9rem; margin-bottom: 1rem; flex-grow: 1; line-height: 1.6; }
 
-        .dashboard-card .card-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--dark); }
-        .dashboard-card .card-text { 
-            color: var(--gray); 
-            font-size: 0.9rem; 
-            margin-bottom: 1rem; 
-            line-height: 1.6; 
-            min-height: 60px; 
-            max-height: 80px; 
-            overflow: hidden; 
-            flex-grow: 1; 
-        }
-
-        /* Indicateur de Statut */
-        .status-indicator { 
-            display: flex; 
-            align-items: center; 
-            margin-top: auto; 
-            margin-bottom: 1rem; 
-            font-size: 0.85rem; 
-            font-family: var(--sans); 
-            font-weight: 500; 
-            color: var(--gray); 
-        }
+        /* --- Indicateur de Statut --- */
+        .status-indicator { display: flex; align-items: center; margin-top: auto; margin-bottom: 1.5rem; font-size: 0.85rem; font-family: var(--sans); font-weight: 500; color: var(--gray); }
         .status-dot { width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
-        .dashboard-card.quorum .status-dot { background-color: var(--color-logo); }
-        .dashboard-card.roles .status-dot { background-color: var(--color-roles); }
-        .dashboard-card.qrcode .status-dot { background-color: var(--color-qrcode); }
-        .dashboard-card.report .status-dot { background-color: var(--color-report); }
-        .dashboard-card.logo .status-dot { background-color: var(--color-quorum); }
+        .dashboard-card.users .status-dot { background-color: var(--color-users); }
+        .dashboard-card.presence .status-dot { background-color: var(--color-presence); }
+        .dashboard-card.vote .status-dot { background-color: var(--color-vote); }
+        .dashboard-card.gestion .status-dot { background-color: var(--color-gestion); }
 
-        /* Formulaires */
-        .form-control { border-radius: 8px; border: 1px solid var(--light-gray); font-size: 0.9rem; padding: 0.5rem 1rem; width: 100%; }
-        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.2); outline: none; }
-        .form-control[disabled] { background-color: var(--light-gray); opacity: 0.7; }
-        .edit-icon { cursor: pointer; margin-left: 10px; color: var(--primary); transition: color 0.2s ease; }
-        .edit-icon:hover { color: var(--primary-dark); }
-        .btn-save { display: none; margin-top: 10px; width: 100%; }
-
-        /* --- Custom File Input Style --- */
-        input[type="file"].d-none { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
-        .custom-file-upload-wrapper { 
-            display: flex; align-items: center; border: none; border-radius: 12px; padding: 0.75rem 1rem; cursor: pointer; transition: background-color 0.2s ease; margin-bottom: 0.75rem; 
-            max-height: 50px; overflow: hidden; /* Limite la hauteur du formulaire Logo */
-        }
-        .custom-file-upload-wrapper:hover { background-color: rgba(13, 148, 136, 0.05); }
-        .file-icon-circle { 
-            width: 36px; 
-            height: 36px; 
-            border-radius: 50%; 
-            background: linear-gradient(135deg, var(--color-quorum) 0%, var(--color-quorum-light) 100%);
-            color: white; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            flex-shrink: 0; 
-            margin-right: 0.75rem; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-        }
-        .file-icon-circle i { font-size: 1rem; }
-        .file-upload-text { font-size: 0.9rem; color: var(--dark); flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
-        .file-upload-placeholder { color: var(--gray); font-style: italic; }
-
-        /* Bouton d'action principal */
-        .btn-custom-action { display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 500; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 25px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.1); transition: all 0.25s ease; text-decoration: none; max-width: 100%; }
-        .btn-custom-action i { transition: transform 0.25s ease; }
-        .btn-custom-action i:first-child { margin-right: 0.6rem; }
-        .btn-custom-action i:last-child:not(:first-child) { margin-left: 0.6rem; }
+        /* --- Boutons --- */
+        .btn-custom-action { display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 500; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 25px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.1); transition: all 0.25s ease; text-decoration: none; cursor: pointer; width: 100%; }
+        .btn-custom-action i { transition: transform 0.25s ease; margin-right: 0.4rem; }
+        .btn-custom-action i.ms-1 { margin-right: 0; margin-left: 0.3rem; }
         .btn-custom-action:hover { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); transform: scale(1.03); }
         .btn-custom-action:hover i.fa-arrow-right { transform: translateX(4px); }
 
-        /* Bouton Valider */
-        .btn-primary { background-color: var(--primary); border-color: var(--primary); border-radius: 25px; padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 500; transition: all 0.25s ease; }
-        .btn-primary:hover { background-color: var(--primary-dark); border-color: var(--primary-dark); transform: scale(1.03); }
-
-        /* --- SweetAlert --- */
-        .swal2-popup { border-radius: 12px !important; font-family: var(--sans) !important; }
-        .swal2-title { color: var(--dark) !important; font-weight: 600 !important; }
-        .swal2-html-container { color: var(--gray) !important; text-align: center !important; margin-top: 0.5em !important; }
-        .swal2-confirm, .swal2-cancel { border-radius: 25px !important; padding: 0.6rem 1.5rem !important; font-weight: 500 !important; transition: all 0.25s ease !important; box-shadow: none !important; }
-        .swal2-confirm { background-color: var(--primary) !important; border: 1px solid var(--primary) !important; color: white !important; }
-        .swal2-confirm:hover { background-color: var(--primary-dark) !important; border-color: var(--primary-dark) !important; transform: scale(1.03); }
-        .swal2-cancel { background-color: rgba(100, 116, 139, 0.1) !important; border: 1px solid rgba(100, 116, 139, 0.2) !important; color: var(--gray) !important; }
-        .swal2-cancel:hover { background-color: var(--gray) !important; border-color: var(--gray) !important; color: white !important; transform: scale(1.03); }
-
         /* --- Responsive --- */
         @media (max-width: 991.98px) {
-            .navbar-collapse { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-radius: 15px; margin-top: 10px; padding: 1rem; border: 1px solid var(--navbar-border); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-            .navbar-nav { margin-top: 0; flex-direction: column; align-items: stretch; width: 100%; }
-            .nav-item { width: 100%; margin-bottom: 0.5rem; }
-            .nav-link { justify-content: flex-start; width: 100%; padding: 0.7rem 1rem; }
-            .navbar-right { display: none; }
-            .dropdown-menu { width: 100%; box-shadow: none; background: transparent; backdrop-filter: none; border: none; padding: 0.5rem 0 0 1.5rem; margin-top: 0 !important; }
-            .dropdown-item { padding: 0.4rem 0; border-radius: 4px; }
-            .dropdown-item:hover { background: rgba(13, 148, 136, 0.08); color: var(--primary-dark); transform: none;}
-            .dropdown-divider { margin: 0.5rem 0; }
+            .navbar-nav { margin-top: 1rem; flex-direction: column; align-items: stretch; width: 100%; }
+            .nav-item { width: 100%; } .nav-link { justify-content: flex-start; width: 100%; margin-bottom: 0.5rem; padding: 0.5rem 1rem; border-left-width: 0; padding-left: 1rem; border-radius: 8px; }
+            .navbar-right { display: none; } .dropdown-menu { width: 95%; }
+            .dashboard-card { margin-bottom: 1rem; }
+             .row > [class*="col-"]:last-child .dashboard-card { margin-bottom: 0; }
         }
         @media (max-width: 767.98px) {
             body { padding-top: 80px; }
             .navbar { width: 94%; left: 3%; top: 10px; padding: 0.5rem 1rem; border-radius: 15px; }
-            .main-content { padding: 1rem; }
-            .dashboard-card { 
-                padding: 1.25rem; 
-                border-radius: 12px; 
-                min-height: 280px; /* Hauteur uniforme pour smartphones */
-                height: 100%; 
-            }
+            .main-content { padding: 1.5rem; }
             .page-header h1 { font-size: 1.5rem; }
-            .btn-custom-action { width: 100%; }
-            .status-indicator { 
-                font-size: 0.8rem; 
-                margin-bottom: 0.75rem; 
-            }
-            .status-dot { width: 8px; height: 8px; margin-right: 6px; }
-        }
-
-        .subtitle-gray {
-            color: var(--gray);
+            .dashboard-card { padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem; }
+            .dashboard-card .card-title { font-size: 1.1rem; }
+            .status-indicator { margin-bottom: 1rem; font-size: 0.8rem;}
         }
     </style>
 </head>
 <body>
-    <%# Navbar détaillée de l'événement %>
+
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
         <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mx-auto">
-                 <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i></a></li>
-                 <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>"><i class="far fa-calendar-alt"></i> Événement</a></li>
-                 <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_utilisateur"><i class="fas fa-users"></i> Participants</a></li>
-                 <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_presence"><i class="fas fa-clipboard-check"></i> Présences</a></li>
-                 <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_vote"><i class="fas fa-vote-yea"></i> Vote</a></li>
-                 <li class="nav-item"><a class="nav-link active" href="/event/<%= eventId %>/gestion_event"><i class="fas fa-cog"></i> Gestion</a></li>
-                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user"></i></a>
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i>
+                <li class="nav-item"><a class="nav-link active" href="/events"><i class="far fa-calendar-alt"></i> <span class="d-none d-lg-inline">Événements</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="/create_user_organisation"><i class="fas fa-users"></i> <span class="d-none d-lg-inline">Utilisateurs</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="/stats_user"><i class="fas fa-chart-line"></i> <span class="d-none d-lg-inline">Statistique</span></a></li>
+                <li class="nav-item"><a class="nav-link" href="/administration"><i class="fas fa-cog"></i> <span class="d-none d-lg-inline">Administration</span></a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user"></i>
+                    </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
                         <li><hr class="dropdown-divider"></li>
@@ -240,244 +151,132 @@
         <div class="navbar-right d-none d-lg-block"><a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a></div>
     </nav>
 
-    <!-- Contenu principal -->
+    <!-- Contenu Principal -->
     <div class="main-content">
         <div class="page-header">
-            <h1>Gestion d'événement</h1>
-            <p class="subtitle-gray"><%= typeof event !== 'undefined' && event ? event.name : "Nom de l'événement" %></p>
+            <h1><%= typeof event !== 'undefined' && event ? event.name : "Détails de l'Événement" %></h1>
+            <p>Choisissez une section pour gérer cet événement</p>
         </div>
 
-        <%# Première ligne de 4 cartes %>
+        <!-- Les cartes directement dans .main-content -->
         <div class="row g-4">
-            <%# Quorum Section %>
-            <div class="col-sm-6 col-lg-3 d-flex">
-                 <div class="dashboard-card quorum">
-                     <div class="card-icon-container quorum"> <i class="fas fa-users-cog card-icon"></i> </div>
-                     <div>
-                         <h5 class="card-title">Quorum</h5>
-                         <p class="card-text">Définissez le nombre minimum de participants requis.</p>
-                     </div>
-                     <div class="status-indicator">
-                         <div class="status-dot"></div>
-                         <span>Configuration quorum</span>
-                     </div>
-                     <div class="mt-auto">
-                         <div class="d-flex align-items-center mb-2">
-                             <input type="text" class="form-control" id="event_quorum" name="event_quorum" disabled placeholder="Non défini">
-                             <i class="fas fa-edit edit-icon" id="edit-quorum"></i>
-                         </div>
-                         <button class="btn btn-primary btn-save w-100" id="save-quorum">Valider</button>
-                     </div>
-                 </div>
+            <!-- Carte Suivi Utilisateurs -->
+            <div class="col-md-6 col-lg-3 d-flex">
+                <div class="dashboard-card users">
+                    <div class="card-icon-container users">
+                        <i class="fas fa-users card-icon"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Participants</h3>
+                        <p class="card-text">Ajoutez ou visualisez les utilisateurs associés à cet évènement</p>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Liste des inscrits</span>
+                    </div>
+                    <a href="/event/<%= eventId %>/suivi_utilisateur" class="btn btn-custom-action">
+                         Gérer <i class="fas fa-arrow-right small ms-1"></i>
+                    </a>
+                </div>
             </div>
 
-            <%# Gestion des rôles et du vote %>
-            <div class="col-sm-6 col-lg-3 d-flex">
-                 <div class="dashboard-card roles">
-                     <div class="card-icon-container roles"> <i class="fas fa-user-shield card-icon"></i> </div>
+            <!-- Carte Suivi Présences -->
+            <div class="col-md-6 col-lg-3 d-flex">
+                <div class="dashboard-card presence">
+                    <div class="card-icon-container presence">
+                        <i class="fas fa-clipboard-check card-icon"></i>
+                    </div>
                      <div>
-                         <h5 class="card-title">Gestion des rôles et du vote</h5>
-                         <p class="card-text">Attribuez les droits de vote par rôle.</p>
+                        <h3 class="card-title">Présences</h3>
+                        <p class="card-text">Marquez et consultez la présence des participants inscrits</p>
                      </div>
-                     <div class="status-indicator">
-                         <div class="status-dot"></div>
-                         <span>Gestion des droits</span>
-                     </div>
-                     <a href="/gestion_event_role?eventId=<%= eventId %>" class="btn btn-custom-action">
-                         Accéder <i class="fas fa-arrow-right ms-2"></i>
-                     </a>
-                 </div>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Pointage des arrivées</span>
+                    </div>
+                    <a href="/event/<%= eventId %>/suivi_presence" class="btn btn-custom-action">
+                         Consulter <i class="fas fa-arrow-right small ms-1"></i>
+                    </a>
+                </div>
             </div>
 
-            <%# QR Code %>
-            <div class="col-sm-6 col-lg-3 d-flex">
-                 <div class="dashboard-card qrcode">
-                     <div class="card-icon-container qrcode"> <i class="fas fa-qrcode card-icon"></i> </div>
-                     <div>
-                         <h5 class="card-title">Badges QR Code</h5>
-                         <p class="card-text">Générez des badges PDF avec QR codes.</p>
-                     </div>
-                     <div class="status-indicator">
-                         <div class="status-dot"></div>
-                         <span>Exportation badges</span>
-                     </div>
-                     <button id="exportPdfQRBtn" class="btn btn-custom-action">
-                         <i class="fas fa-download me-2"></i> Exporter
-                     </button>
-                 </div>
+             <!-- Carte Gestion Vote -->
+            <div class="col-md-6 col-lg-3 d-flex">
+                <div class="dashboard-card vote">
+                    <div class="card-icon-container vote">
+                         <i class="fas fa-vote-yea card-icon"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Votes</h3>
+                        <p class="card-text">Configurez ou consultez les résultats des sessions de vote</p>
+                    </div>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                         <span>Sessions de vote</span>
+                    </div>
+                    <a href="/event/<%= eventId %>/suivi_vote" class="btn btn-custom-action">
+                        Accéder <i class="fas fa-arrow-right small ms-1"></i>
+                    </a>
+                </div>
             </div>
 
-            <%# Rapport %>
-            <div class="col-sm-6 col-lg-3 d-flex">
-                 <div class="dashboard-card report">
-                     <div class="card-icon-container report"> <i class="fas fa-file-pdf card-icon"></i> </div>
+             <!-- Carte Gestion Événement -->
+             <div class="col-md-6 col-lg-3 d-flex">
+                 <div class="dashboard-card gestion">
+                    <div class="card-icon-container gestion">
+                         <i class="fas fa-cog card-icon"></i>
+                    </div>
                      <div>
-                         <h5 class="card-title">Rapport d'événement</h5>
-                         <p class="card-text">Téléchargez le rapport PDF de l'événement.</p>
+                        <h3 class="card-title">Gestion Évènements</h3>
+                        <p class="card-text">Accédez aux paramètres et à la gestion générale de l'évènement</p>
                      </div>
-                     <div class="status-indicator">
-                         <div class="status-dot"></div>
-                         <span>Rapport présence</span>
-                     </div>
-                     <button id="exportPdfBtn" class="btn btn-custom-action">
-                         <i class="fas fa-download me-2"></i> Exporter
-                     </button>
-                 </div>
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Configuration événement</span>
+                    </div>
+                    <a href="/event/<%= eventId %>/gestion_event" class="btn btn-custom-action">
+                         Configurer <i class="fas fa-arrow-right small ms-1"></i>
+                    </a>
+                </div>
             </div>
-        </div> <%# Fin de la première ligne %>
+        </div> <!-- Fin .row -->
+    </div> <!-- Fin .main-content -->
 
-        <%# Deuxième ligne pour centrer la carte Logo %>
-        <div class="row g-4 justify-content-center mt-5">
-            <%# Logo %>
-            <div class="col-sm-6 col-lg-3 d-flex">
-                 <div class="dashboard-card logo">
-                     <div class="card-icon-container logo"> <i class="fas fa-image card-icon"></i> </div>
-                     <div>
-                         <h5 class="card-title">Logo</h5>
-                         <p class="card-text">Ajoutez un logo pour les PDF générés.</p>
-                     </div>
-                     <div class="status-indicator">
-                         <div class="status-dot"></div>
-                         <span>Personnalisation PDF</span>
-                     </div>
-                     <form id="logoForm" class="mt-auto" action="/event/<%= eventId %>/upload_logo" method="POST" enctype="multipart/form-data">
-                         <input type="file" id="logo" name="logo" accept="image/*" class="d-none">
-                         <label for="logo" class="custom-file-upload-wrapper">
-                             <div class="file-icon-circle">
-                                 <i class="fas fa-cloud-upload-alt"></i>
-                             </div>
-                             <span class="file-upload-text" id="logo-label-text">Choisir un fichier...</span>
-                         </label>
-                         <button type="submit" class="btn btn-custom-action w-100 mt-2">
-                             <i class="fas fa-upload me-2"></i> Mettre à jour
-                         </button>
-                     </form>
-                 </div>
-            </div>
-        </div> <%# Fin de la deuxième ligne %>
-
-    </div> <%# Fin de .main-content %>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Lien vers Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Script pour récupérer les infos utilisateur -->
     <script>
         async function fetchUserInfo() {
-            try {
-                const response = await fetch('/get_user_info');
-                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
-                const contentType = response.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) { const text = await response.text(); console.warn(`Réponse inattendue /get_user_info: ${text.substring(0,100)}...`); throw new TypeError(`Format invalide.`); }
-                const user = await response.json();
-                const fullName = `${user.name || ''} ${user.surname || ''}`.trim();
-                const userFullNameEl = document.getElementById('userFullName');
-                const userEmailEl = document.getElementById('userEmail');
-                if (userFullNameEl) userFullNameEl.textContent = fullName || 'Utilisateur';
-                if (userEmailEl) userEmailEl.textContent = user.email || 'Email non disponible';
-            } catch (error) {
-                console.error('Erreur fetchUserInfo:', error);
-                const userFullNameEl = document.getElementById('userFullName'); const userEmailEl = document.getElementById('userEmail');
-                if (userFullNameEl) userFullNameEl.textContent = 'Erreur'; if (userEmailEl) userEmailEl.textContent = 'Indisponible';
-            }
+             console.log("fetchUserInfo: Début");
+             try {
+                 const response = await fetch('/get_user_info');
+                 if (!response.ok) throw new Error(`Erreur HTTP fetchUserInfo: ${response.status}`);
+                 const contentType = response.headers.get("content-type");
+                 if (!contentType || !contentType.includes("application/json")) {
+                     const text = await response.text();
+                     throw new TypeError(`Réponse inattendue du serveur (pas JSON): ${text.substring(0, 100)}...`);
+                 }
+                 const user = await response.json();
+                 const fullName = `${user.name || ''} ${user.surname || ''}`.trim();
+                 const userFullNameEl = document.getElementById('userFullName');
+                 const userEmailEl = document.getElementById('userEmail');
+                 if (userFullNameEl) userFullNameEl.textContent = fullName || 'Utilisateur';
+                 if (userEmailEl) userEmailEl.textContent = user.email || 'Email non disponible';
+                 console.log("fetchUserInfo: Infos utilisateur chargées");
+             } catch (error) {
+                 console.error('fetchUserInfo: Erreur:', error);
+                 const userFullNameEl = document.getElementById('userFullName');
+                 const userEmailEl = document.getElementById('userEmail');
+                 if (userFullNameEl) userFullNameEl.textContent = 'Erreur';
+                 if (userEmailEl) userEmailEl.textContent = 'Chargement impossible';
+             }
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             fetchUserInfo();
-
-            const quorumInput = document.getElementById('event_quorum');
-            const editButton = document.getElementById('edit-quorum');
-            const saveButton = document.getElementById('save-quorum');
-            const eventId = '<%= eventId %>';
-
-            try {
-                const quorumResponse = await fetch(`/event/${eventId}/get_quorum`);
-                if (quorumResponse.ok) { const { quorum } = await quorumResponse.json(); quorumInput.value = quorum ?? ''; quorumInput.placeholder = "Non défini"; }
-                else { console.error('Erreur récup quorum:', quorumResponse.status); quorumInput.placeholder = "Erreur"; }
-            } catch (err) { console.error('Erreur réseau quorum:', err); quorumInput.placeholder = "Erreur"; }
-
-            if(editButton && quorumInput && saveButton){
-                editButton.addEventListener('click', () => { quorumInput.disabled = false; quorumInput.focus(); saveButton.style.display = 'inline-flex'; });
-                saveButton.addEventListener('click', async () => {
-                    localStorage.removeItem(`quorumNotified_${eventId}`); const quorumValue = quorumInput.value.trim(); let quorumToSend = null;
-                    if (quorumValue !== '') { const quorumNum = Number(quorumValue); if (isNaN(quorumNum) || quorumNum <= 0) { Swal.fire({ icon: 'error', title: 'Erreur', text: 'Quorum invalide (nombre > 0) ou vide pour supprimer.' }); return; } quorumToSend = quorumNum; }
-                    quorumInput.disabled = true; saveButton.style.display = 'none';
-                    try {
-                        const response = await fetch(`/event/${eventId}/update_quorum`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ quorum: quorumToSend }) });
-                        if (response.ok) { Swal.fire({ icon: 'success', title: 'Succès', text: quorumToSend === null ? 'Quorum supprimé.' : 'Quorum mis à jour.' }); quorumInput.placeholder = "Non défini"; }
-                        else { const error = await response.json(); Swal.fire({ icon: 'error', title: 'Erreur', text: error.message || 'Erreur maj quorum.' }); quorumInput.disabled = false; saveButton.style.display = 'inline-flex'; }
-                    } catch (err) { console.error('Erreur maj quorum fetch:', err); Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur réseau maj quorum.' }); quorumInput.disabled = false; saveButton.style.display = 'inline-flex'; }
-                });
-            }
-
-            const logoForm = document.getElementById('logoForm');
-            const logoInput = document.getElementById('logo');
-            const logoLabelText = document.getElementById('logo-label-text');
-            const defaultLogoLabelText = 'Choisir un fichier...';
-
-            if (logoInput && logoLabelText) {
-                logoInput.addEventListener('change', function(e) {
-                    if (e.target.files && e.target.files.length > 0) {
-                        const fileName = e.target.files[0].name;
-                        logoLabelText.textContent = fileName;
-                        logoLabelText.classList.remove('file-upload-placeholder');
-                    } else {
-                        logoLabelText.textContent = defaultLogoLabelText;
-                        logoLabelText.classList.add('file-upload-placeholder');
-                    }
-                });
-                logoLabelText.classList.add('file-upload-placeholder');
-            }
-
-            if(logoForm) {
-                logoForm.addEventListener('submit', async (event) => {
-                    event.preventDefault();
-                    const formData = new FormData(logoForm);
-                    if (!logoInput || !logoInput.files || logoInput.files.length === 0) {
-                        Swal.fire({ icon: 'warning', title: 'Aucun fichier', text: 'Veuillez sélectionner un fichier logo.' });
-                        return;
-                    }
-                    try {
-                        const response = await fetch(`/event/<%= eventId %>/upload_logo`, { method: 'POST', body: formData });
-                        const result = await response.json();
-                        if (response.ok && result.success) {
-                            Swal.fire({ icon: 'success', title: 'Succès', text: result.message });
-                            logoForm.reset();
-                            if(logoLabelText) {
-                                logoLabelText.textContent = defaultLogoLabelText;
-                                logoLabelText.classList.add('file-upload-placeholder');
-                            }
-                        } else {
-                            Swal.fire({ icon: 'error', title: 'Erreur', text: result.message || 'Erreur upload logo.' });
-                        }
-                    } catch (error) {
-                        console.error('Erreur upload logo fetch:', error);
-                        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur réseau upload logo.' });
-                    }
-                });
-            }
-
-             const exportPdfBtn = document.getElementById("exportPdfBtn");
-             if(exportPdfBtn) {
-                 exportPdfBtn.addEventListener("click", function() {
-                    const exportUrl = `/event/${eventId}/export-pdf`;
-                    fetch(exportUrl)
-                        .then(response => { if (!response.ok) { return response.json().then(err => { throw new Error(err.message || `Erreur ${response.status}`) }); } return response.blob(); })
-                        .then(blob => { const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `Rapport_Presence_Evenement_${eventId}.pdf`; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href); })
-                        .catch(err => { console.error("Erreur export PDF:", err.message); Swal.fire({ icon: 'warning', title: 'Export impossible', text: err.message.includes('Aucun utilisateur') ? 'Aucun utilisateur rattaché.' : 'Erreur: ' + err.message }); });
-                });
-             }
-
-            const exportPdfQRBtn = document.getElementById('exportPdfQRBtn');
-            if (exportPdfQRBtn) {
-                exportPdfQRBtn.addEventListener('click', async () => {
-                    try {
-                        const response = await fetch(`/generate-qrcodes/${eventId}`);
-                        if (response.ok) { const blob = await response.blob(); const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.style.display = 'none'; a.href = url; a.download = `Badges_QR_Evenement_${eventId}.pdf`; document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); document.body.removeChild(a); }
-                        else { const errorData = await response.json().catch(() => ({ message: 'Erreur inconnue' })); if (response.status === 400 && errorData.message.includes("Aucun utilisateur")) { Swal.fire({ icon: 'warning', title: 'Aucun utilisateur', text: 'Aucun utilisateur rattaché.' }); } else { Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur export QR: ' + (errorData.message || 'Inconnue') }); } }
-                    } catch (error) { console.error('Erreur fetch QR PDF:', error); Swal.fire({ icon: 'error', title: 'Erreur', text: 'Erreur réseau export QR.' }); }
-                });
-            }
         });
     </script>
+
 </body>
 </html>
