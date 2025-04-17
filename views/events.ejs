@@ -184,7 +184,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mx-auto">
                 <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i> <span class="d-lg-none">Accueil</span></a></li>
-                <li class="nav-item"><a class="nav-link active" href="/events"><i class="far fa-calendar-alt"></i> Événements</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/events"><i class="far fa-calendar-alt"></i> Évènements</a></li>
                 <li class="nav-item"><a class="nav-link" href="/create_user_organisation"><i class="fas fa-users"></i> Utilisateurs</a></li>
                 <li class="nav-item"><a class="nav-link" href="/stats_user"><i class="fas fa-chart-line"></i> Statistique</a></li>
                 <li class="nav-item"><a class="nav-link" href="/administration"><i class="fas fa-cog"></i> Administration</a></li>
@@ -208,7 +208,7 @@
         </div>
 
         <div class="create-event-btn-container">
-            <button id="createEventBtn" class="btn btn-custom-action"><i class="fas fa-plus"></i> Créer un nouvel événement</button>
+            <button id="createEventBtn" class="btn btn-custom-action"><i class="fas fa-plus"></i> Créer un nouvel évènement</button>
         </div>
 
         <div class="content-block" id="eventFormContainer">
@@ -229,7 +229,7 @@
         </div>
 
         <div class="content-block">
-            <h2>Liste des événements</h2>
+            <h2>Liste des évènements</h2>
             <div class="table-responsive-scrollable">
                 <table class="table table-hover">
                     <thead><tr><th>ID</th><th>Nom</th><th>Début</th><th>Fin</th><th>Adresse</th><th>Wilaya</th><th>Statut</th></tr></thead>
@@ -261,14 +261,14 @@
                         </tr>
                         <% }); %>
                         <% if (events.length === 0) { %>
-                        <tr><td colspan="7" class="text-center text-muted py-4">Aucun événement trouvé.</td></tr>
+                        <tr><td colspan="7" class="text-center text-muted py-4">Aucun évènement trouvé.</td></tr>
                         <% } %>
                     </tbody>
                 </table>
             </div>
              <div class="counts-container">
                 <span id="totalEventsCount" class="form-control">
-                    Nombre total d'événements : <%= events.length %>
+                    Nombre total d'évènements : <%= events.length %>
                 </span>
             </div>
         </div>
@@ -282,11 +282,11 @@
             </div>
             <div class="col-lg-5">
                 <div class="content-block">
-                    <h2>Événements par Statut</h2>
+                    <h2>Évènements par Statut</h2>
                     <div class="chart-container"><canvas id="eventsStatusChart"></canvas></div>
                 </div>
                 <div class="content-block">
-                    <h2>Événements par Mois (Année en cours)</h2>
+                    <h2>Évènements par Mois (Année en cours)</h2>
                     <div class="chart-container"><canvas id="eventsPerMonthChart"></canvas></div>
                 </div>
             </div>
@@ -295,13 +295,13 @@
         <div class="row g-3 graphic-row">
             <div class="col-md-6">
                 <div class="content-block">
-                    <h2>Événements par Jour (7 derniers jours)</h2>
+                    <h2>Évènements par Jour (7 derniers jours)</h2>
                     <div class="chart-container"><canvas id="eventsPerDayChart"></canvas></div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="content-block">
-                    <h2>Événements par Semaine (4 dernières)</h2>
+                    <h2>Évènements par Semaine (4 dernières)</h2>
                     <div class="chart-container"><canvas id="eventsPerWeekChart"></canvas></div>
                 </div>
             </div>
@@ -309,7 +309,7 @@
         <div class="row g-3 graphic-row">
             <div class="col-md-6">
                 <div class="content-block">
-                    <h2>Événements par An (±5 ans)</h2>
+                    <h2>Évènements par An (±5 ans)</h2>
                     <div class="chart-container"><canvas id="eventsPerYearChart"></canvas></div>
                 </div>
             </div>
@@ -341,7 +341,7 @@
     <div class="modal fade" id="editEventModal" tabindex="-1" aria-labelledby="editEventModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title" id="editEventModalLabel">Modifier l'événement</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                <div class="modal-header"><h5 class="modal-title" id="editEventModalLabel">Modifier l'évènement</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
                 <div class="modal-body">
                     <form id="editEventForm">
                         <input type="hidden" id="editEventId" name="eventId">
