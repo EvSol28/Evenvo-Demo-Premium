@@ -64,6 +64,7 @@
         .page-header .event-subtitle { color: var(--gray); font-size: 1.1rem; margin-top: 0.25rem; }
 
         /* --- Cartes de Gestion --- */
+        .row.g-4 { align-items: stretch; } /* Uniformise la hauteur des carreaux dans une ligne */
         .dashboard-card { 
             background: var(--card-bg); 
             border-radius: 16px; 
@@ -76,6 +77,7 @@
             flex-direction: column; 
             min-height: 240px;
             justify-content: space-between;
+            height: 100%; /* S'étend à la hauteur de la grille */
         }
         .dashboard-card:hover { border-color: var(--card-hover-border); box-shadow: var(--card-hover-shadow); transform: translateY(-6px); }
         .dashboard-card .card-body { padding: 0; flex-grow: 1; display: flex; flex-direction: column; }
@@ -86,23 +88,40 @@
         @keyframes iconPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
         .card-icon-container::before { content: ''; position: absolute; width: 150%; height: 100%; background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%); border-radius: 12px; animation: shine 3.5s infinite linear; top: 0; left: -100%; transform: skewX(-25deg); z-index: 0; }
         @keyframes shine { 0% { left: -125%; } 50% { left: 75%; } 100% { left: 75%; } }
-        .card-icon-container.quorum { background: linear-gradient(135deg, var(--color-logo) 0%, var(--color-logo-light) 100%); } /* Inversé */
+        .card-icon-container.quorum { background: linear-gradient(135deg, var(--color-logo) 0%, var(--color-logo-light) 100%); }
         .card-icon-container.roles { background: linear-gradient(135deg, var(--color-roles) 0%, var(--color-roles-light) 100%); }
         .card-icon-container.qrcode { background: linear-gradient(135deg, var(--color-qrcode) 0%, var(--color-qrcode-light) 100%); }
         .card-icon-container.report { background: linear-gradient(135deg, var(--color-report) 0%, var(--color-report-light) 100%); }
-        .card-icon-container.logo { background: linear-gradient(135deg, var(--color-quorum) 0%, var(--color-quorum-light) 100%); } /* Inversé */
+        .card-icon-container.logo { background: linear-gradient(135deg, var(--color-quorum) 0%, var(--color-quorum-light) 100%); }
 
         .dashboard-card .card-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--dark); }
-        .dashboard-card .card-text { color: var(--gray); font-size: 0.9rem; margin-bottom: 1rem; flex-grow: 1; line-height: 1.6; }
+        .dashboard-card .card-text { 
+            color: var(--gray); 
+            font-size: 0.9rem; 
+            margin-bottom: 1rem; 
+            line-height: 1.6; 
+            max-height: 70px; /* Limite stricte pour uniformité */
+            overflow: hidden; 
+            flex-grow: 1; 
+        }
 
         /* Indicateur de Statut */
-        .status-indicator { display: flex; align-items: center; margin-top: auto; margin-bottom: 1.5rem; font-size: 0.85rem; font-family: var(--sans); font-weight: 500; color: var(--gray); }
+        .status-indicator { 
+            display: flex; 
+            align-items: center; 
+            margin-top: auto; 
+            margin-bottom: 1rem; 
+            font-size: 0.85rem; 
+            font-family: var(--sans); 
+            font-weight: 500; 
+            color: var(--gray); 
+        }
         .status-dot { width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
-        .dashboard-card.quorum .status-dot { background-color: var(--color-logo); } /* Inversé */
+        .dashboard-card.quorum .status-dot { background-color: var(--color-logo); }
         .dashboard-card.roles .status-dot { background-color: var(--color-roles); }
         .dashboard-card.qrcode .status-dot { background-color: var(--color-qrcode); }
         .dashboard-card.report .status-dot { background-color: var(--color-report); }
-        .dashboard-card.logo .status-dot { background-color: var(--color-quorum); } /* Inversé */
+        .dashboard-card.logo .status-dot { background-color: var(--color-quorum); }
 
         /* Formulaires */
         .form-control { border-radius: 8px; border: 1px solid var(--light-gray); font-size: 0.9rem; padding: 0.5rem 1rem; width: 100%; }
@@ -116,13 +135,14 @@
         input[type="file"].d-none { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
         .custom-file-upload-wrapper { 
             display: flex; align-items: center; border: none; border-radius: 12px; padding: 0.75rem 1rem; cursor: pointer; transition: background-color 0.2s ease; margin-bottom: 0.75rem; 
+            max-height: 50px; overflow: hidden; /* Limite la hauteur du formulaire Logo */
         }
         .custom-file-upload-wrapper:hover { background-color: rgba(13, 148, 136, 0.05); }
         .file-icon-circle { 
             width: 36px; 
             height: 36px; 
             border-radius: 50%; 
-            background: linear-gradient(135deg, var(--color-quorum) 0%, var(--color-quorum-light) 100%); /* Inversé pour correspondre à Logo */
+            background: linear-gradient(135deg, var(--color-quorum) 0%, var(--color-quorum-light) 100%);
             color: white; 
             display: flex; 
             align-items: center; 
@@ -132,11 +152,11 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
         }
         .file-icon-circle i { font-size: 1rem; }
-        .file-upload-text { font-size: 0.9rem; color: var(--dark); flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-upload-text { font-size: 0.9rem; color: var(--dark); flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
         .file-upload-placeholder { color: var(--gray); font-style: italic; }
 
         /* Bouton d'action principal */
-        .btn-custom-action { display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 500; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 25px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.1); transition: all 0.25s ease; text-decoration: none; max-width: 100%; margin-top: auto; }
+        .btn-custom-action { display: inline-flex; align-items: center; justify-content: center; color: var(--primary); font-weight: 500; font-size: 0.9rem; padding: 0.6rem 1.2rem; border-radius: 25px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.1); transition: all 0.25s ease; text-decoration: none; max-width: 100%; }
         .btn-custom-action i { transition: transform 0.25s ease; }
         .btn-custom-action i:first-child { margin-right: 0.6rem; }
         .btn-custom-action i:last-child:not(:first-child) { margin-left: 0.6rem; }
@@ -173,14 +193,65 @@
             body { padding-top: 80px; }
             .navbar { width: 94%; left: 3%; top: 10px; padding: 0.5rem 1rem; border-radius: 15px; }
             .main-content { padding: 1rem; }
-            .dashboard-card { padding: 1.25rem; border-radius: 12px; min-height: auto; }
+            .dashboard-card { 
+                padding: 1.25rem; 
+                border-radius: 12px; 
+                height: 300px; /* Hauteur fixe pour uniformité sur smartphone */
+                min-height: unset; /* Supprime min-height pour forcer la hauteur fixe */
+                display: flex; 
+                flex-direction: column; 
+                justify-content: space-between; 
+            }
             .page-header h1 { font-size: 1.5rem; }
-            .btn-custom-action { width: 100%; }
+            .btn-custom-action { 
+                width: 100%; 
+                padding: 0.5rem 1rem; 
+                font-size: 0.85rem; 
+            }
+            .status-indicator { 
+                font-size: 0.8rem; 
+                margin-bottom: 0.5rem; 
+            }
+            .status-dot { width: 8px; height: 8px; margin-right: 6px; }
+            .dashboard-card .card-title { 
+                font-size: 1.1rem; 
+                margin-bottom: 0.5rem; 
+            }
+            .dashboard-card .card-text { 
+                font-size: 0.85rem; 
+                margin-bottom: 0.75rem; 
+                max-height: 60px; /* Réduit la hauteur max pour s'adapter */
+                line-height: 1.5; 
+            }
+            .card-icon-container { 
+                width: 40px; 
+                height: 40px; 
+                margin-bottom: 0.75rem; 
+            }
+            .card-icon { font-size: 1rem; }
+            .form-control { 
+                font-size: 0.85rem; 
+                padding: 0.4rem 0.8rem; 
+            }
+            .custom-file-upload-wrapper { 
+                padding: 0.5rem 0.8rem; 
+                max-height: 40px; 
+            }
+            .file-icon-circle { 
+                width: 30px; 
+                height: 30px; 
+            }
+            .file-icon-circle i { font-size: 0.9rem; }
+            .file-upload-text { font-size: 0.8rem; max-width: 120px; }
+            .btn-primary { 
+                padding: 0.5rem 1rem; 
+                font-size: 0.85rem; 
+            }
         }
-		
-				.subtitle-gray {
-    color: var(--gray); /* #64748B */
-}
+
+        .subtitle-gray {
+            color: var(--gray);
+        }
     </style>
 </head>
 <body>
@@ -226,7 +297,10 @@
                          <h5 class="card-title">Quorum</h5>
                          <p class="card-text">Définissez le nombre minimum de participants requis.</p>
                      </div>
-                     <div class="status-indicator"> <div class="status-dot"></div> <span>Configuration quorum</span> </div>
+                     <div class="status-indicator">
+                         <div class="status-dot"></div>
+                         <span>Configuration quorum</span>
+                     </div>
                      <div class="mt-auto">
                          <div class="d-flex align-items-center mb-2">
                              <input type="text" class="form-control" id="event_quorum" name="event_quorum" disabled placeholder="Non défini">
@@ -245,8 +319,11 @@
                          <h5 class="card-title">Gestion des rôles et du vote</h5>
                          <p class="card-text">Attribuez les droits de vote par rôle.</p>
                      </div>
-                     <div class="status-indicator"> <div class="status-dot"></div> <span>Gestion des droits</span> </div>
-                     <a href="/gestion_event_role?eventId=<%= eventId %>" class="btn btn-custom-action mt-auto">
+                     <div class="status-indicator">
+                         <div class="status-dot"></div>
+                         <span>Gestion des droits</span>
+                     </div>
+                     <a href="/gestion_event_role?eventId=<%= eventId %>" class="btn btn-custom-action">
                          Accéder <i class="fas fa-arrow-right ms-2"></i>
                      </a>
                  </div>
@@ -260,8 +337,11 @@
                          <h5 class="card-title">Badges QR Code</h5>
                          <p class="card-text">Générez des badges PDF avec QR codes.</p>
                      </div>
-                     <div class="status-indicator"> <div class="status-dot"></div> <span>Exportation badges</span> </div>
-                     <button id="exportPdfQRBtn" class="btn btn-custom-action mt-auto">
+                     <div class="status-indicator">
+                         <div class="status-dot"></div>
+                         <span>Exportation badges</span>
+                     </div>
+                     <button id="exportPdfQRBtn" class="btn btn-custom-action">
                          <i class="fas fa-download me-2"></i> Exporter
                      </button>
                  </div>
@@ -275,8 +355,11 @@
                          <h5 class="card-title">Rapport d'événement</h5>
                          <p class="card-text">Téléchargez le rapport PDF de l'événement.</p>
                      </div>
-                     <div class="status-indicator"> <div class="status-dot"></div> <span>Rapport présence</span> </div>
-                     <button id="exportPdfBtn" class="btn btn-custom-action mt-auto">
+                     <div class="status-indicator">
+                         <div class="status-dot"></div>
+                         <span>Rapport présence</span>
+                     </div>
+                     <button id="exportPdfBtn" class="btn btn-custom-action">
                          <i class="fas fa-download me-2"></i> Exporter
                      </button>
                  </div>
@@ -293,7 +376,10 @@
                          <h5 class="card-title">Logo</h5>
                          <p class="card-text">Ajoutez un logo pour les PDF générés.</p>
                      </div>
-                     <div class="status-indicator"> <div class="status-dot"></div> <span>Personnalisation PDF</span> </div>
+                     <div class="status-indicator">
+                         <div class="status-dot"></div>
+                         <span>Personnalisation PDF</span>
+                     </div>
                      <form id="logoForm" class="mt-auto" action="/event/<%= eventId %>/upload_logo" method="POST" enctype="multipart/form-data">
                          <input type="file" id="logo" name="logo" accept="image/*" class="d-none">
                          <label for="logo" class="custom-file-upload-wrapper">
