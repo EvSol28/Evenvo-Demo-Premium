@@ -32,7 +32,7 @@
         .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
         .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
         .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
-        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transitionContinuation: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
+        .nav-link { color: var(--primary-dark) !important; font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; transition: color 0.25s ease, background-color 0.25s ease; display: flex; align-items: center; gap: 0.5rem; border-radius: 25px; background: transparent; border: 1px solid transparent; text-decoration: none !important; }
         .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
         .nav-link.active {
             color: var(--light) !important;
@@ -126,6 +126,21 @@
         .swal2-confirm:hover { background-color: #dc2626 !important; border-color: #dc2626 !important; transform: scale(1.03); }
         .swal2-cancel { background-color: rgba(100, 116, 139, 0.1) !important; border: 1px solid rgba(100, 116, 139, 0.2) !important; color: var(--gray) !important; }
         .swal2-cancel:hover { background-color: var(--gray) !important; border-color: var(--gray) !important; color: white !important; transform: scale(1.03); }
+        /* Style pour le bouton OK du SweetAlert de succès avec effet glassmorphism vert clair */
+        .swal2-success-confirm .swal2-confirm {
+            background: rgba(94, 234, 212, 0.2) !important; /* Vert clair transparent */
+            border: 1px solid rgba(94, 234, 212, 0.3) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            color: var(--primary-dark) !important;
+            font-weight: 600 !important;
+        }
+        .swal2-success-confirm .swal2-confirm:hover {
+            background: rgba(94, 234, 212, 0.3) !important;
+            border-color: rgba(94, 234, 212, 0.4) !important;
+            transform: scale(1.03);
+            box-shadow: 0 4px 12px rgba(94, 234, 212, 0.2) !important;
+        }
 
         /* --- Styles spécifiques --- */
         .arrow { display: inline-block; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; margin-left: 5px; }
@@ -706,7 +721,10 @@
                     Swal.fire({
                         icon: "success",
                         title: "Succès",
-                        text: "Les participants ont été ajoutés avec succès à l'événement."
+                        text: "Les participants ont été ajoutés avec succès à l'événement.",
+                        customClass: {
+                            popup: 'swal2-success-confirm'
+                        }
                     });
                     const addUserModal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
                     if (addUserModal) addUserModal.hide();

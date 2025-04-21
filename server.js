@@ -2992,7 +2992,7 @@ app.get('/generate-qrcodes/:eventId', async (req, res) => {
                     doc.image(logoPath, logoX, logoY, { width: logoSize, height: logoSize });
                 }
 
-                const footerText = 'NocEvent by Evenvo©';
+                const footerText = 'Powered by Evenvo©';
                 const footerX = startX + 20;
                 const footerY = startY + badgeHeight - 20;
                 doc.fontSize(9).text(footerText, footerX, footerY, {
