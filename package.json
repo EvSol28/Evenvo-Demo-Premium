@@ -44,6 +44,6 @@
     "web-streams-polyfill": "^4.0.0"
   },
   "puppeteer": {
-    "default_browser_revision": "1221010"
+    "default_browser_revision": "135.0.7049.84"
   }
 }
