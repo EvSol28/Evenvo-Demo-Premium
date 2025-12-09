@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "postinstall": "npm rebuild canvas && npx puppeteer browsers install chrome"
+    "postinstall": "npm rebuild canvas"
   },
   "keywords": [],
   "author": "",
@@ -42,8 +42,5 @@
     "react-google-charts": "^5.2.1",
     "sweetalert2": "^11.14.4",
     "web-streams-polyfill": "^4.0.0"
-  },
-  "puppeteer": {
-    "default_browser_revision": "135.0.7049.84"
   }
 }
