@@ -44,7 +44,18 @@ const port = process.env.PORT || 4000;
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Initialisation de Firebase Admin SDK
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+// Initialisation de Firebase Admin SDK
+let serviceAccount;
+try {
+    // Chemin par défaut où Render monte les Secret Files
+    serviceAccount = require('./firebase-adminsdk.json'); // adapte le nom si différent
+} catch (error) {
+    console.error('Fichier service account non trouvé, fallback sur variable env...');
+    if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
+        throw new Error('Aucune credential Firebase trouvée (ni fichier ni variable env)');
+    }
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
