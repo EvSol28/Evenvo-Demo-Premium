@@ -44,7 +44,7 @@ const port = process.env.PORT || 4000;
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Initialisation de Firebase Admin SDK
-
+admin.initializeApp();
 
 const firestore = admin.firestore();
 firestore.settings({
