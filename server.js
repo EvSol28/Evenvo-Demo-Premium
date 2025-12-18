@@ -44,8 +44,7 @@ const port = process.env.PORT || 4000;
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Initialisation de Firebase Admin SDK
-const admin = require('firebase-admin');
-admin.initializeApp();   // ← c’est tout ! Il trouve le fichier tout seul
+
 
 const firestore = admin.firestore();
 firestore.settings({
