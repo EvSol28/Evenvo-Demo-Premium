@@ -48,7 +48,7 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 let serviceAccount;
 try {
     // Chemin par défaut où Render monte les Secret Files
-    serviceAccount = require('./nocevent-20791-firebase-adminsdk-zvrwh-5d9c9b7016.json'); // adapte le nom si différent
+    serviceAccount = require('./nocevent-20791-firebase-adminsdk-zvrwh-cdb34b4097.json'); // adapte le nom si différent
 } catch (error) {
     console.error('Fichier service account non trouvé, fallback sur variable env...');
     if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
