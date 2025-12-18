@@ -44,10 +44,8 @@ const port = process.env.PORT || 4000;
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 // Initialisation de Firebase Admin SDK
-admin.initializeApp({
-  credential: admin.credential.cert(require('./nocevent-20791-firebase-adminsdk-zvrwh-5d9c9b7016.json')),
-  databaseURL: "https://nocevent-20791.firebaseio.com"
-});
+const admin = require('firebase-admin');
+admin.initializeApp();   // ← c’est tout ! Il trouve le fichier tout seul
 
 const firestore = admin.firestore();
 firestore.settings({
