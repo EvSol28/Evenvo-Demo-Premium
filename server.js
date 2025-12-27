@@ -5532,7 +5532,102 @@ app.post('/send_invitations', requireAuth, async (req, res) => {
 });
 */
 
+// API pour récupérer les formulaires de vote actifs (pour l'application mobile)
+app.get('/api/event/:eventId/active_vote_forms', async (req, res) => {
+    const { eventId } = req.params;
 
+    try {
+        console.log(`🔍 Recherche des formulaires actifs pour l'événement: ${eventId}`);
+        
+        // Vérifier si l'événement existe
+        const eventRef = firestore.collection('events').doc(eventId);
+        const eventDoc = await eventRef.get();
+        
+        if (!eventDoc.exists) {
+            console.log(`❌ Événement ${eventId} non trouvé`);
+            return res.status(404).json({
+                success: false,
+                message: `Événement '${eventId}' non trouvé`
+            });
+        }
+
+        console.log(`✅ Événement ${eventId} trouvé`);
+
+        // Requête simplifiée sans orderBy pour éviter le problème d'index
+        const voteFormsSnapshot = await firestore.collection('vote_forms')
+            .where('eventId', '==', eventId)
+            .where('isActive', '==', true)
+            .get();
+
+        console.log(`📊 Nombre de formulaires actifs trouvés: ${voteFormsSnapshot.size}`);
+
+        const voteForms = [];
+        voteFormsSnapshot.forEach(doc => {
+            const data = doc.data();
+            voteForms.push({
+                id: doc.id,
+                name: data.name,
+                description: data.description,
+                fields: data.fields,
+                createdAt: data.createdAt,
+                updatedAt: data.updatedAt
+            });
+        });
+
+        // Trier côté serveur si nécessaire
+        voteForms.sort((a, b) => {
+            if (a.createdAt && b.createdAt) {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            }
+            return 0;
+        });
+
+        console.log(`✅ Réponse envoyée avec ${voteForms.length} formulaires`);
+        res.json({
+            success: true,
+            voteForms: voteForms
+        });
+    } catch (error) {
+        console.error("❌ Erreur lors de la récupération des formulaires actifs:", error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de la récupération des formulaires'
+        });
+    }
+});
+
+// API pour lister tous les événements disponibles
+app.get('/api/events/list', async (req, res) => {
+    try {
+        console.log('🔍 Récupération de la liste des événements');
+        
+        const eventsSnapshot = await firestore.collection('events').get();
+        
+        const events = [];
+        eventsSnapshot.forEach(doc => {
+            const data = doc.data();
+            events.push({
+                id: doc.id,
+                name: data.name,
+                startDate: data.startDate,
+                endDate: data.endDate,
+                organizerName: data.organizerName
+            });
+        });
+
+        console.log(`✅ ${events.length} événements trouvés`);
+        res.json({
+            success: true,
+            events: events
+        });
+    } catch (error) {
+        console.error("❌ Erreur lors de la récupération des événements:", error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de la récupération des événements'
+        });
+    }
+});
 
 app.use(router);
 
