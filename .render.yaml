@@ -8,4 +8,8 @@ services:
     startCommand: node server.js
     envVars:
       - key: NODE_VERSION
-        value: 22.14.0 
+        value: 22.14.0
+      - key: NODE_ENV
+        value: production
+      # Les autres variables Firebase doivent être configurées via l'interface Render
+      # pour des raisons de sécurité. Voir RENDER_SETUP.md

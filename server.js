@@ -33,6 +33,13 @@ const access = util.promisify(fs.access);
 const iconv = require('iconv-lite'); 
 const { parse } = require('csv-parse/sync');
 
+// Charger les variables d'environnement depuis .env si le fichier existe
+try {
+  require('dotenv').config();
+} catch (error) {
+  console.log('dotenv non installé, utilisation des variables d\'environnement système');
+}
+
 
 
 
@@ -47,12 +54,48 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 let firebaseConfig;
 
 try {
-  // Essayer d'abord avec le fichier service account
-  const serviceAccount = require('./evenvo-ba568-firebase-adminsdk-fbsvc-a2d63101fe.json');
-  firebaseConfig = {
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://evenvo-ba568.firebaseio.com"
-  };
+  // Debug des variables d'environnement
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('FIREBASE_PROJECT_ID:', process.env.FIREBASE_PROJECT_ID);
+  console.log('FIREBASE_CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL);
+  console.log('FIREBASE_PRIVATE_KEY présente:', !!process.env.FIREBASE_PRIVATE_KEY);
+  
+  // Vérifier si on est en production (Render) ou en développement
+  if (process.env.NODE_ENV === 'production' || process.env.FIREBASE_PRIVATE_KEY) {
+    // Configuration pour la production avec variables d'environnement
+    console.log('Initialisation Firebase avec variables d\'environnement...');
+    
+    if (!process.env.FIREBASE_PRIVATE_KEY) {
+      throw new Error('FIREBASE_PRIVATE_KEY manquante dans les variables d\'environnement');
+    }
+    
+    const serviceAccount = {
+      type: "service_account",
+      project_id: process.env.FIREBASE_PROJECT_ID || "evenvo-ba568",
+      private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+      client_id: process.env.FIREBASE_CLIENT_ID,
+      auth_uri: "https://accounts.google.com/o/oauth2/auth",
+      token_uri: "https://oauth2.googleapis.com/token",
+      auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+      client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
+      universe_domain: "googleapis.com"
+    };
+
+    firebaseConfig = {
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: process.env.FIREBASE_DATABASE_URL || "https://evenvo-ba568.firebaseio.com"
+    };
+  } else {
+    // Configuration pour le développement avec fichier local
+    console.log('Initialisation Firebase avec fichier service account local...');
+    const serviceAccount = require('./evenvo-ba568-firebase-adminsdk-fbsvc-0f2a90b30b.json');
+    firebaseConfig = {
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: "https://evenvo-ba568.firebaseio.com"
+    };
+  }
   
   admin.initializeApp(firebaseConfig);
   console.log('Firebase initialisé avec succès');
@@ -1918,226 +1961,6 @@ app.get('/event/:eventId/gestion_event', async (req, res) => {
     } catch (error) {
         console.error("Erreur lors de la récupération de l'événement:", error);
         res.status(500).send("Erreur serveur");
-    }
-});
-
-// Route pour le form builder de vote
-app.get('/event/:eventId/vote_form_builder', requireAuth, async (req, res) => {
-    const { eventId } = req.params;
-    
-    console.log(`🔍 Accès à la route vote_form_builder pour l'événement: ${eventId}`);
-
-    try {
-        const eventSnapshot = await firestore.collection('events').doc(eventId).get();
-
-        if (!eventSnapshot.exists) {
-            console.log(`❌ Événement ${eventId} non trouvé`);
-            return res.status(404).send("Événement non trouvé");
-        }
-
-        const event = eventSnapshot.data();
-        event.id = eventSnapshot.id;
-        console.log(`✅ Événement trouvé: ${event.name}`);
-
-        // Récupérer les formulaires de vote existants pour cet événement (sans orderBy pour éviter l'erreur d'index)
-        let voteForms = [];
-        try {
-            const voteFormsSnapshot = await firestore.collection('vote_forms')
-                .where('eventId', '==', eventId)
-                .get();
-
-            voteFormsSnapshot.forEach(doc => {
-                voteForms.push({
-                    id: doc.id,
-                    ...doc.data()
-                });
-            });
-
-            // Trier côté serveur par date de création (si elle existe)
-            voteForms.sort((a, b) => {
-                if (a.createdAt && b.createdAt) {
-                    return b.createdAt.toDate() - a.createdAt.toDate();
-                }
-                return 0;
-            });
-            
-            console.log(`✅ ${voteForms.length} formulaires trouvés`);
-        } catch (indexError) {
-            console.log("Pas encore de formulaires ou erreur d'index:", indexError.message);
-            voteForms = [];
-        }
-
-        console.log(`🎨 Rendu de la page vote_form_builder`);
-        res.render('vote_form_builder', { event, eventId, voteForms });
-    } catch (error) {
-        console.error("❌ Erreur lors de la récupération des formulaires de vote:", error);
-        res.status(500).send("Erreur serveur: " + error.message);
-    }
-});
-
-// Route pour sauvegarder un formulaire de vote
-app.post('/event/:eventId/save_vote_form', async (req, res) => {
-    const { eventId } = req.params;
-    const { formName, formDescription, formFields, isActive } = req.body;
-
-    try {
-        const voteFormData = {
-            eventId: eventId,
-            name: formName,
-            description: formDescription,
-            fields: formFields,
-            isActive: isActive || false,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp()
-        };
-
-        const docRef = await firestore.collection('vote_forms').add(voteFormData);
-        
-        res.json({ 
-            success: true, 
-            message: 'Formulaire de vote sauvegardé avec succès',
-            formId: docRef.id 
-        });
-    } catch (error) {
-        console.error("Erreur lors de la sauvegarde du formulaire:", error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Erreur lors de la sauvegarde du formulaire' 
-        });
-    }
-});
-
-// Route pour supprimer un formulaire de vote
-app.delete('/event/:eventId/delete_vote_form/:formId', async (req, res) => {
-    const { eventId, formId } = req.params;
-
-    try {
-        await firestore.collection('vote_forms').doc(formId).delete();
-        
-        res.json({ 
-            success: true, 
-            message: 'Formulaire supprimé avec succès' 
-        });
-    } catch (error) {
-        console.error("Erreur lors de la suppression du formulaire:", error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Erreur lors de la suppression du formulaire' 
-        });
-    }
-});
-
-// Route pour activer/désactiver un formulaire de vote
-app.post('/event/:eventId/toggle_vote_form/:formId', async (req, res) => {
-    const { eventId, formId } = req.params;
-    const { isActive } = req.body;
-
-    try {
-        await firestore.collection('vote_forms').doc(formId).update({
-            isActive: isActive,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-        
-        res.json({ 
-            success: true, 
-            message: `Formulaire ${isActive ? 'activé' : 'désactivé'} avec succès` 
-        });
-    } catch (error) {
-        console.error("Erreur lors de la mise à jour du formulaire:", error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Erreur lors de la mise à jour du formulaire' 
-        });
-    }
-});
-
-// API pour récupérer les formulaires de vote actifs (pour l'application mobile)
-app.get('/api/event/:eventId/active_vote_forms', async (req, res) => {
-    const { eventId } = req.params;
-
-    try {
-        // Requête simplifiée sans orderBy pour éviter le problème d'index
-        const voteFormsSnapshot = await firestore.collection('vote_forms')
-            .where('eventId', '==', eventId)
-            .where('isActive', '==', true)
-            .get();
-
-        const voteForms = [];
-        voteFormsSnapshot.forEach(doc => {
-            const data = doc.data();
-            voteForms.push({
-                id: doc.id,
-                name: data.name,
-                description: data.description,
-                fields: data.fields,
-                createdAt: data.createdAt,
-                updatedAt: data.updatedAt
-            });
-        });
-
-        // Trier côté serveur si nécessaire
-        voteForms.sort((a, b) => {
-            if (a.createdAt && b.createdAt) {
-                return new Date(b.createdAt) - new Date(a.createdAt);
-            }
-            return 0;
-        });
-
-        res.json({
-            success: true,
-            voteForms: voteForms
-        });
-    } catch (error) {
-        console.error("Erreur lors de la récupération des formulaires actifs:", error);
-        res.status(500).json({
-            success: false,
-            message: 'Erreur lors de la récupération des formulaires'
-        });
-    }
-});
-
-// API pour soumettre une réponse de vote
-app.post('/api/event/:eventId/submit_vote', async (req, res) => {
-    const { eventId } = req.params;
-    const { formId, userId, responses } = req.body;
-
-    try {
-        // Vérifier si l'utilisateur a déjà voté pour ce formulaire
-        const existingVoteSnapshot = await firestore.collection('vote_responses')
-            .where('eventId', '==', eventId)
-            .where('formId', '==', formId)
-            .where('userId', '==', userId)
-            .limit(1)
-            .get();
-
-        if (!existingVoteSnapshot.empty) {
-            return res.status(400).json({
-                success: false,
-                message: 'Vous avez déjà voté pour ce formulaire'
-            });
-        }
-
-        // Sauvegarder la réponse
-        const voteResponse = {
-            eventId: eventId,
-            formId: formId,
-            userId: userId,
-            responses: responses,
-            submittedAt: admin.firestore.FieldValue.serverTimestamp()
-        };
-
-        await firestore.collection('vote_responses').add(voteResponse);
-
-        res.json({
-            success: true,
-            message: 'Vote enregistré avec succès'
-        });
-    } catch (error) {
-        console.error("Erreur lors de la soumission du vote:", error);
-        res.status(500).json({
-            success: false,
-            message: 'Erreur lors de l\'enregistrement du vote'
-        });
     }
 });
 

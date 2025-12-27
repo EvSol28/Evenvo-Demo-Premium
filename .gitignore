@@ -1,2 +1,6 @@
 node_modules/ 
 git 
+.env
+*.env
+# Firebase service account files (security)
+*firebase-adminsdk*.json
