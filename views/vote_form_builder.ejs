@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de Vote - <%= typeof event !== 'undefined' && event ? event.name : 'Événement' %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css">
+    
+    <style>
+        :root {
+            --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
+            --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
+            --gray: #64748B; --light-gray: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --navbar-bg: rgba(162, 217, 206, 0.3); --navbar-hover-bg: rgba(162, 217, 206, 0.4);
+            --navbar-border: rgba(255, 255, 255, 0.2);
+            --navbar-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 20px rgba(13, 148, 136, 0.05);
+            --navbar-hover-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 6px 25px rgba(13, 148, 136, 0.1);
+            --card-border: rgba(13, 148, 136, 0.15); --card-hover-border: rgba(13, 148, 136, 0.4);
+            --card-shadow: 0 6px 15px rgba(190, 190, 190, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+            --card-hover-shadow: 0 12px 28px rgba(13, 148, 136, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+            --sans: 'Hellix', 'Arial', sans-serif;
+        }
+        
+        body { 
+            font-family: var(--sans); 
+            background-color: #F1F5F9; 
+            color: var(--dark); 
+            min-height: 100vh; 
+            margin: 0; 
+            padding-top: 90px; 
+        }
+
+        /* Navbar styles (same as other pages) */
+        .navbar { 
+            background: var(--navbar-bg); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px); 
+            padding: 0.4rem 1rem; 
+            box-shadow: var(--navbar-shadow); 
+            border: 1px solid var(--navbar-border); 
+            border-radius: 20px; 
+            position: fixed; 
+            width: 96%; 
+            left: 2%; 
+            top: 10px; 
+            z-index: 1030; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            transition: all 0.4s ease; 
+        }
+        .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
+        .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
+        .nav-link { 
+            color: var(--primary-dark) !important; 
+            font-size: 0.9rem; 
+            font-weight: 500; 
+            padding: 0.5rem 1rem; 
+            transition: color 0.25s ease, background-color 0.25s ease; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            border-radius: 25px; 
+            background: transparent; 
+            border: 1px solid transparent; 
+            text-decoration: none !important; 
+        }
+        .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
+        .nav-link.active { 
+            color: var(--light) !important; 
+            background: var(--navbar-bg) !important; 
+            backdrop-filter: blur(5px); 
+            -webkit-backdrop-filter: blur(5px); 
+            border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+            font-weight: 600; 
+            box-shadow: none; 
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); 
+        }
+        .nav-link i { font-size: 1rem; }
+        .dropdown-toggle::after { margin-left: 0.4rem; border-top-color: currentColor; transition: transform 0.3s ease; }
+        .nav-item.show .dropdown-toggle::after, .nav-item.dropdown:hover .dropdown-toggle::after { transform: rotate(180deg); }
+        .dropdown-menu { 
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid var(--navbar-border); 
+            border-radius: 12px; 
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); 
+            padding: 0.75rem; 
+            margin-top: 0.6rem !important; 
+        }
+        .dropdown-item-text strong { color: var(--dark); font-weight: 600; }
+        .dropdown-item-text small { color: var(--gray); font-size: 0.8rem; display: block; margin-top: 2px; }
+        .dropdown-divider { border-top: 1px solid rgba(0, 0, 0, 0.1); margin: 0.5rem 0; }
+        .dropdown-item { 
+            font-size: 0.85rem; 
+            color: var(--primary-dark); 
+            font-weight: 500; 
+            padding: 0.5rem 1rem; 
+            border-radius: 8px; 
+            transition: all 0.2s ease; 
+            background: transparent; 
+        }
+        .dropdown-item:hover { 
+            background: var(--primary); 
+            color: var(--light); 
+            transform: translateX(3px); 
+            box-shadow: none; 
+        }
+        .navbar-right { margin-left: auto; }
+
+        /* Main content */
+        .main-content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+        .page-header { margin-bottom: 2rem; text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
+        .page-header p { font-size: 1rem; color: var(--gray); margin-top: 0.5rem; }
+
+        /* Form Builder Layout */
+        .form-builder-container { display: flex; gap: 2rem; min-height: 70vh; }
+        
+        /* Sidebar with form elements */
+        .form-elements-sidebar {
+            width: 280px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
+            height: fit-content;
+        }
+        
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-element {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+            color: white;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 12px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .form-element:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
+        }
+        
+        .form-element:active {
+            cursor: grabbing;
+        }
+        
+        .form-element i {
+            font-size: 1.1rem;
+        }
+
+        /* Main form builder area */
+        .form-builder-main {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
+        }
+        
+        .form-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light-gray);
+        }
+        
+        .form-header input {
+            border: none;
+            background: transparent;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-header input:focus {
+            outline: none;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .form-header textarea {
+            border: none;
+            background: transparent;
+            color: var(--gray);
+            width: 100%;
+            resize: none;
+            font-size: 0.95rem;
+        }
+        
+        .form-header textarea:focus {
+            outline: none;
+            border-bottom: 1px solid var(--primary);
+        }
+
+        /* Drop zone */
+        .form-drop-zone {
+            min-height: 400px;
+            border: 2px dashed var(--light-gray);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .form-drop-zone.drag-over {
+            border-color: var(--primary);
+            background: rgba(13, 148, 136, 0.05);
+        }
+        
+        .drop-zone-empty {
+            color: var(--gray);
+            font-size: 1.1rem;
+            margin-top: 2rem;
+        }
+        
+        .drop-zone-empty i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Form field styles */
+        .form-field {
+            background: white;
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .form-field:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.1);
+        }
+        
+        .form-field.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+        
+        .field-controls {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.25rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .form-field:hover .field-controls {
+            opacity: 1;
+        }
+        
+        .field-control-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.8rem;
+        }
+        
+        .field-control-btn.edit {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .field-control-btn.delete {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .field-control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Action buttons */
+        .form-actions {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 2px solid var(--light-gray);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--gray);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            font-weight: 500;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--dark);
+            transform: translateY(-2px);
+        }
+
+        /* Existing forms section */
+        .existing-forms {
+            margin-top: 3rem;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
+        }
+        
+        .existing-forms h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-card {
+            background: white;
+            border: 1px solid var(--light-gray);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.1);
+        }
+        
+        .form-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .form-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin: 0;
+        }
+        
+        .form-card-description {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        
+        .form-card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .form-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .form-status.active {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+        
+        .form-status.inactive {
+            background: rgba(156, 163, 175, 0.1);
+            color: #6b7280;
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        
+        .form-status.active .status-dot {
+            background: #16a34a;
+        }
+        
+        .form-status.inactive .status-dot {
+            background: #6b7280;
+        }
+
+        /* Responsive */
+        @media (max-width: 991.98px) {
+            .form-builder-container {
+                flex-direction: column;
+            }
+            
+            .form-elements-sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            .form-builder-main {
+                order: 1;
+            }
+        }
+        
+        @media (max-width: 767.98px) {
+            body { padding-top: 80px; }
+            .navbar { width: 94%; left: 3%; top: 10px; padding: 0.5rem 1rem; border-radius: 15px; }
+            .main-content { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i></a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>"><i class="far fa-calendar-alt"></i> Évènement</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_utilisateur"><i class="fas fa-users"></i> Participants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_presence"><i class="fas fa-clipboard-check"></i> Présences</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_vote"><i class="fas fa-vote-yea"></i> Vote</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/gestion_event"><i class="fas fa-cog"></i> Gestion</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-right d-none d-lg-block">
+            <a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1><i class="fas fa-poll me-2"></i>Formulaire de Vote</h1>
+            <p><%= typeof event !== 'undefined' && event ? event.name : "Nom de l'événement" %></p>
+        </div>
+
+        <!-- Form Builder -->
+        <div class="form-builder-container">
+            <!-- Sidebar with form elements -->
+            <div class="form-elements-sidebar">
+                <div class="sidebar-title">
+                    <i class="fas fa-puzzle-piece"></i>
+                    Éléments de formulaire
+                </div>
+                
+                <div class="form-element" draggable="true" data-type="text">
+                    <i class="fas fa-font"></i>
+                    Texte court
+                </div>
+                
+                <div class="form-element" draggable="true" data-type="textarea">
+                    <i class="fas fa-align-left"></i>
+                    Texte long
+                </div>
+                
+                <div class="form-element" draggable="true" data-type="radio">
+                    <i class="fas fa-dot-circle"></i>
+                    Choix unique
+                </div>
+                
+                <div class="form-element" draggable="true" data-type="checkbox">
+                    <i class="fas fa-check-square"></i>
+                    Choix multiple
+                </div>
+                
+                <div class="form-element" draggable="true" data-type="select">
+                    <i class="fas fa-list"></i>
+                    Liste déroulante
+                </div>
+                
+                <div class="form-element" draggable="true" data-type="number">
+                    <i class="fas fa-hashtag"></i>
+                    Nombre
+                </div>
+                
+                <div class="form-element" draggable="true" data-type="date">
+                    <i class="fas fa-calendar"></i>
+                    Date
+                </div>
+                
+                <div class="form-element" draggable="true" data-type="rating">
+                    <i class="fas fa-star"></i>
+                    Évaluation
+                </div>
+            </div>
+
+            <!-- Main form builder area -->
+            <div class="form-builder-main">
+                <div class="form-header">
+                    <input type="text" id="formName" placeholder="Nom du formulaire de vote" maxlength="100">
+                    <textarea id="formDescription" placeholder="Description du formulaire (optionnel)" rows="2" maxlength="500"></textarea>
+                </div>
+                
+                <div class="form-drop-zone" id="formDropZone">
+                    <div class="drop-zone-empty">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <div>Glissez et déposez des éléments ici pour créer votre formulaire</div>
+                        <small>Ou cliquez sur un élément dans la barre latérale</small>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="previewBtn">
+                        <i class="fas fa-eye me-2"></i>Aperçu
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveFormBtn">
+                        <i class="fas fa-save me-2"></i>Sauvegarder
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Existing Forms -->
+        <% if (typeof voteForms !== 'undefined' && voteForms.length > 0) { %>
+        <div class="existing-forms">
+            <h3><i class="fas fa-list me-2"></i>Formulaires existants</h3>
+            
+            <% voteForms.forEach(function(form) { %>
+            <div class="form-card">
+                <div class="form-card-header">
+                    <div>
+                        <h4 class="form-card-title"><%= form.name %></h4>
+                        <% if (form.description) { %>
+                        <p class="form-card-description"><%= form.description %></p>
+                        <% } %>
+                        <div class="form-status <%= form.isActive ? 'active' : 'inactive' %>">
+                            <div class="status-dot"></div>
+                            <%= form.isActive ? 'Actif' : 'Inactif' %>
+                        </div>
+                    </div>
+                    <div class="form-card-actions">
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="editForm('<%= form.id %>')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm <%= form.isActive ? 'btn-outline-warning' : 'btn-outline-success' %> me-2" 
+                                onclick="toggleForm('<%= form.id %>', <%= !form.isActive %>)">
+                            <i class="fas fa-<%= form.isActive ? 'pause' : 'play' %>"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteForm('<%= form.id %>')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+        <% } %>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    
+    <script>
+        const eventId = '<%= eventId %>';
+        let formFields = [];
+        let fieldCounter = 0;
+
+        // Initialize drag and drop
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDragAndDrop();
+            fetchUserInfo();
+        });
+
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('/get_user_info');
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+                const user = await response.json();
+                const fullName = `${user.name || ''} ${user.surname || ''}`.trim();
+                document.getElementById('userFullName').textContent = fullName || 'Utilisateur';
+                document.getElementById('userEmail').textContent = user.email || 'Email non disponible';
+            } catch (error) {
+                console.error('Erreur fetchUserInfo:', error);
+                document.getElementById('userFullName').textContent = 'Erreur';
+                document.getElementById('userEmail').textContent = 'Indisponible';
+            }
+        }
+
+        function initializeDragAndDrop() {
+            const dropZone = document.getElementById('formDropZone');
+            const formElements = document.querySelectorAll('.form-element');
+
+            // Make drop zone sortable
+            new Sortable(dropZone, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function(evt) {
+                    updateFieldOrder();
+                }
+            });
+
+            // Add click handlers for form elements
+            formElements.forEach(element => {
+                element.addEventListener('click', function() {
+                    const type = this.getAttribute('data-type');
+                    addFormField(type);
+                });
+
+                // Drag and drop
+                element.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('text/plain', this.getAttribute('data-type'));
+                });
+            });
+
+            // Drop zone events
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
+            });
+
+            dropZone.addEventListener('dragleave', function(e) {
+                this.classList.remove('drag-over');
+            });
+
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                const fieldType = e.dataTransfer.getData('text/plain');
+                addFormField(fieldType);
+            });
+
+            // Save button
+            document.getElementById('saveFormBtn').addEventListener('click', saveForm);
+            
+            // Preview button
+            document.getElementById('previewBtn').addEventListener('click', previewForm);
+        }
+
+        function addFormField(type) {
+            fieldCounter++;
+            const fieldId = `field_${fieldCounter}`;
+            
+            const field = {
+                id: fieldId,
+                type: type,
+                label: getDefaultLabel(type),
+                required: false,
+                options: type === 'radio' || type === 'checkbox' || type === 'select' ? ['Option 1', 'Option 2'] : null
+            };
+
+            formFields.push(field);
+            renderFormField(field);
+            updateDropZoneVisibility();
+        }
+
+        function getDefaultLabel(type) {
+            const labels = {
+                'text': 'Texte court',
+                'textarea': 'Texte long',
+                'radio': 'Choix unique',
+                'checkbox': 'Choix multiple',
+                'select': 'Liste déroulante',
+                'number': 'Nombre',
+                'date': 'Date',
+                'rating': 'Évaluation'
+            };
+            return labels[type] || 'Champ';
+        }
+
+        function renderFormField(field) {
+            const dropZone = document.getElementById('formDropZone');
+            const fieldHtml = createFieldHtml(field);
+            
+            const fieldElement = document.createElement('div');
+            fieldElement.className = 'form-field';
+            fieldElement.setAttribute('data-field-id', field.id);
+            fieldElement.innerHTML = fieldHtml;
+            
+            dropZone.appendChild(fieldElement);
+        }
+
+        function createFieldHtml(field) {
+            let html = `
+                <div class="field-controls">
+                    <button class="field-control-btn edit" onclick="editField('${field.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="field-control-btn delete" onclick="deleteField('${field.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <label class="form-label fw-bold">${field.label} ${field.required ? '<span class="text-danger">*</span>' : ''}</label>
+            `;
+
+            switch (field.type) {
+                case 'text':
+                    html += `<input type="text" class="form-control" placeholder="Réponse courte" disabled>`;
+                    break;
+                case 'textarea':
+                    html += `<textarea class="form-control" rows="3" placeholder="Réponse longue" disabled></textarea>`;
+                    break;
+                case 'radio':
+                    field.options.forEach((option, index) => {
+                        html += `
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="${field.id}" disabled>
+                                <label class="form-check-label">${option}</label>
+                            </div>
+                        `;
+                    });
+                    break;
+                case 'checkbox':
+                    field.options.forEach((option, index) => {
+                        html += `
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" disabled>
+                                <label class="form-check-label">${option}</label>
+                            </div>
+                        `;
+                    });
+                    break;
+                case 'select':
+                    html += `
+                        <select class="form-select" disabled>
+                            <option>Choisir une option</option>
+                            ${field.options.map(option => `<option>${option}</option>`).join('')}
+                        </select>
+                    `;
+                    break;
+                case 'number':
+                    html += `<input type="number" class="form-control" placeholder="Nombre" disabled>`;
+                    break;
+                case 'date':
+                    html += `<input type="date" class="form-control" disabled>`;
+                    break;
+                case 'rating':
+                    html += `
+                        <div class="d-flex gap-2">
+                            ${[1,2,3,4,5].map(i => `<i class="fas fa-star text-warning" style="font-size: 1.5rem;"></i>`).join('')}
+                        </div>
+                    `;
+                    break;
+            }
+
+            return html;
+        }
+
+        function updateDropZoneVisibility() {
+            const dropZone = document.getElementById('formDropZone');
+            const emptyMessage = dropZone.querySelector('.drop-zone-empty');
+            
+            if (formFields.length > 0) {
+                if (emptyMessage) emptyMessage.style.display = 'none';
+            } else {
+                if (emptyMessage) emptyMessage.style.display = 'block';
+            }
+        }
+
+        function editField(fieldId) {
+            const field = formFields.find(f => f.id === fieldId);
+            if (!field) return;
+
+            // Create edit modal (simplified for this example)
+            Swal.fire({
+                title: 'Modifier le champ',
+                html: `
+                    <div class="text-start">
+                        <label class="form-label">Libellé</label>
+                        <input type="text" id="editLabel" class="form-control mb-3" value="${field.label}">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editRequired" ${field.required ? 'checked' : ''}>
+                            <label class="form-check-label" for="editRequired">Champ obligatoire</label>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Sauvegarder',
+                cancelButtonText: 'Annuler',
+                preConfirm: () => {
+                    const label = document.getElementById('editLabel').value;
+                    const required = document.getElementById('editRequired').checked;
+                    
+                    if (!label.trim()) {
+                        Swal.showValidationMessage('Le libellé est requis');
+                        return false;
+                    }
+                    
+                    return { label: label.trim(), required };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    field.label = result.value.label;
+                    field.required = result.value.required;
+                    
+                    // Re-render the field
+                    const fieldElement = document.querySelector(`[data-field-id="${fieldId}"]`);
+                    fieldElement.innerHTML = createFieldHtml(field);
+                }
+            });
+        }
+
+        function deleteField(fieldId) {
+            Swal.fire({
+                title: 'Supprimer le champ ?',
+                text: 'Cette action est irréversible.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Supprimer',
+                cancelButtonText: 'Annuler'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    formFields = formFields.filter(f => f.id !== fieldId);
+                    document.querySelector(`[data-field-id="${fieldId}"]`).remove();
+                    updateDropZoneVisibility();
+                }
+            });
+        }
+
+        function updateFieldOrder() {
+            const fieldElements = document.querySelectorAll('.form-field[data-field-id]');
+            const newOrder = [];
+            
+            fieldElements.forEach(element => {
+                const fieldId = element.getAttribute('data-field-id');
+                const field = formFields.find(f => f.id === fieldId);
+                if (field) newOrder.push(field);
+            });
+            
+            formFields = newOrder;
+        }
+
+        async function saveForm() {
+            const formName = document.getElementById('formName').value.trim();
+            const formDescription = document.getElementById('formDescription').value.trim();
+
+            if (!formName) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Le nom du formulaire est requis'
+                });
+                return;
+            }
+
+            if (formFields.length === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Ajoutez au moins un champ au formulaire'
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch(`/event/${eventId}/save_vote_form`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        formName,
+                        formDescription,
+                        formFields,
+                        isActive: false
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succès',
+                        text: result.message
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: result.message
+                    });
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Erreur lors de la sauvegarde'
+                });
+            }
+        }
+
+        function previewForm() {
+            const formName = document.getElementById('formName').value.trim() || 'Aperçu du formulaire';
+            const formDescription = document.getElementById('formDescription').value.trim();
+
+            if (formFields.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Aperçu',
+                    text: 'Ajoutez des champs pour voir l\'aperçu'
+                });
+                return;
+            }
+
+            let previewHtml = `<div class="text-start"><h4>${formName}</h4>`;
+            if (formDescription) {
+                previewHtml += `<p class="text-muted">${formDescription}</p>`;
+            }
+            previewHtml += '<hr>';
+
+            formFields.forEach(field => {
+                previewHtml += `<div class="mb-3">`;
+                previewHtml += `<label class="form-label fw-bold">${field.label}${field.required ? ' <span class="text-danger">*</span>' : ''}</label>`;
+                
+                switch (field.type) {
+                    case 'text':
+                        previewHtml += `<input type="text" class="form-control" placeholder="Votre réponse">`;
+                        break;
+                    case 'textarea':
+                        previewHtml += `<textarea class="form-control" rows="3" placeholder="Votre réponse"></textarea>`;
+                        break;
+                    case 'radio':
+                        field.options.forEach(option => {
+                            previewHtml += `
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="preview_${field.id}">
+                                    <label class="form-check-label">${option}</label>
+                                </div>
+                            `;
+                        });
+                        break;
+                    case 'checkbox':
+                        field.options.forEach(option => {
+                            previewHtml += `
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox">
+                                    <label class="form-check-label">${option}</label>
+                                </div>
+                            `;
+                        });
+                        break;
+                    case 'select':
+                        previewHtml += `
+                            <select class="form-select">
+                                <option>Choisir une option</option>
+                                ${field.options.map(option => `<option>${option}</option>`).join('')}
+                            </select>
+                        `;
+                        break;
+                    case 'number':
+                        previewHtml += `<input type="number" class="form-control">`;
+                        break;
+                    case 'date':
+                        previewHtml += `<input type="date" class="form-control">`;
+                        break;
+                    case 'rating':
+                        previewHtml += `
+                            <div class="d-flex gap-2">
+                                ${[1,2,3,4,5].map(i => `<i class="fas fa-star text-warning" style="font-size: 1.5rem; cursor: pointer;"></i>`).join('')}
+                            </div>
+                        `;
+                        break;
+                }
+                previewHtml += `</div>`;
+            });
+
+            previewHtml += '</div>';
+
+            Swal.fire({
+                title: 'Aperçu du formulaire',
+                html: previewHtml,
+                width: '600px',
+                confirmButtonText: 'Fermer'
+            });
+        }
+
+        // Functions for existing forms
+        async function toggleForm(formId, isActive) {
+            try {
+                const response = await fetch(`/event/${eventId}/toggle_vote_form/${formId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ isActive })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Succès',
+                        text: result.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: result.message
+                    });
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: 'Erreur lors de la mise à jour'
+                });
+            }
+        }
+
+        async function deleteForm(formId) {
+            const result = await Swal.fire({
+                title: 'Supprimer le formulaire ?',
+                text: 'Cette action est irréversible.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Supprimer',
+                cancelButtonText: 'Annuler'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/event/${eventId}/delete_vote_form/${formId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Succès',
+                            text: result.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erreur',
+                            text: result.message
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: 'Erreur lors de la suppression'
+                    });
+                }
+            }
+        }
+
+        function editForm(formId) {
+            // TODO: Implement form editing
+            Swal.fire({
+                icon: 'info',
+                title: 'Fonctionnalité à venir',
+                text: 'L\'édition des formulaires sera disponible prochainement'
+            });
+        }
+    </script>
+</body>
+</html>

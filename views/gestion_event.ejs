@@ -91,6 +91,7 @@
         .card-icon-container.qrcode { background: linear-gradient(135deg, var(--color-qrcode) 0%, var(--color-qrcode-light) 100%); }
         .card-icon-container.report { background: linear-gradient(135deg, var(--color-report) 0%, var(--color-report-light) 100%); }
         .card-icon-container.logo { background: linear-gradient(135deg, var(--color-quorum) 0%, var(--color-quorum-light) 100%); } /* Inversé */
+        .card-icon-container.vote-form { background: linear-gradient(135deg, #10B981 0%, #6EE7B7 100%); }
 
         .dashboard-card .card-title { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--dark); }
         .dashboard-card .card-text { color: var(--gray); font-size: 0.9rem; margin-bottom: 1rem; flex-grow: 1; line-height: 1.6; }
@@ -103,6 +104,7 @@
         .dashboard-card.qrcode .status-dot { background-color: var(--color-qrcode); }
         .dashboard-card.report .status-dot { background-color: var(--color-report); }
         .dashboard-card.logo .status-dot { background-color: var(--color-quorum); } /* Inversé */
+        .dashboard-card.vote-form .status-dot { background-color: #10B981; }
 
         /* Formulaires */
         .form-control { border-radius: 8px; border: 1px solid var(--light-gray); font-size: 0.9rem; padding: 0.5rem 1rem; width: 100%; }
@@ -283,8 +285,8 @@
             </div>
         </div> <%# Fin de la première ligne %>
 
-        <%# Deuxième ligne pour centrer la carte Logo %>
-        <div class="row g-4 justify-content-center mt-5">
+        <%# Deuxième ligne avec Logo et Formulaire de Vote %>
+        <div class="row g-4 mt-4">
             <%# Logo %>
             <div class="col-sm-6 col-lg-3 d-flex">
                  <div class="dashboard-card logo">
@@ -306,6 +308,21 @@
                              <i class="fas fa-upload me-2"></i> Mettre à jour
                          </button>
                      </form>
+                 </div>
+            </div>
+
+            <%# Formulaire de Vote %>
+            <div class="col-sm-6 col-lg-3 d-flex">
+                 <div class="dashboard-card vote-form">
+                     <div class="card-icon-container vote-form"> <i class="fas fa-poll card-icon"></i> </div>
+                     <div>
+                         <h5 class="card-title">Formulaire de Vote</h5>
+                         <p class="card-text">Créez des formulaires de vote personnalisés avec un éditeur drag & drop.</p>
+                     </div>
+                     <div class="status-indicator"> <div class="status-dot"></div> <span>Création de formulaires</span> </div>
+                     <a href="/event/<%= eventId %>/vote_form_builder" class="btn btn-custom-action mt-auto">
+                         <i class="fas fa-plus me-2"></i> Créer <i class="fas fa-arrow-right ms-2"></i>
+                     </a>
                  </div>
             </div>
         </div> <%# Fin de la deuxième ligne %>
