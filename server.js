@@ -860,11 +860,6 @@ app.get('/event/:eventId/suivi_utilisateur', requireAuth, async (req, res) => {
 app.get('/api/getEventStatus/:eventId', async (req, res) => {
   const eventId = req.params.eventId;
   
-  // Test if changes are being deployed
-  if (eventId === 'test') {
-    return res.json({ message: 'Test endpoint working - changes deployed!', timestamp: new Date().toISOString() });
-  }
-  
   try {
     // Utilisez Firestore pour récupérer l'événement par son ID
     const eventSnapshot = await firestore.collection('events').doc(eventId).get();
@@ -941,6 +936,55 @@ app.get('/api/event/:eventId/active_vote_forms', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Erreur lors de la récupération des formulaires'
+        });
+    }
+});
+
+// API pour soumettre une réponse de vote
+app.post('/api/event/:eventId/submit_vote', async (req, res) => {
+    const { eventId } = req.params;
+    const { formId, userId, responses } = req.body;
+
+    try {
+        console.log(`📝 Soumission de vote pour l'événement: ${eventId}, formulaire: ${formId}, utilisateur: ${userId}`);
+        
+        // Vérifier si l'utilisateur a déjà voté pour ce formulaire
+        const existingVoteSnapshot = await firestore.collection('vote_responses')
+            .where('eventId', '==', eventId)
+            .where('formId', '==', formId)
+            .where('userId', '==', userId)
+            .limit(1)
+            .get();
+
+        if (!existingVoteSnapshot.empty) {
+            console.log(`❌ Vote déjà existant pour utilisateur ${userId} sur formulaire ${formId}`);
+            return res.status(400).json({
+                success: false,
+                message: 'Vous avez déjà voté pour ce formulaire'
+            });
+        }
+
+        // Sauvegarder la réponse
+        const voteResponse = {
+            eventId: eventId,
+            formId: formId,
+            userId: userId,
+            responses: responses,
+            submittedAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+
+        await firestore.collection('vote_responses').add(voteResponse);
+        console.log(`✅ Vote enregistré avec succès pour utilisateur ${userId}`);
+
+        res.json({
+            success: true,
+            message: 'Vote enregistré avec succès'
+        });
+    } catch (error) {
+        console.error("❌ Erreur lors de la soumission du vote:", error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de l\'enregistrement du vote'
         });
     }
 });
