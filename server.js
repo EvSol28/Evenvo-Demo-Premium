@@ -3105,7 +3105,7 @@ app.get('/event/:eventId/suivi_vote', requireAuth, async (req, res) => {
         });
 
         if (voteForms.length === 0) {
-            return res.render('suivi_vote_new', {
+            return res.render('suivi_vote', {
                 eventId,
                 eventName: eventData.name || 'Nom d evenement inconnu',
                 eventStartDate: eventData.startDate,
@@ -3197,7 +3197,7 @@ app.get('/event/:eventId/suivi_vote', requireAuth, async (req, res) => {
             nonVote: data.nonVote
         }));
 
-        res.render('suivi_vote_new', {
+        res.render('suivi_vote', {
             eventId,
             eventName: eventData.name || 'Nom d’événement inconnu',
             eventStartDate: eventData.startDate,
