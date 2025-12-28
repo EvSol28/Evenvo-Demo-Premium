@@ -1005,7 +1005,6 @@ app.get('/event/:eventId/vote_form_builder', requireAuth, async (req, res) => {
         // Récupérer les formulaires de vote existants pour cet événement
         const voteFormsSnapshot = await firestore.collection('vote_forms')
             .where('eventId', '==', eventId)
-            .orderBy('createdAt', 'desc')
             .get();
             
         const voteForms = [];
@@ -3095,7 +3094,6 @@ app.get('/event/:eventId/suivi_vote', requireAuth, async (req, res) => {
         // Récupérer tous les formulaires de vote pour cet événement
         const voteFormsSnapshot = await firestore.collection('vote_forms')
             .where('eventId', '==', eventId)
-            .orderBy('createdAt', 'asc')
             .get();
 
         const voteForms = [];
