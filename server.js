@@ -5433,6 +5433,11 @@ app.get('/gestion_event_invitation', requireAuth, async (req, res) => {
     }
 });
 
+// Simple test endpoint
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'Test endpoint working', timestamp: new Date().toISOString() });
+});
+
 // API pour récupérer les formulaires de vote actifs (pour l'application mobile)
 app.get('/api/event/:eventId/active_vote_forms', async (req, res) => {
     const { eventId } = req.params;
