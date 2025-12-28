@@ -860,6 +860,11 @@ app.get('/event/:eventId/suivi_utilisateur', requireAuth, async (req, res) => {
 app.get('/api/getEventStatus/:eventId', async (req, res) => {
   const eventId = req.params.eventId;
   
+  // Test if changes are being deployed
+  if (eventId === 'test') {
+    return res.json({ message: 'Test endpoint working - changes deployed!', timestamp: new Date().toISOString() });
+  }
+  
   try {
     // Utilisez Firestore pour récupérer l'événement par son ID
     const eventSnapshot = await firestore.collection('events').doc(eventId).get();
