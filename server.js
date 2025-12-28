@@ -989,6 +989,239 @@ app.post('/api/event/:eventId/submit_vote', async (req, res) => {
     }
 });
 
+// Route pour le créateur de formulaires de vote
+app.get('/event/:eventId/vote_form_builder', requireAuth, async (req, res) => {
+    const eventId = req.params.eventId;
+    
+    try {
+        // Récupérer l'événement
+        const eventDoc = await firestore.collection('events').doc(eventId).get();
+        if (!eventDoc.exists) {
+            return res.status(404).send('Événement introuvable');
+        }
+        
+        const eventData = eventDoc.data();
+        
+        // Récupérer les formulaires de vote existants pour cet événement
+        const voteFormsSnapshot = await firestore.collection('vote_forms')
+            .where('eventId', '==', eventId)
+            .orderBy('createdAt', 'desc')
+            .get();
+            
+        const voteForms = [];
+        voteFormsSnapshot.forEach(doc => {
+            voteForms.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+        
+        res.render('vote_form_builder', {
+            eventId,
+            eventName: eventData.name,
+            voteForms
+        });
+    } catch (error) {
+        console.error('Erreur lors du chargement du créateur de formulaires:', error);
+        res.status(500).send('Erreur serveur');
+    }
+});
+
+// API pour créer un nouveau formulaire de vote
+app.post('/api/vote_forms/create', requireAuth, async (req, res) => {
+    try {
+        const { eventId, name, description, fields } = req.body;
+        
+        if (!eventId || !name || !fields || !Array.isArray(fields)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Données manquantes ou invalides' 
+            });
+        }
+        
+        const voteForm = {
+            eventId,
+            name,
+            description: description || '',
+            fields,
+            isActive: true,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+        
+        const docRef = await firestore.collection('vote_forms').add(voteForm);
+        
+        res.json({
+            success: true,
+            message: 'Formulaire créé avec succès',
+            formId: docRef.id
+        });
+    } catch (error) {
+        console.error('Erreur lors de la création du formulaire:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de la création du formulaire'
+        });
+    }
+});
+
+// API pour mettre à jour un formulaire de vote
+app.put('/api/vote_forms/:formId', requireAuth, async (req, res) => {
+    try {
+        const { formId } = req.params;
+        const { name, description, fields, isActive } = req.body;
+        
+        const updateData = {
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+        
+        if (name) updateData.name = name;
+        if (description !== undefined) updateData.description = description;
+        if (fields) updateData.fields = fields;
+        if (isActive !== undefined) updateData.isActive = isActive;
+        
+        await firestore.collection('vote_forms').doc(formId).update(updateData);
+        
+        res.json({
+            success: true,
+            message: 'Formulaire mis à jour avec succès'
+        });
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du formulaire:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de la mise à jour du formulaire'
+        });
+    }
+});
+
+// Route pour sauvegarder un formulaire de vote
+app.post('/event/:eventId/save_vote_form', requireAuth, async (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const { formName, formDescription, formFields, isActive } = req.body;
+        
+        if (!formName || !formFields || !Array.isArray(formFields)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Données manquantes ou invalides' 
+            });
+        }
+        
+        const voteForm = {
+            eventId,
+            name: formName,
+            description: formDescription || '',
+            fields: formFields,
+            isActive: isActive || false,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+        
+        const docRef = await firestore.collection('vote_forms').add(voteForm);
+        
+        res.json({
+            success: true,
+            message: 'Formulaire créé avec succès',
+            formId: docRef.id
+        });
+    } catch (error) {
+        console.error('Erreur lors de la création du formulaire:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de la création du formulaire'
+        });
+    }
+});
+
+// Route pour activer/désactiver un formulaire
+app.post('/event/:eventId/toggle_vote_form/:formId', requireAuth, async (req, res) => {
+    try {
+        const { formId } = req.params;
+        const { isActive } = req.body;
+        
+        await firestore.collection('vote_forms').doc(formId).update({
+            isActive: isActive,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        
+        res.json({
+            success: true,
+            message: `Formulaire ${isActive ? 'activé' : 'désactivé'} avec succès`
+        });
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du formulaire:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de la mise à jour du formulaire'
+        });
+    }
+});
+
+// Route pour supprimer un formulaire
+app.delete('/event/:eventId/delete_vote_form/:formId', requireAuth, async (req, res) => {
+    try {
+        const { formId } = req.params;
+        
+        // Supprimer le formulaire
+        await firestore.collection('vote_forms').doc(formId).delete();
+        
+        // Supprimer toutes les réponses associées
+        const responsesSnapshot = await firestore.collection('vote_responses')
+            .where('formId', '==', formId)
+            .get();
+            
+        const batch = firestore.batch();
+        responsesSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+        
+        res.json({
+            success: true,
+            message: 'Formulaire supprimé avec succès'
+        });
+    } catch (error) {
+        console.error('Erreur lors de la suppression du formulaire:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de la suppression du formulaire'
+        });
+    }
+});
+
+// API pour supprimer un formulaire de vote
+app.delete('/api/vote_forms/:formId', requireAuth, async (req, res) => {
+    try {
+        const { formId } = req.params;
+        
+        // Supprimer le formulaire
+        await firestore.collection('vote_forms').doc(formId).delete();
+        
+        // Supprimer toutes les réponses associées
+        const responsesSnapshot = await firestore.collection('vote_responses')
+            .where('formId', '==', formId)
+            .get();
+            
+        const batch = firestore.batch();
+        responsesSnapshot.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+        
+        res.json({
+            success: true,
+            message: 'Formulaire supprimé avec succès'
+        });
+    } catch (error) {
+        console.error('Erreur lors de la suppression du formulaire:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de la suppression du formulaire'
+        });
+    }
+});
+
 // API pour lister tous les événements disponibles
 app.get('/api/events/list', async (req, res) => {
     try {
