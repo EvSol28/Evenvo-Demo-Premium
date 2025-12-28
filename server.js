@@ -3092,6 +3092,33 @@ app.get('/event/:eventId/suivi_vote', requireAuth, async (req, res) => {
 
         const eventData = eventSnapshot.data();
 
+        // Récupérer tous les formulaires de vote pour cet événement
+        const voteFormsSnapshot = await firestore.collection('vote_forms')
+            .where('eventId', '==', eventId)
+            .orderBy('createdAt', 'asc')
+            .get();
+
+        const voteForms = [];
+        voteFormsSnapshot.forEach(doc => {
+            voteForms.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        if (voteForms.length === 0) {
+            return res.render('suivi_vote_new', {
+                eventId,
+                eventName: eventData.name || 'Nom d evenement inconnu',
+                eventStartDate: eventData.startDate,
+                eventEndDate: eventData.endDate,
+                organizerName: eventData.organizerName || 'Organisateur inconnu',
+                voteForms: [],
+                message: 'Aucun formulaire de vote n a ete cree pour cet evenement.'
+            });
+        }
+
+        // Récupérer les utilisateurs éligibles au vote
         const userSnapshot = await firestore
             .collection('users')
             .where('events', 'array-contains', eventId)
@@ -3172,7 +3199,7 @@ app.get('/event/:eventId/suivi_vote', requireAuth, async (req, res) => {
             nonVote: data.nonVote
         }));
 
-        res.render('suivi_vote', {
+        res.render('suivi_vote_new', {
             eventId,
             eventName: eventData.name || 'Nom d’événement inconnu',
             eventStartDate: eventData.startDate,
@@ -3188,6 +3215,102 @@ app.get('/event/:eventId/suivi_vote', requireAuth, async (req, res) => {
         res.status(500).send('Erreur lors de la récupération des utilisateurs pour le suivi.');
     }
 });
+
+// Fonction pour calculer les statistiques d'un formulaire
+function calculateFormStats(form, responses, users) {
+    const stats = {
+        byField: {},
+        byRole: {},
+        participation: {
+            voted: responses.length,
+            notVoted: users.length - responses.length,
+            percentage: users.length > 0 ? Math.round((responses.length / users.length) * 100) : 0
+        }
+    };
+
+    // Statistiques par champ
+    form.fields.forEach(field => {
+        stats.byField[field.id] = {
+            fieldLabel: field.label,
+            fieldType: field.type,
+            responses: {}
+        };
+
+        if (field.type === 'radio' || field.type === 'checkbox' || field.type === 'select') {
+            // Pour les champs à choix multiples
+            field.options.forEach(option => {
+                stats.byField[field.id].responses[option] = 0;
+            });
+
+            responses.forEach(response => {
+                const userResponse = response.responses[field.id];
+                if (userResponse) {
+                    if (Array.isArray(userResponse)) {
+                        // Checkbox (choix multiples)
+                        userResponse.forEach(choice => {
+                            if (stats.byField[field.id].responses[choice] !== undefined) {
+                                stats.byField[field.id].responses[choice]++;
+                            }
+                        });
+                    } else {
+                        // Radio ou select (choix unique)
+                        if (stats.byField[field.id].responses[userResponse] !== undefined) {
+                            stats.byField[field.id].responses[userResponse]++;
+                        }
+                    }
+                }
+            });
+        } else if (field.type === 'rating') {
+            // Pour les évaluations
+            const ratings = [1, 2, 3, 4, 5];
+            ratings.forEach(rating => {
+                stats.byField[field.id].responses[`${rating} étoile${rating > 1 ? 's' : ''}`] = 0;
+            });
+
+            responses.forEach(response => {
+                const userResponse = response.responses[field.id];
+                if (userResponse && userResponse >= 1 && userResponse <= 5) {
+                    const key = `${userResponse} étoile${userResponse > 1 ? 's' : ''}`;
+                    stats.byField[field.id].responses[key]++;
+                }
+            });
+        } else {
+            // Pour les champs texte, nombre, date
+            stats.byField[field.id].responses = responses.map(response => ({
+                userId: response.userId,
+                value: response.responses[field.id] || 'Non répondu'
+            }));
+        }
+    });
+
+    // Statistiques par rôle
+    const roleStats = {};
+    users.forEach(user => {
+        if (!roleStats[user.role]) {
+            roleStats[user.role] = {
+                total: 0,
+                voted: 0,
+                notVoted: 0
+            };
+        }
+        roleStats[user.role].total++;
+        
+        const hasVoted = responses.some(response => response.userId === user.id);
+        if (hasVoted) {
+            roleStats[user.role].voted++;
+        } else {
+            roleStats[user.role].notVoted++;
+        }
+    });
+
+    stats.byRole = Object.keys(roleStats).map(role => ({
+        role,
+        ...roleStats[role],
+        percentage: roleStats[role].total > 0 ? Math.round((roleStats[role].voted / roleStats[role].total) * 100) : 0
+    }));
+
+    return stats;
+}
 
 app.post('/api/updateVote', async (req, res) => {
     const { userId, eventId, voteChoice } = req.body;

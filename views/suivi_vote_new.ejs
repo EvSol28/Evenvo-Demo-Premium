@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi des Votes - <%= eventName %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
+            --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
+            --gray: #64748B; --light-gray: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --navbar-bg: rgba(162, 217, 206, 0.3); --navbar-hover-bg: rgba(162, 217, 206, 0.4);
+            --navbar-border: rgba(255, 255, 255, 0.2);
+            --navbar-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 20px rgba(13, 148, 136, 0.05);
+            --navbar-hover-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 6px 25px rgba(13, 148, 136, 0.1);
+            --card-border: rgba(13, 148, 136, 0.15); --card-hover-border: rgba(13, 148, 136, 0.4);
+            --card-shadow: 0 6px 15px rgba(190, 190, 190, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+            --card-hover-shadow: 0 12px 28px rgba(13, 148, 136, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+            --sans: 'Hellix', 'Arial', sans-serif;
+        }
+        
+        body { 
+            font-family: var(--sans); 
+            background-color: #F1F5F9; 
+            color: var(--dark); 
+            min-height: 100vh; 
+            margin: 0; 
+            padding-top: 90px; 
+        }
+
+        /* Navbar styles */
+        .navbar { 
+            background: var(--navbar-bg); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px); 
+            padding: 0.4rem 1rem; 
+            box-shadow: var(--navbar-shadow); 
+            border: 1px solid var(--navbar-border); 
+            border-radius: 20px; 
+            position: fixed; 
+            width: 96%; 
+            left: 2%; 
+            top: 10px; 
+            z-index: 1030; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            transition: all 0.4s ease; 
+        }
+        .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
+        .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
+        .nav-link { 
+            color: var(--primary-dark) !important; 
+            font-size: 0.9rem; 
+            font-weight: 500; 
+            padding: 0.5rem 1rem; 
+            transition: color 0.25s ease, background-color 0.25s ease; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            border-radius: 25px; 
+            background: transparent; 
+            border: 1px solid transparent; 
+            text-decoration: none !important; 
+        }
+        .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
+        .nav-link.active { 
+            color: var(--light) !important; 
+            background: var(--primary) !important; 
+            backdrop-filter: blur(5px); 
+            -webkit-backdrop-filter: blur(5px); 
+            border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+            font-weight: 600; 
+            box-shadow: none; 
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); 
+        }
+
+        /* Main content */
+        .main-content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+        .page-header { margin-bottom: 2rem; text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
+        .page-header p { font-size: 1rem; color: var(--gray); margin-top: 0.5rem; }
+
+        /* Cards */
+        .vote-form-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+        }
+
+        .vote-form-card:hover {
+            border-color: var(--card-hover-border);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .form-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-description {
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .participation-stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+
+        .field-stats {
+            margin-bottom: 2rem;
+        }
+
+        .field-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 1rem;
+        }
+
+        .response-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: var(--light);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .response-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .response-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .user-response {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .no-forms-message {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray);
+        }
+
+        .no-forms-message i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .create-form-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .create-form-btn:hover {
+            background: var(--primary-dark);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 767.98px) {
+            body { padding-top: 80px; }
+            .navbar { width: 94%; left: 3%; top: 10px; padding: 0.5rem 1rem; border-radius: 15px; }
+            .main-content { padding: 1rem; }
+            .participation-stats { gap: 1rem; }
+            .stat-item { min-width: 100px; padding: 0.75rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i></a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>"><i class="far fa-calendar-alt"></i> Évènement</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_utilisateur"><i class="fas fa-users"></i> Participants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_presence"><i class="fas fa-clipboard-check"></i> Présences</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/event/<%= eventId %>/suivi_vote"><i class="fas fa-vote-yea"></i> Vote</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/gestion_event"><i class="fas fa-cog"></i> Gestion</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-right d-none d-lg-block">
+            <a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1><i class="fas fa-poll me-2"></i>Suivi des Votes</h1>
+            <p><%= eventName %></p>
+        </div>
+
+        <% if (typeof message !== 'undefined' && message) { %>
+        <div class="vote-form-card">
+            <div class="no-forms-message">
+                <i class="fas fa-poll"></i>
+                <h3>Aucun formulaire de vote</h3>
+                <p><%= message %></p>
+                <a href="/event/<%= eventId %>/vote_form_builder" class="create-form-btn">
+                    <i class="fas fa-plus"></i>
+                    Créer un formulaire de vote
+                </a>
+            </div>
+        </div>
+        <% } else if (typeof voteForms !== 'undefined' && voteForms.length > 0) { %>
+            <% voteForms.forEach(function(form, formIndex) { %>
+            <div class="vote-form-card">
+                <div class="form-title">
+                    <i class="fas fa-poll"></i>
+                    <%= form.name %>
+                </div>
+                
+                <% if (form.description) { %>
+                <div class="form-description">
+                    <%= form.description %>
+                </div>
+                <% } %>
+
+                <!-- Statistiques de participation -->
+                <div class="participation-stats">
+                    <div class="stat-item">
+                        <span class="stat-number"><%= form.stats.participation.voted %></span>
+                        <span class="stat-label">Ont voté</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number"><%= form.stats.participation.notVoted %></span>
+                        <span class="stat-label">N'ont pas voté</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number"><%= form.stats.participation.percentage %>%</span>
+                        <span class="stat-label">Participation</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number"><%= form.totalEligible %></span>
+                        <span class="stat-label">Total éligibles</span>
+                    </div>
+                </div>
+
+                <!-- Statistiques par champ -->
+                <% Object.keys(form.stats.byField).forEach(function(fieldId) { %>
+                    <% const fieldStats = form.stats.byField[fieldId]; %>
+                    <div class="field-stats">
+                        <div class="field-title">
+                            <i class="fas fa-chart-bar"></i>
+                            <%= fieldStats.fieldLabel %>
+                        </div>
+
+                        <% if (fieldStats.fieldType === 'radio' || fieldStats.fieldType === 'checkbox' || fieldStats.fieldType === 'select' || fieldStats.fieldType === 'rating') { %>
+                            <!-- Graphique pour les choix multiples -->
+                            <div class="chart-container">
+                                <canvas id="chart_<%= formIndex %>_<%= fieldId %>"></canvas>
+                            </div>
+                            
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    const ctx = document.getElementById('chart_<%= formIndex %>_<%= fieldId %>').getContext('2d');
+                                    const data = <%- JSON.stringify(fieldStats.responses) %>;
+                                    const labels = Object.keys(data);
+                                    const values = Object.values(data);
+                                    
+                                    new Chart(ctx, {
+                                        type: 'doughnut',
+                                        data: {
+                                            labels: labels,
+                                            datasets: [{
+                                                data: values,
+                                                backgroundColor: [
+                                                    '#0D9488', '#5EEAD4', '#22D3EE', '#A78BFA', 
+                                                    '#F59E0B', '#EF4444', '#10B981', '#8B5CF6',
+                                                    '#F97316', '#06B6D4', '#84CC16', '#EC4899'
+                                                ],
+                                                borderWidth: 2,
+                                                borderColor: '#ffffff'
+                                            }]
+                                        },
+                                        options: {
+                                            responsive: true,
+                                            maintainAspectRatio: false,
+                                            plugins: {
+                                                legend: {
+                                                    position: 'right',
+                                                    labels: {
+                                                        usePointStyle: true,
+                                                        padding: 20
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
+                                });
+                            </script>
+                        <% } else { %>
+                            <!-- Liste des réponses pour les champs texte -->
+                            <div class="response-list">
+                                <% if (Array.isArray(fieldStats.responses) && fieldStats.responses.length > 0) { %>
+                                    <% fieldStats.responses.forEach(function(response) { %>
+                                        <% const user = users.find(u => u.id === response.userId); %>
+                                        <div class="response-item">
+                                            <span class="user-name">
+                                                <%= user ? (user.name + ' ' + user.surname) : 'Utilisateur inconnu' %>
+                                            </span>
+                                            <span class="user-response"><%= response.value %></span>
+                                        </div>
+                                    <% }); %>
+                                <% } else { %>
+                                    <div class="text-center text-muted">Aucune réponse</div>
+                                <% } %>
+                            </div>
+                        <% } %>
+                    </div>
+                <% }); %>
+
+                <!-- Statistiques par rôle -->
+                <% if (form.stats.byRole && form.stats.byRole.length > 0) { %>
+                <div class="field-stats">
+                    <div class="field-title">
+                        <i class="fas fa-users"></i>
+                        Participation par rôle
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="roleChart_<%= formIndex %>"></canvas>
+                    </div>
+                    
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const ctx = document.getElementById('roleChart_<%= formIndex %>').getContext('2d');
+                            const roleData = <%- JSON.stringify(form.stats.byRole) %>;
+                            
+                            new Chart(ctx, {
+                                type: 'bar',
+                                data: {
+                                    labels: roleData.map(r => r.role),
+                                    datasets: [
+                                        {
+                                            label: 'Ont voté',
+                                            data: roleData.map(r => r.voted),
+                                            backgroundColor: '#0D9488'
+                                        },
+                                        {
+                                            label: 'N\'ont pas voté',
+                                            data: roleData.map(r => r.notVoted),
+                                            backgroundColor: '#EF4444'
+                                        }
+                                    ]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: {
+                                        x: {
+                                            stacked: true
+                                        },
+                                        y: {
+                                            stacked: true,
+                                            beginAtZero: true
+                                        }
+                                    },
+                                    plugins: {
+                                        legend: {
+                                            position: 'top'
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                    </script>
+                </div>
+                <% } %>
+            </div>
+            <% }); %>
+        <% } %>
+
+        <!-- Bouton pour créer un nouveau formulaire -->
+        <div class="text-center mt-4">
+            <a href="/event/<%= eventId %>/vote_form_builder" class="create-form-btn">
+                <i class="fas fa-plus"></i>
+                Créer un nouveau formulaire de vote
+            </a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('/get_user_info');
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+                const user = await response.json();
+                const fullName = `${user.name || ''} ${user.surname || ''}`.trim();
+                document.getElementById('userFullName').textContent = fullName || 'Utilisateur';
+                document.getElementById('userEmail').textContent = user.email || 'Email non disponible';
+            } catch (error) {
+                console.error('Erreur fetchUserInfo:', error);
+                document.getElementById('userFullName').textContent = 'Erreur';
+                document.getElementById('userEmail').textContent = 'Indisponible';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchUserInfo();
+        });
+    </script>
+</body>
+</html>
