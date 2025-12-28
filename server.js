@@ -3236,7 +3236,7 @@ function calculateFormStats(form, responses, users) {
             responses: {}
         };
 
-        if (field.type === 'radio' || field.type === 'checkbox' || field.type === 'select') {
+        if (field.type === 'radio' || field.type === 'checkbox' || field.type === 'select' || field.type === 'ranking') {
             // Pour les champs à choix multiples
             field.options.forEach(option => {
                 stats.byField[field.id].responses[option] = 0;
@@ -3272,6 +3272,22 @@ function calculateFormStats(form, responses, users) {
                 if (userResponse && userResponse >= 1 && userResponse <= 5) {
                     const key = `${userResponse} étoile${userResponse > 1 ? 's' : ''}`;
                     stats.byField[field.id].responses[key]++;
+                }
+            });
+        } else if (field.type === 'syndical') {
+            // Pour les votes syndicaux (Oui/Non/S'abstenir)
+            const choices = ['Oui', 'Non', 'S\'abstenir'];
+            choices.forEach(choice => {
+                stats.byField[field.id].responses[choice] = 0;
+            });
+
+            responses.forEach(response => {
+                const userResponse = response.responses[field.id];
+                if (userResponse && userResponse.vote) {
+                    const vote = userResponse.vote;
+                    if (stats.byField[field.id].responses[vote] !== undefined) {
+                        stats.byField[field.id].responses[vote]++;
+                    }
                 }
             });
         } else {

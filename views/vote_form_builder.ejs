@@ -549,6 +549,16 @@
                     <i class="fas fa-star"></i>
                     Évaluation
                 </div>
+                
+                <div class="form-element" draggable="true" data-type="ranking">
+                    <i class="fas fa-sort-numeric-down"></i>
+                    Vote par ordre
+                </div>
+                
+                <div class="form-element" draggable="true" data-type="syndical">
+                    <i class="fas fa-balance-scale"></i>
+                    Vote syndical
+                </div>
             </div>
 
             <!-- Main form builder area -->
@@ -704,7 +714,7 @@
                 type: type,
                 label: getDefaultLabel(type),
                 required: false,
-                options: type === 'radio' || type === 'checkbox' || type === 'select' ? ['Option 1', 'Option 2'] : null
+                options: type === 'radio' || type === 'checkbox' || type === 'select' || type === 'ranking' ? ['Option 1', 'Option 2'] : null
             };
 
             formFields.push(field);
@@ -721,7 +731,9 @@
                 'select': 'Liste déroulante',
                 'number': 'Nombre',
                 'date': 'Date',
-                'rating': 'Évaluation'
+                'rating': 'Évaluation',
+                'ranking': 'Vote par ordre',
+                'syndical': 'Vote syndical'
             };
             return labels[type] || 'Champ';
         }
@@ -796,6 +808,41 @@
                     html += `
                         <div class="d-flex gap-2">
                             ${[1,2,3,4,5].map(i => `<i class="fas fa-star text-warning" style="font-size: 1.5rem;"></i>`).join('')}
+                        </div>
+                    `;
+                    break;
+                case 'ranking':
+                    html += `
+                        <div class="alert alert-info mb-2">
+                            <small><i class="fas fa-info-circle"></i> Les utilisateurs classeront les options par ordre de préférence (1, 2, 3...)</small>
+                        </div>
+                    `;
+                    field.options.forEach((option, index) => {
+                        html += `
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="badge bg-primary me-2">${index + 1}</span>
+                                <span class="form-control-plaintext">${option}</span>
+                            </div>
+                        `;
+                    });
+                    break;
+                case 'syndical':
+                    html += `
+                        <div class="alert alert-warning mb-3">
+                            <small><i class="fas fa-balance-scale"></i> Vote syndical : texte descriptif + choix Oui/Non/S'abstenir</small>
+                        </div>
+                        <textarea class="form-control mb-3" rows="3" placeholder="Description de la proposition..." disabled></textarea>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="${field.id}_syndical" disabled>
+                            <label class="form-check-label">Oui</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="${field.id}_syndical" disabled>
+                            <label class="form-check-label">Non</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="${field.id}_syndical" disabled>
+                            <label class="form-check-label">S'abstenir</label>
                         </div>
                     `;
                     break;
@@ -1021,6 +1068,38 @@
                         previewHtml += `
                             <div class="d-flex gap-2">
                                 ${[1,2,3,4,5].map(i => `<i class="fas fa-star text-warning" style="font-size: 1.5rem; cursor: pointer;"></i>`).join('')}
+                            </div>
+                        `;
+                        break;
+                    case 'ranking':
+                        previewHtml += `
+                            <div class="alert alert-info mb-2">
+                                <small>Classez les options par ordre de préférence (glissez-déposez)</small>
+                            </div>
+                        `;
+                        field.options.forEach((option, index) => {
+                            previewHtml += `
+                                <div class="d-flex align-items-center mb-2 p-2 border rounded" style="cursor: move;">
+                                    <i class="fas fa-grip-vertical me-2 text-muted"></i>
+                                    <span>${option}</span>
+                                </div>
+                            `;
+                        });
+                        break;
+                    case 'syndical':
+                        previewHtml += `
+                            <textarea class="form-control mb-3" rows="3" placeholder="Décrivez votre position..."></textarea>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="preview_${field.id}_syndical">
+                                <label class="form-check-label">Oui</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="preview_${field.id}_syndical">
+                                <label class="form-check-label">Non</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="preview_${field.id}_syndical">
+                                <label class="form-check-label">S'abstenir</label>
                             </div>
                         `;
                         break;
