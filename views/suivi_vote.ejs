@@ -73,6 +73,332 @@
         .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
         .nav-link.active { 
             color: var(--light) !important; 
+            background: var(--navbar-bg) !important; 
+            backdrop-filter: blur(5px); 
+            -webkit-backdrop-filter: blur(5px); 
+            border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+            font-weight: 600; 
+            box-shadow: none; 
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); 
+        }
+        .nav-link i { font-size: 1rem; }
+        .dropdown-toggle::after { margin-left: 0.4rem; border-top-color: currentColor; transition: transform 0.3s ease; }
+        .nav-item.show .dropdown-toggle::after, .nav-item.dropdown:hover .dropdown-toggle::after { transform: rotate(180deg); }
+        .dropdown-menu { 
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid var(--navbar-border); 
+            border-radius: 12px; 
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); 
+            padding: 0.75rem; 
+            margin-top: 0.6rem !important; 
+        }
+        .dropdown-item-text strong { color: var(--dark); font-weight: 600; }
+        .dropdown-item-text small { color: var(--gray); font-size: 0.8rem; display: block; margin-top: 2px; }
+        .dropdown-divider { border-top: 1px solid rgba(0, 0, 0, 0.1); margin: 0.5rem 0; }
+        .dropdown-item { 
+            font-size: 0.85rem; 
+            color: var(--primary-dark); 
+            font-weight: 500; 
+            padding: 0.5rem 1rem; 
+            border-radius: 8px; 
+            transition: all 0.2s ease; 
+            background: transparent; 
+        }
+        .dropdown-item:hover { 
+            background: var(--primary); 
+            color: var(--light); 
+            transform: translateX(3px); 
+            box-shadow: none; 
+        }
+        .navbar-right { margin-left: auto; }
+
+        /* Main content */
+        .main-content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+        .page-header { margin-bottom: 2rem; text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
+        .page-header p { font-size: 1rem; color: var(--gray); margin-top: 0.5rem; }
+
+        /* Vote Cards Section */
+        .vote-cards-section {
+            margin-bottom: 3rem;
+        }
+        
+        .vote-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .vote-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .vote-card:hover {
+            border-color: var(--card-hover-border);
+            box-shadow: var(--card-hover-shadow);
+            transform: translateY(-4px);
+        }
+        
+        .vote-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .vote-card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin: 0;
+        }
+        
+        .vote-card-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .vote-card-status.active {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+        
+        .vote-card-status.inactive {
+            background: rgba(156, 163, 175, 0.1);
+            color: #6b7280;
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        
+        .vote-card-status.active .status-dot {
+            background: #16a34a;
+        }
+        
+        .vote-card-status.inactive .status-dot {
+            background: #6b7280;
+        }
+        
+        .vote-card-description {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+        
+        .vote-card-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .vote-stat {
+            text-align: center;
+            padding: 0.75rem;
+            background: rgba(13, 148, 136, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(13, 148, 136, 0.1);
+        }
+        
+        .vote-stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+        }
+        
+        .vote-stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 0.25rem;
+        }
+
+        /* Content blocks */
+        .content-block { 
+            background: var(--card-bg); 
+            border-radius: 16px; 
+            padding: 2rem; 
+            margin-bottom: 2rem; 
+            box-shadow: var(--card-shadow); 
+            border: 1px solid var(--card-border); 
+            transition: all 0.3s ease; 
+        }
+        .content-block:hover { border-color: var(--card-hover-border); box-shadow: var(--card-hover-shadow); }
+        .content-block h2 { font-size: 1.4rem; font-weight: 600; color: var(--dark); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .content-block h2 i { color: var(--primary); }
+
+        /* Rest of the existing styles... */
+        .subtitle-gray { color: var(--gray); }
+        
+        /* Responsive */
+        @media (max-width: 767.98px) {
+            body { padding-top: 80px; }
+            .navbar { width: 94%; left: 3%; top: 10px; padding: 0.5rem 1rem; border-radius: 15px; }
+            .main-content { padding: 1rem; }
+            .vote-cards-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i></a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>"><i class="far fa-calendar-alt"></i> Évènement</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_utilisateur"><i class="fas fa-users"></i> Participants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_presence"><i class="fas fa-clipboard-check"></i> Présences</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/event/<%= eventId %>/suivi_vote"><i class="fas fa-vote-yea"></i> Vote</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/gestion_event"><i class="fas fa-cog"></i> Gestion</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-right d-none d-lg-block">
+            <a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1><i class="fas fa-poll me-2"></i>Suivi des Votes</h1>
+            <% if (typeof eventName !== 'undefined' && eventName) { %>
+                <p class="subtitle-gray">Évènement : <%= eventName %></p>
+            <% } %>
+        </div>
+
+        <!-- Vote Cards Section -->
+        <% if (typeof voteForms !== 'undefined' && voteForms && voteForms.length > 0) { %>
+        <div class="vote-cards-section">
+            <div class="content-block">
+                <h2><i class="fas fa-th-large"></i>Formulaires de Vote</h2>
+                <div class="vote-cards-grid">
+                    <% voteForms.forEach(function(form) { %>
+                    <div class="vote-card" onclick="window.location.href='/event/<%= eventId %>/suivi_vote/<%= form.id %>'">
+                        <div class="vote-card-header">
+                            <h3 class="vote-card-title"><%= form.name %></h3>
+                            <div class="vote-card-status <%= form.isActive ? 'active' : 'inactive' %>">
+                                <div class="status-dot"></div>
+                                <%= form.isActive ? 'Actif' : 'Inactif' %>
+                            </div>
+                        </div>
+                        <% if (form.description) { %>
+                        <p class="vote-card-description"><%= form.description %></p>
+                        <% } %>
+                        <div class="vote-card-stats">
+                            <div class="vote-stat">
+                                <span class="vote-stat-number"><%= form.totalVotes || 0 %></span>
+                                <div class="vote-stat-label">Votes</div>
+                            </div>
+                            <div class="vote-stat">
+                                <span class="vote-stat-number"><%= form.participationRate || 0 %>%</span>
+                                <div class="vote-stat-label">Participation</div>
+                            </div>
+                        </div>
+                    </div>
+                    <% }); %>
+                </div>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Global Statistics (Original content) -->
+        <div class="content-block">
+            <h2><i class="fas fa-chart-pie"></i>Statistiques Globales</h2>
+            <p class="subtitle-gray">Vue d'ensemble de tous les votes de l'événement</p>
+            
+            <!-- Add global stats content here if needed -->
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-info-circle fa-2x mb-3"></i>
+                <p>Cliquez sur un formulaire de vote ci-dessus pour voir les statistiques détaillées</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('/get_user_info');
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+                const user = await response.json();
+                const fullName = `${user.name || ''} ${user.surname || ''}`.trim();
+                document.getElementById('userFullName').textContent = fullName || 'Utilisateur';
+                document.getElementById('userEmail').textContent = user.email || 'Email non disponible';
+            } catch (error) {
+                console.error('Erreur fetchUserInfo:', error);
+                document.getElementById('userFullName').textContent = 'Erreur';
+                document.getElementById('userEmail').textContent = 'Indisponible';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchUserInfo();
+        });
+    </script>
+</body>
+</html> 
+            justify-content: space-between; 
+            align-items: center; 
+            transition: all 0.4s ease; 
+        }
+        .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
+        .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
+        .nav-link { 
+            color: var(--primary-dark) !important; 
+            font-size: 0.9rem; 
+            font-weight: 500; 
+            padding: 0.5rem 1rem; 
+            transition: color 0.25s ease, background-color 0.25s ease; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            border-radius: 25px; 
+            background: transparent; 
+            border: 1px solid transparent; 
+            text-decoration: none !important; 
+        }
+        .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
+        .nav-link.active { 
+            color: var(--light) !important; 
             background: var(--primary) !important; 
             backdrop-filter: blur(5px); 
             -webkit-backdrop-filter: blur(5px); 

@@ -3096,7 +3096,15 @@ app.get('/event/:eventId/suivi_vote', requireAuth, async (req, res) => {
             .where('eventId', '==', eventId)
             .get();
 
-        if (voteFormsSnapshot.empty) {
+        const voteForms = [];
+        voteFormsSnapshot.forEach(doc => {
+            voteForms.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+
+        if (voteForms.length === 0) {
             return res.render('suivi_vote', {
                 eventId,
                 eventName: eventData.name || 'Nom d evenement inconnu',
