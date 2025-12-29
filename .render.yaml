@@ -1,14 +1,14 @@
 services:
   - type: web
-    name: evenvo-demo
+    name: evenvo-demo-premium
     env: node
-    repo: https://github.com/EvSol28/Evenvo-Demo
+    repo: https://github.com/EvSol28/Evenvo-Demo-Premium
     branch: main
-    buildCommand: apt-get update && apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev pkg-config python3 && npm install
-    startCommand: node server.js
+    buildCommand: npm install && npx puppeteer browsers install chrome
+    startCommand: node Evenvo-Demo-Premieum/server.js
     envVars:
       - key: NODE_VERSION
-        value: 22.14.0
+        value: 22.16.0
       - key: NODE_ENV
         value: production
       # Les autres variables Firebase doivent être configurées via l'interface Render
