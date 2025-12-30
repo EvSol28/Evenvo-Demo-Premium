@@ -12,7 +12,7 @@ const ejs = require('ejs');
 const session = require('express-session');
 const QRCode = require('qrcode');
 const puppeteer = require('puppeteer');
-const router = express.Router();  // Cr�er un router pour d�finir les routes
+const router = express.Router();  // Créer un router pour définir les routes
 const { jsPDF } = require("jspdf");
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const logoPath = path.join(__dirname, 'assets', 'logo.png');  // Assurez-vous que le chemin est correct
@@ -2728,7 +2728,7 @@ router.get('/event/:eventId/export-pdf', async (req, res) => {
             acc[totalKey] = stats[roleKey].present + stats[roleKey].absent;
             return acc;
         }, {
-            totalPresents: participantRoles.reduce((total, role) => total + stats[role.toLowerCase()].present, 0),
+            totalPrésents: participantRoles.reduce((total, role) => total + stats[role.toLowerCase()].present, 0),
             totalAbsents: participantRoles.reduce((total, role) => total + stats[role.toLowerCase()].absent, 0)
         });
 
@@ -3013,40 +3013,6 @@ app.post('/toggle-vote', async (req, res) => {
     }
 });
 
-// API pour vérifier le statut de vote d'un utilisateur pour un formulaire spécifique (pour l'application mobile)
-app.get('/api/event/:eventId/vote_status/:userId/:formId', async (req, res) => {
-    try {
-        const { eventId, userId, formId } = req.params;
-        
-        console.log(`🔍 Vérification statut vote - Event: ${eventId}, User: ${userId}, Form: ${formId}`);
-        
-        // Vérifier si l'utilisateur a voté pour ce formulaire
-        const responseSnapshot = await firestore.collection('vote_responses')
-            .where('eventId', '==', eventId)
-            .where('userId', '==', userId)
-            .where('formId', '==', formId)
-            .get();
-        
-        const hasVoted = !responseSnapshot.empty;
-        
-        console.log(`📊 Statut vote - User ${userId}, Form ${formId}: ${hasVoted ? 'Voté' : 'Non voté'}`);
-        
-        res.json({
-            success: true,
-            hasVoted: hasVoted,
-            voteCount: responseSnapshot.size
-        });
-        
-    } catch (error) {
-        console.error("❌ Erreur lors de la vérification du statut de vote:", error);
-        res.status(500).json({
-            success: false,
-            message: 'Erreur lors de la vérification du statut de vote',
-            hasVoted: false
-        });
-    }
-});
-
 app.get('/get-vote-status', async (req, res) => {
     try {
         const { eventId } = req.query;
@@ -3138,9 +3104,6 @@ app.get('/event/:eventId/suivi_vote', requireAuth, async (req, res) => {
                 eventEndDate: eventData.endDate,
                 organizerName: eventData.organizerName || 'Organisateur inconnu',
                 voteForms: [],
-                users: [],
-                chartData: [],
-                totalByRole: [],
                 message: 'Aucun formulaire de vote n a ete cree pour cet evenement.'
             });
         }
@@ -3168,112 +3131,85 @@ app.get('/event/:eventId/suivi_vote', requireAuth, async (req, res) => {
             }
         }
 
-        const voteForms = [];
-        const allResponses = []; // Pour collecter toutes les r�ponses
+        const voteSnapshot = await firestore.collection('votes').where('eventId', '==', eventId).get();
+        const votes = voteSnapshot.docs.map(doc => doc.data());
 
-        for (const doc of voteFormsSnapshot.docs) {
-            const form = { id: doc.id, ...doc.data() };
-            
-            // Récupérer les réponses pour ce formulaire
-            const responsesSnapshot = await firestore.collection('vote_responses')
-                .where('formId', '==', doc.id)
-                .get();
-            const responses = responsesSnapshot.docs.map(responseDoc => responseDoc.data());
-            
-            // Ajouter les r�ponses � la collection globale
-            allResponses.push(...responses);
-            
-            // Calculer les statistiques pour ce formulaire
-            const stats = calculateFormStats(form, responses, users);
-            form.stats = stats;
-            form.totalResponses = responses.length;
-            form.totalEligible = users.length;
-            
-            voteForms.push(form);
-        }
+        const totalEligibleUsers = users.length;
+        const usersWhoVoted = votes.filter(vote => users.some(user => user.id === vote.userId)).length;
+        const nonVotedCount = totalEligibleUsers - usersWhoVoted;
 
-        // Ajouter les informations de vote pour chaque utilisateur
         const usersWithVotes = users.map(user => {
-            const userResponse = allResponses.find(response => response.userId === user.id);
-            let voteChoice = null;
-            if (userResponse && userResponse.responses) {
-                const firstField = Object.keys(userResponse.responses)[0];
-                if (firstField) {
-                    voteChoice = userResponse.responses[firstField];
-                }
-            }
-            
+            const userVote = votes.find(vote => vote.userId === user.id);
             return {
                 ...user,
-                hasVoted: !!userResponse,
-                voteTimestamp: userResponse ? userResponse.timestamp : null,
-                voteChoice: voteChoice
+                voteChoice: userVote ? userVote.choice : 'Non voté'
             };
         });
 
-        // Calculer les statistiques par r�le pour les graphiques
-        const roleStats = {};
-        const chartData = [];
-        const totalByRole = [];
+        // Calcul des statistiques globales (voteChartData)
+        const voteStats = usersWithVotes.reduce((acc, user) => {
+            acc[user.voteChoice] = (acc[user.voteChoice] || 0) + 1;
+            return acc;
+        }, {});
 
-        // Grouper les utilisateurs par r�le
-        usersWithVotes.forEach(user => {
-            if (!roleStats[user.role]) {
-                roleStats[user.role] = {
-                    role: user.role,
-                    total: 0,
-                    voted: 0,
-                    notVoted: 0
-                };
-            }
-            roleStats[user.role].total++;
-            
-            if (user.hasVoted) {
-                roleStats[user.role].voted++;
-            } else {
-                roleStats[user.role].notVoted++;
-            }
-        });
+        const orderedChoices = ["Oui", "Non", "S'abstenir", "Non voté"];
+        const voteChartData = orderedChoices.map(choice => ({
+            choice,
+            count: voteStats[choice] || 0
+        }));
 
-        // Convertir en format pour les graphiques
-        Object.values(roleStats).forEach(roleStat => {
-            chartData.push({
-                role: roleStat.role,
-                total: roleStat.total,
-                voted: roleStat.voted,
-                notVoted: roleStat.notVoted
-            });
-            
-            totalByRole.push({
-                role: roleStat.role,
-                totalPresents: roleStat.voted,
-                totalAbsents: roleStat.notVoted
-            });
-        });
+        // Calcul des données par rôle (chartData)
+        const roleStats = usersWithVotes.reduce((acc, user) => {
+            if (!acc[user.role]) {
+                acc[user.role] = { total: 0, oui: 0, non: 0, abstention: 0, nonVote: 0 };
+            }
+            acc[user.role].total++;
+            if (user.voteChoice === "Oui") acc[user.role].oui++;
+            else if (user.voteChoice === "Non") acc[user.role].non++;
+            else if (user.voteChoice === "S'abstenir") acc[user.role].abstention++;
+            else acc[user.role].nonVote++;
+            return acc;
+        }, {});
+
+        const chartData = Object.keys(roleStats).map(role => ({
+            role,
+            total: roleStats[role].total,
+            oui: roleStats[role].oui,
+            non: roleStats[role].non,
+            abstention: roleStats[role].abstention,
+            nonVote: roleStats[role].nonVote
+        }));
+
+        // Calcul des totaux pour tous les rôles (totalByRole)
+        const totalByRole = chartData.map(data => ({
+            role: data.role,
+            oui: data.oui,
+            non: data.non,
+            abstention: data.abstention,
+            nonVote: data.nonVote
+        }));
 
         res.render('suivi_vote', {
             eventId,
-            eventName: eventData.name || 'Nom d\'événement inconnu',
+            eventName: eventData.name || 'Nom d’événement inconnu',
             eventStartDate: eventData.startDate,
             eventEndDate: eventData.endDate,
             organizerName: eventData.organizerName || 'Organisateur inconnu',
-            voteForms: voteForms,
             users: usersWithVotes,
-            chartData: chartData,
-            totalByRole: totalByRole
+            voteChartData,
+            chartData, // Données par rôle
+            totalByRole, // Données totales
+            voteForms: [] // Ajout temporaire pour éviter l'erreur
         });
-
     } catch (error) {
-        console.error('Erreur lors de la récupération des données de suivi de vote:', error);
-        res.status(500).send('Erreur interne du serveur');
+        console.error('Erreur lors de la récupération des utilisateurs pour le suivi :', error);
+        res.status(500).send('Erreur lors de la récupération des utilisateurs pour le suivi.');
     }
 });
 
 // Route pour afficher les détails d'un formulaire de vote spécifique
 app.get('/event/:eventId/suivi_vote/:formId', requireAuth, async (req, res) => {
     const { eventId, formId } = req.params;
-    
-    console.log('?? KIRO DEBUG - Route suivi_vote_detail appel�e avec:', { eventId, formId });
 
     try {
         // Récupérer l'événement
@@ -3306,9 +3242,7 @@ app.get('/event/:eventId/suivi_vote/:formId', requireAuth, async (req, res) => {
         const users = [];
         for (const doc of userSnapshot.docs) {
             const eligibility = await getUserVoteEligibility(doc.id, eventId);
-            console.log(`?? KIRO DEBUG - Utilisateur v�rifi�: ID=${doc.id}, �ligible=${eligibility.eligible}`);
             if (eligibility.eligible) {
-                console.log(`?? KIRO DEBUG - Utilisateur �ligible ajout�: ID=${doc.id}, nom=${eligibility.user.name}`);
                 users.push({
                     id: doc.id,
                     name: eligibility.user.name,
@@ -3335,11 +3269,6 @@ app.get('/event/:eventId/suivi_vote/:formId', requireAuth, async (req, res) => {
             });
         });
 
-        console.log('?? KIRO DEBUG - Formulaire:', formId);
-        console.log('?? KIRO DEBUG - Nombre de r�ponses trouv�es:', responses.length);
-        console.log('?? KIRO DEBUG - R�ponses:', JSON.stringify(responses, null, 2));
-        console.log('?? KIRO DEBUG - Nombre d\'utilisateurs �ligibles:', users.length);
-
         // Calculer les statistiques pour ce formulaire
         const form = {
             id: formId,
@@ -3354,112 +3283,13 @@ app.get('/event/:eventId/suivi_vote/:formId', requireAuth, async (req, res) => {
         // Ajouter les informations de vote pour chaque utilisateur
         const usersWithVotes = users.map(user => {
             const userResponse = responses.find(response => response.userId === user.id);
-            console.log(`?? KIRO DEBUG - Utilisateur ${user.id} (${user.name}):`, userResponse ? 'A VOT�' : 'N\'A PAS VOT�');
-            if (userResponse) {
-                console.log('?? KIRO DEBUG - R�ponse compl�te:', JSON.stringify(userResponse, null, 2));
-            }
-            
-            // Extraire le choix de vote de la structure de r�ponse
-            let voteChoice = null;
-            if (userResponse && userResponse.responses) {
-                // La structure est {"field_1": "choix"}
-                const firstField = Object.keys(userResponse.responses)[0];
-                if (firstField) {
-                    voteChoice = userResponse.responses[firstField];
-                    console.log(`?? KIRO DEBUG - Choix extrait pour ${user.name}: ${voteChoice}`);
-                }
-            }
-            
             return {
                 ...user,
                 hasVoted: !!userResponse,
-                voteTimestamp: userResponse ? userResponse.timestamp : null,
-                voteChoice: voteChoice
+                voteTimestamp: userResponse ? userResponse.timestamp : null
             };
         });
 
-        // Calculer les statistiques bas�es sur les choix du formulaire
-        const formChoices = form.fields && form.fields.length > 0 ? form.fields[0].options || [] : [];
-        const roleStats = {};
-        const chartData = [];
-        const totalByRole = [];
-
-        // Grouper les utilisateurs par r�le
-        users.forEach(user => {
-            if (!roleStats[user.role]) {
-                roleStats[user.role] = {
-                    role: user.role,
-                    total: 0,
-                    voted: 0,
-                    notVoted: 0,
-                    choices: {}
-                };
-                
-                // Initialiser les compteurs pour chaque choix du formulaire
-                formChoices.forEach(choice => {
-                    roleStats[user.role].choices[choice] = 0;
-                });
-            }
-            roleStats[user.role].total++;
-            
-            const userResponse = responses.find(response => response.userId === user.id);
-            if (userResponse && userResponse.responses) {
-                roleStats[user.role].voted++;
-                // Extraire le choix de la structure {"field_1": "choix"}
-                const firstField = Object.keys(userResponse.responses)[0];
-                if (firstField) {
-                    const userChoice = userResponse.responses[firstField];
-                    if (roleStats[user.role].choices.hasOwnProperty(userChoice)) {
-                        roleStats[user.role].choices[userChoice]++;
-                    }
-                }
-            } else {
-                roleStats[user.role].notVoted++;
-            }
-        });
-
-        // Convertir en format pour les graphiques
-        Object.values(roleStats).forEach(roleStat => {
-            const roleData = {
-                role: roleStat.role,
-                total: roleStat.total,
-                voted: roleStat.voted,
-                notVoted: roleStat.notVoted,
-                choices: roleStat.choices
-            };
-            
-            chartData.push(roleData);
-            totalByRole.push(roleData);
-        });
-
-        // Calculer les statistiques globales
-        const globalStats = {
-            total: users.length,
-            voted: responses.length,
-            notVoted: users.length - responses.length,
-            choices: {}
-        };
-
-        // Initialiser les compteurs globaux pour chaque choix
-        formChoices.forEach(choice => {
-            globalStats.choices[choice] = 0;
-        });
-
-        // Compter les choix globaux
-        responses.forEach(response => {
-            if (response.responses) {
-                // Extraire le choix de la structure {"field_1": "choix"}
-                const firstField = Object.keys(response.responses)[0];
-                if (firstField) {
-                    const userChoice = response.responses[firstField];
-                    if (globalStats.choices.hasOwnProperty(userChoice)) {
-                        globalStats.choices[userChoice]++;
-                    }
-                }
-            }
-        });
-
-        console.log('?? KIRO DEBUG - Avant res.render avec template: suivi_vote_detail');
         res.render('suivi_vote_detail', {
             eventId,
             eventName: eventData.name || 'Nom d\'événement inconnu',
@@ -3468,15 +3298,9 @@ app.get('/event/:eventId/suivi_vote/:formId', requireAuth, async (req, res) => {
             organizerName: eventData.organizerName || 'Organisateur inconnu',
             form: form,
             users: usersWithVotes,
-            responses: responses,
-            chartData: chartData,
-            totalByRole: totalByRole,
-            globalStats: globalStats,
-            formChoices: formChoices
+            responses: responses
         });
-        console.log('?? KIRO DEBUG - Apr�s res.render');
     } catch (error) {
-        console.error('?? KIRO DEBUG - Erreur dans la route:', error);
         console.error('Erreur lors de la récupération des détails du formulaire :', error);
         res.status(500).send('Erreur lors de la récupération des détails du formulaire.');
     }

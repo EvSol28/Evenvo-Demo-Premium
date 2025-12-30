@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi des votes - <%= typeof eventName !== 'undefined' ? eventName : 'Événement' %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
+            --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
+            --gray: #64748B; --light-gray: #e2e8f0;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --navbar-bg: rgba(162, 217, 206, 0.3); --navbar-hover-bg: rgba(162, 217, 206, 0.4);
+            --navbar-border: rgba(255, 255, 255, 0.2);
+            --navbar-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3), 0 4px 20px rgba(13, 148, 136, 0.05);
+            --navbar-hover-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 6px 25px rgba(13, 148, 136, 0.1);
+            --card-border: rgba(13, 148, 136, 0.15); --card-hover-border: rgba(13, 148, 136, 0.4);
+            --card-shadow: 0 6px 15px rgba(190, 190, 190, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+            --card-hover-shadow: 0 12px 28px rgba(13, 148, 136, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+            --sans: 'Hellix', 'Arial', sans-serif;
+        }
+
+        body { 
+            font-family: var(--sans); 
+            background-color: #F1F5F9; 
+            color: var(--dark); 
+            min-height: 100vh; 
+            margin: 0; 
+            padding-top: 90px; 
+        }
+
+        /* Navbar */
+        .navbar { 
+            background: var(--navbar-bg); 
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px); 
+            padding: 0.4rem 1rem; 
+            box-shadow: var(--navbar-shadow); 
+            border: 1px solid var(--navbar-border); 
+            border-radius: 20px; 
+            position: fixed; 
+            width: 96%; 
+            left: 2%; 
+            top: 10px; 
+            z-index: 1030; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            transition: all 0.4s ease; 
+        }
+        .navbar:hover { background: var(--navbar-hover-bg); box-shadow: var(--navbar-hover-shadow); transform: translateY(-2px); }
+        .navbar-brand img { height: 20px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-brand1 img { height: 40px; width: auto; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+        .navbar-nav { display: flex; align-items: center; justify-content: center; flex-grow: 1; gap: 0.5rem; }
+        .nav-link { 
+            color: var(--primary-dark) !important; 
+            font-size: 0.9rem; 
+            font-weight: 500; 
+            padding: 0.5rem 1rem; 
+            transition: color 0.25s ease, background-color 0.25s ease; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+            border-radius: 25px; 
+            background: transparent; 
+            border: 1px solid transparent; 
+            text-decoration: none !important; 
+        }
+        .nav-link:hover { color: var(--primary-dark) !important; background: rgba(13, 148, 136, 0.08); }
+        .nav-link.active { 
+            color: var(--light) !important; 
+            background: var(--navbar-bg) !important; 
+            backdrop-filter: blur(5px); 
+            -webkit-backdrop-filter: blur(5px); 
+            border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+            font-weight: 600; 
+            box-shadow: none; 
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.3); 
+        }
+        .nav-link i { font-size: 1rem; }
+        .dropdown-toggle::after { margin-left: 0.4rem; border-top-color: currentColor; transition: transform 0.3s ease; }
+        .nav-item.show .dropdown-toggle::after, .nav-item.dropdown:hover .dropdown-toggle::after { transform: rotate(180deg); }
+        .dropdown-menu { 
+            background: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid var(--navbar-border); 
+            border-radius: 12px; 
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); 
+            padding: 0.75rem; 
+            margin-top: 0.6rem !important; 
+        }
+        .dropdown-item-text strong { color: var(--dark); font-weight: 600; } 
+        .dropdown-item-text small { color: var(--gray); font-size: 0.8rem; display: block; margin-top: 2px; }
+        .dropdown-divider { border-top: 1px solid rgba(0, 0, 0, 0.1); margin: 0.5rem 0; }
+        .dropdown-item { 
+            font-size: 0.85rem; 
+            color: var(--primary-dark); 
+            font-weight: 500; 
+            padding: 0.5rem 1rem; 
+            border-radius: 8px; 
+            transition: all 0.2s ease; 
+            background: transparent; 
+        }
+        .dropdown-item:hover { 
+            background: var(--primary); 
+            color: var(--light); 
+            transform: translateX(3px); 
+            box-shadow: none; 
+        }
+        .navbar-right { margin-left: auto; }
+
+        /* Main content */
+        .main-content { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+        .page-header { margin-bottom: 2rem; text-align: center; }
+        .page-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); font-family: var(--sans); }
+
+        /* Vote Forms Grid */
+        .vote-forms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Vote Form Card - Grand Rectangle */
+        .vote-form-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
+            padding: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vote-form-card:hover {
+            border-color: var(--card-hover-border);
+            box-shadow: var(--card-hover-shadow);
+            transform: translateY(-4px);
+        }
+
+        .vote-form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .vote-form-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .vote-form-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .vote-form-status.active {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+
+        .vote-form-status.inactive {
+            background: rgba(156, 163, 175, 0.1);
+            color: #6b7280;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .vote-form-status.active .status-dot {
+            background: #16a34a;
+        }
+
+        .vote-form-status.inactive .status-dot {
+            background: #6b7280;
+        }
+
+        .vote-form-description {
+            color: var(--gray);
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        /* Stats Grid - Petits carreaux dans le grand rectangle */
+        .vote-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .vote-stat-card {
+            background: rgba(13, 148, 136, 0.05);
+            border: 1px solid rgba(13, 148, 136, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .vote-stat-card:hover {
+            background: rgba(13, 148, 136, 0.1);
+            border-color: rgba(13, 148, 136, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .vote-stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .vote-stat-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        /* No forms message */
+        .no-forms-message {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
+        }
+
+        .no-forms-message i {
+            font-size: 4rem;
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .no-forms-message h3 {
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+
+        .no-forms-message p {
+            color: var(--gray);
+            margin-bottom: 2rem;
+        }
+
+        .create-form-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .create-form-btn:hover {
+            background: var(--primary-dark);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
+        }
+
+        .subtitle-gray { color: var(--gray); }
+
+        /* Responsive */
+        @media (max-width: 767.98px) {
+            body { padding-top: 80px; }
+            .navbar { 
+                width: 94%; 
+                left: 3%; 
+                top: 10px; 
+                padding: 0.5rem 1rem; 
+                border-radius: 15px; 
+            }
+            .main-content { padding: 1rem; }
+            .vote-forms-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .vote-form-card {
+                padding: 1.5rem;
+            }
+            .vote-stats-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/dashboard"><img src="/assets/evenvo.png" alt="Logo evenvo gauche"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i></a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>"><i class="far fa-calendar-alt"></i> Évènement</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_utilisateur"><i class="fas fa-users"></i> Participants</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/suivi_presence"><i class="fas fa-clipboard-check"></i> Présences</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/event/<%= eventId %>/suivi_vote"><i class="fas fa-vote-yea"></i> Vote</a></li>
+                <li class="nav-item"><a class="nav-link" href="/event/<%= eventId %>/gestion_event"><i class="fas fa-cog"></i> Gestion</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><span class="dropdown-item-text"><strong id="userFullName">Chargement...</strong><br><small id="userEmail">...</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt fa-fw me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-right d-none d-lg-block">
+            <a class="navbar-brand1" href="/dashboard"><img src="/assets/logo.png" alt="Logo droite"></a>
+        </div>
+    </nav>
+
+    <!-- Contenu Principal -->
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Suivi des Votes</h1>
+            <% if (typeof eventName !== 'undefined' && eventName) { %>
+                <p class="subtitle-gray">Évènement : <%= eventName %></p>
+            <% } %>
+        </div>
+
+        <!-- Vote Forms Grid - Grands rectangles -->
+        <% if (typeof voteForms !== 'undefined' && voteForms && voteForms.length > 0) { %>
+        <div class="vote-forms-grid">
+            <% voteForms.forEach(function(form) { %>
+            <div class="vote-form-card" onclick="window.location.href='/event/<%= eventId %>/suivi_vote/<%= form.id %>'">
+                <div class="vote-form-header">
+                    <h3 class="vote-form-title"><%= form.name %></h3>
+                    <div class="vote-form-status <%= form.isActive ? 'active' : 'inactive' %>">
+                        <div class="status-dot"></div>
+                        <%= form.isActive ? 'Actif' : 'Inactif' %>
+                    </div>
+                </div>
+                <% if (form.description) { %>
+                <p class="vote-form-description"><%= form.description %></p>
+                <% } %>
+                
+                <!-- Petits carreaux de statistiques -->
+                <div class="vote-stats-grid">
+                    <div class="vote-stat-card">
+                        <span class="vote-stat-number"><%= form.stats ? form.stats.participation.voted : 0 %></span>
+                        <div class="vote-stat-label">Ont voté</div>
+                    </div>
+                    <div class="vote-stat-card">
+                        <span class="vote-stat-number"><%= form.stats ? form.stats.participation.notVoted : 0 %></span>
+                        <div class="vote-stat-label">N'ont pas voté</div>
+                    </div>
+                    <div class="vote-stat-card">
+                        <span class="vote-stat-number"><%= form.stats ? form.stats.participation.percentage : 0 %>%</span>
+                        <div class="vote-stat-label">Pourcentage</div>
+                    </div>
+                    <div class="vote-stat-card">
+                        <span class="vote-stat-number"><%= form.totalEligible || 0 %></span>
+                        <div class="vote-stat-label">Total votes</div>
+                    </div>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+        <% } else { %>
+        <!-- Message si aucun formulaire -->
+        <div class="no-forms-message">
+            <i class="fas fa-poll"></i>
+            <h3>Aucun formulaire de vote</h3>
+            <p>Aucun formulaire de vote n'a été créé pour cet événement.</p>
+            <a href="/event/<%= eventId %>/vote_form_builder" class="create-form-btn">
+                <i class="fas fa-plus"></i>
+                Créer un formulaire de vote
+            </a>
+        </div>
+        <% } %>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        async function fetchUserInfo() {
+            try {
+                const response = await fetch('/get_user_info');
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+                const user = await response.json();
+                const fullName = `${user.name || ''} ${user.surname || ''}`.trim();
+                document.getElementById('userFullName').textContent = fullName || 'Utilisateur';
+                document.getElementById('userEmail').textContent = user.email || 'Email non disponible';
+            } catch (error) {
+                console.error('Erreur fetchUserInfo:', error);
+                document.getElementById('userFullName').textContent = 'Erreur';
+                document.getElementById('userEmail').textContent = 'Indisponible';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchUserInfo();
+        });
+    </script>
+</body>
+</html>

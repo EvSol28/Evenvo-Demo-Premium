@@ -145,11 +145,14 @@
         }
         
         .form-element {
-            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
-            color: white;
+            background: rgba(13, 148, 136, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(13, 148, 136, 0.2);
+            color: var(--primary-dark);
             padding: 0.75rem 1rem;
             margin-bottom: 0.75rem;
-            border-radius: 12px;
+            border-radius: 25px;
             cursor: grab;
             transition: all 0.3s ease;
             display: flex;
@@ -157,11 +160,15 @@
             gap: 0.75rem;
             font-weight: 500;
             font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(13, 148, 136, 0.1);
         }
         
         .form-element:hover {
+            background: rgba(13, 148, 136, 0.15);
+            border-color: rgba(13, 148, 136, 0.3);
+            color: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
+            box-shadow: 0 8px 25px rgba(13, 148, 136, 0.2);
         }
         
         .form-element:active {
@@ -317,33 +324,45 @@
         }
         
         .btn-primary {
-            background: var(--primary);
-            border: none;
+            background: rgba(13, 148, 136, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(13, 148, 136, 0.2);
+            color: var(--primary-dark);
             padding: 0.75rem 2rem;
             border-radius: 25px;
             font-weight: 500;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(13, 148, 136, 0.1);
         }
         
         .btn-primary:hover {
-            background: var(--primary-dark);
+            background: rgba(13, 148, 136, 0.15);
+            border-color: rgba(13, 148, 136, 0.3);
+            color: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
+            box-shadow: 0 8px 25px rgba(13, 148, 136, 0.2);
         }
         
         .btn-secondary {
-            background: var(--gray);
-            border: none;
+            background: rgba(108, 117, 125, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(108, 117, 125, 0.2);
+            color: #6b7280;
             padding: 0.75rem 2rem;
             border-radius: 25px;
             font-weight: 500;
-            color: white;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.1);
         }
         
         .btn-secondary:hover {
-            background: var(--dark);
+            background: rgba(108, 117, 125, 0.15);
+            border-color: rgba(108, 117, 125, 0.3);
+            color: #6b7280;
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.2);
         }
 
         /* Existing forms section */
@@ -437,6 +456,21 @@
         
         .form-status.inactive .status-dot {
             background: #6b7280;
+        }
+
+        /* Styles pour le glisser-déposer des classements */
+        .sortable-list {
+            min-height: 50px;
+        }
+        
+        .sortable-ghost {
+            opacity: 0.4;
+            background: var(--primary-light) !important;
+        }
+        
+        .sortable-list .border:hover {
+            border-color: var(--primary) !important;
+            box-shadow: 0 2px 8px rgba(13, 148, 136, 0.2);
         }
 
         /* Responsive */
@@ -535,9 +569,9 @@
                     Liste déroulante
                 </div>
                 
-                <div class="form-element" draggable="true" data-type="number">
-                    <i class="fas fa-hashtag"></i>
-                    Nombre
+                <div class="form-element" draggable="true" data-type="ranking">
+                    <i class="fas fa-sort-numeric-up"></i>
+                    Classement
                 </div>
                 
                 <div class="form-element" draggable="true" data-type="date">
@@ -713,6 +747,7 @@
                 id: fieldId,
                 type: type,
                 label: getDefaultLabel(type),
+                description: '', // Nouveau champ pour le paragraphe
                 required: false,
                 options: type === 'radio' || type === 'checkbox' || type === 'select' || type === 'ranking' ? ['Option 1', 'Option 2'] : null
             };
@@ -729,7 +764,7 @@
                 'radio': 'Choix unique',
                 'checkbox': 'Choix multiple',
                 'select': 'Liste déroulante',
-                'number': 'Nombre',
+                'ranking': 'Classement',
                 'date': 'Date',
                 'rating': 'Évaluation',
                 'ranking': 'Vote par ordre',
@@ -762,6 +797,11 @@
                 </div>
                 <label class="form-label fw-bold">${field.label} ${field.required ? '<span class="text-danger">*</span>' : ''}</label>
             `;
+
+            // Ajouter le paragraphe de description si présent
+            if (field.description && field.description.trim()) {
+                html += `<p class="text-muted mb-2" style="font-size: 0.9rem;">${field.description}</p>`;
+            }
 
             switch (field.type) {
                 case 'text':
@@ -798,8 +838,24 @@
                         </select>
                     `;
                     break;
-                case 'number':
-                    html += `<input type="number" class="form-control" placeholder="Nombre" disabled>`;
+                case 'ranking':
+                    if (field.description) {
+                        html += `<div class="alert alert-light mb-3"><p class="mb-0">${field.description}</p></div>`;
+                    }
+                    html += `
+                        <div class="alert alert-info mb-2">
+                            <small><i class="fas fa-info-circle"></i> Les utilisateurs classeront les options par ordre de préférence (1er, 2ème, 3ème...)</small>
+                        </div>
+                    `;
+                    field.options.forEach((option, index) => {
+                        html += `
+                            <div class="d-flex align-items-center mb-2 p-2 border rounded">
+                                <span class="badge bg-primary me-2">${index + 1}</span>
+                                <span class="flex-grow-1">${option}</span>
+                                <i class="fas fa-grip-vertical text-muted"></i>
+                            </div>
+                        `;
+                    });
                     break;
                 case 'date':
                     html += `<input type="date" class="form-control" disabled>`;
@@ -866,24 +922,52 @@
             const field = formFields.find(f => f.id === fieldId);
             if (!field) return;
 
-            // Create edit modal (simplified for this example)
+            let optionsHtml = '';
+            if (field.options) {
+                optionsHtml = `
+                    <label class="form-label mt-3">Options</label>
+                    <div id="optionsContainer">
+                        ${field.options.map((option, index) => `
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control option-input" value="${option}" data-index="${index}">
+                                <button class="btn btn-outline-danger btn-sm" type="button" onclick="removeOption(${index})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="addOption()">
+                        <i class="fas fa-plus"></i> Ajouter une option
+                    </button>
+                `;
+            }
+
+            // Create edit modal
             Swal.fire({
                 title: 'Modifier le champ',
                 html: `
                     <div class="text-start">
                         <label class="form-label">Libellé</label>
                         <input type="text" id="editLabel" class="form-control mb-3" value="${field.label}">
-                        <div class="form-check">
+                        
+                        <label class="form-label">Description (paragraphe explicatif)</label>
+                        <textarea id="editDescription" class="form-control mb-3" rows="3" placeholder="Description optionnelle pour expliquer ce champ...">${field.description || ''}</textarea>
+                        
+                        <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" id="editRequired" ${field.required ? 'checked' : ''}>
                             <label class="form-check-label" for="editRequired">Champ obligatoire</label>
                         </div>
+                        
+                        ${optionsHtml}
                     </div>
                 `,
+                width: '600px',
                 showCancelButton: true,
                 confirmButtonText: 'Sauvegarder',
                 cancelButtonText: 'Annuler',
                 preConfirm: () => {
                     const label = document.getElementById('editLabel').value;
+                    const description = document.getElementById('editDescription').value;
                     const required = document.getElementById('editRequired').checked;
                     
                     if (!label.trim()) {
@@ -891,18 +975,62 @@
                         return false;
                     }
                     
-                    return { label: label.trim(), required };
+                    let options = null;
+                    if (field.options) {
+                        const optionInputs = document.querySelectorAll('.option-input');
+                        options = Array.from(optionInputs).map(input => input.value.trim()).filter(val => val);
+                        
+                        if (options.length < 2) {
+                            Swal.showValidationMessage('Au moins 2 options sont requises');
+                            return false;
+                        }
+                    }
+                    
+                    return { label: label.trim(), description: description.trim(), required, options };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
                     field.label = result.value.label;
+                    field.description = result.value.description;
                     field.required = result.value.required;
+                    if (result.value.options) {
+                        field.options = result.value.options;
+                    }
                     
                     // Re-render the field
                     const fieldElement = document.querySelector(`[data-field-id="${fieldId}"]`);
                     fieldElement.innerHTML = createFieldHtml(field);
                 }
             });
+
+            // Add functions for option management
+            window.addOption = function() {
+                const container = document.getElementById('optionsContainer');
+                const index = container.children.length;
+                const newOptionHtml = `
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control option-input" value="Nouvelle option" data-index="${index}">
+                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="removeOption(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', newOptionHtml);
+            };
+
+            window.removeOption = function(index) {
+                const container = document.getElementById('optionsContainer');
+                if (container.children.length > 2) {
+                    container.children[index].remove();
+                    // Re-index remaining options
+                    Array.from(container.children).forEach((child, newIndex) => {
+                        child.querySelector('.option-input').setAttribute('data-index', newIndex);
+                        child.querySelector('button').setAttribute('onclick', `removeOption(${newIndex})`);
+                    });
+                } else {
+                    Swal.showValidationMessage('Au moins 2 options sont requises');
+                }
+            };
         }
 
         function deleteField(fieldId) {
@@ -1023,6 +1151,11 @@
                 previewHtml += `<div class="mb-3">`;
                 previewHtml += `<label class="form-label fw-bold">${field.label}${field.required ? ' <span class="text-danger">*</span>' : ''}</label>`;
                 
+                // Ajouter la description si présente
+                if (field.description && field.description.trim()) {
+                    previewHtml += `<p class="text-muted mb-2" style="font-size: 0.9rem;">${field.description}</p>`;
+                }
+                
                 switch (field.type) {
                     case 'text':
                         previewHtml += `<input type="text" class="form-control" placeholder="Votre réponse">`;
@@ -1058,8 +1191,26 @@
                             </select>
                         `;
                         break;
-                    case 'number':
-                        previewHtml += `<input type="number" class="form-control">`;
+                    case 'ranking':
+                        if (field.description) {
+                            previewHtml += `<div class="alert alert-light mb-3"><p class="mb-0">${field.description}</p></div>`;
+                        }
+                        previewHtml += `
+                            <div class="alert alert-info mb-2">
+                                <small><i class="fas fa-info-circle"></i> Classez les options par ordre de préférence (glissez-déposez)</small>
+                            </div>
+                            <div id="sortable-${field.id}" class="sortable-list">
+                        `;
+                        field.options.forEach((option, index) => {
+                            previewHtml += `
+                                <div class="d-flex align-items-center mb-2 p-3 border rounded bg-light" style="cursor: move;">
+                                    <i class="fas fa-grip-vertical me-3 text-muted"></i>
+                                    <span class="flex-grow-1">${option}</span>
+                                    <span class="badge bg-primary">${index + 1}</span>
+                                </div>
+                            `;
+                        });
+                        previewHtml += `</div>`;
                         break;
                     case 'date':
                         previewHtml += `<input type="date" class="form-control">`;
@@ -1113,7 +1264,28 @@
                 title: 'Aperçu du formulaire',
                 html: previewHtml,
                 width: '600px',
-                confirmButtonText: 'Fermer'
+                confirmButtonText: 'Fermer',
+                didOpen: () => {
+                    // Initialiser les listes triables pour les champs de classement
+                    formFields.forEach(field => {
+                        if (field.type === 'ranking') {
+                            const sortableElement = document.getElementById(`sortable-${field.id}`);
+                            if (sortableElement) {
+                                new Sortable(sortableElement, {
+                                    animation: 150,
+                                    ghostClass: 'sortable-ghost',
+                                    onEnd: function(evt) {
+                                        // Mettre à jour les numéros de classement
+                                        const items = sortableElement.querySelectorAll('.badge');
+                                        items.forEach((badge, index) => {
+                                            badge.textContent = index + 1;
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
             });
         }
 
