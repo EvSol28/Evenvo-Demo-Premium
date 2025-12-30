@@ -605,8 +605,16 @@
                                         <td><%= user.email || '-' %></td>
                                         <td><%= user.role || '-' %></td>
                                         <td>
-                                            <% if (user.hasVoted && user.voteChoice) { %>
-                                                <span class="badge badge-success"><%= user.voteChoice %></span>
+                                            <% if (user.hasVoted) { %>
+                                                <% if (voteForm && voteForm.fields && voteForm.fields.some(field => field.type === 'ranking')) { %>
+                                                    <button class="btn btn-sm btn-info" onclick="showRankingDetails('<%= user.id %>', '<%= user.name %>', '<%= user.surname %>')">
+                                                        <i class="fas fa-eye"></i> Voté
+                                                    </button>
+                                                <% } else { %>
+                                                    <span class="badge badge-success">
+                                                        <%= user.voteChoice || 'Voté' %>
+                                                    </span>
+                                                <% } %>
                                             <% } else { %>
                                                 <span class="badge badge-secondary">Non voté</span>
                                             <% } %>
@@ -641,6 +649,52 @@
             </div>
             <p id="totalStats" class="chart-stats">Chargement des statistiques...</p>
         </div>
+
+        <!-- Section spéciale pour les votes par ordre -->
+        <% if (voteForm && voteForm.fields && voteForm.fields.some(field => field.type === 'ranking')) { %>
+        <div class="content-block chart-block">
+            <h2>Statistiques de classement</h2>
+            
+            <!-- Tableau de classement final -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h4>Classement final (par nombre de 1ères places)</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Position</th>
+                                    <th>Option</th>
+                                    <th>1ères places</th>
+                                    <th>Rang moyen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="finalRankingTable">
+                                <!-- Rempli par JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h4>Graphique du classement</h4>
+                    <div class="chart-canvas-container">
+                        <canvas id="rankingChart" class="chart-size"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Graphiques de distribution des rangs -->
+            <div class="row">
+                <div class="col-12">
+                    <h4>Distribution des rangs par option</h4>
+                    <div class="chart-canvas-container" style="height: 400px;">
+                        <canvas id="rankDistributionChart" class="chart-size"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %>
 
         <% if (chartData && chartData.length > 0) { %>
         <div class="content-block chart-block">
@@ -1168,9 +1222,254 @@
                     }
                 }
 
+                // Fonction pour rendre les graphiques de ranking
+                function renderRankingCharts() {
+                    const voteForm = <%- JSON.stringify(voteForm || {}) %>;
+                    
+                    // Vérifier s'il y a des champs de ranking
+                    const rankingField = voteForm.fields && voteForm.fields.find(field => field.type === 'ranking');
+                    if (!rankingField) return;
+                    
+                    // Récupérer les statistiques de ranking depuis le serveur
+                    fetch(`/api/event/<%= eventId %>/ranking_stats/<%= voteForm.id %>`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.rankingStats) {
+                                renderFinalRankingTable(data.rankingStats);
+                                renderRankingChart(data.rankingStats);
+                                renderRankDistributionChart(data.rankingStats);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur lors du chargement des statistiques de ranking:', error);
+                        });
+                }
+                
+                function renderFinalRankingTable(rankingStats) {
+                    const tableBody = document.getElementById('finalRankingTable');
+                    if (!tableBody) return;
+                    
+                    // Créer un tableau trié par nombre de 1ères places, puis par rang moyen
+                    const sortedOptions = Object.keys(rankingStats.winnerByVotes)
+                        .map(option => ({
+                            option,
+                            firstPlaces: rankingStats.winnerByVotes[option],
+                            averageRank: parseFloat(rankingStats.averageRanks[option].average) || 999
+                        }))
+                        .sort((a, b) => {
+                            if (b.firstPlaces !== a.firstPlaces) {
+                                return b.firstPlaces - a.firstPlaces; // Plus de 1ères places d'abord
+                            }
+                            return a.averageRank - b.averageRank; // Meilleur rang moyen ensuite
+                        });
+                    
+                    let html = '';
+                    sortedOptions.forEach((item, index) => {
+                        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                        html += `
+                            <tr class="${index < 3 ? 'table-warning' : ''}">
+                                <td>${medal} ${index + 1}</td>
+                                <td><strong>${item.option}</strong></td>
+                                <td><span class="badge bg-success">${item.firstPlaces}</span></td>
+                                <td><span class="badge bg-info">${item.averageRank}</span></td>
+                            </tr>
+                        `;
+                    });
+                    
+                    tableBody.innerHTML = html;
+                }
+                
+                function renderRankingChart(rankingStats) {
+                    const ctx = document.getElementById('rankingChart');
+                    if (!ctx) return;
+                    
+                    const options = Object.keys(rankingStats.winnerByVotes);
+                    const firstPlaces = options.map(option => rankingStats.winnerByVotes[option]);
+                    
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: options,
+                            datasets: [{
+                                label: 'Nombre de 1ères places',
+                                data: firstPlaces,
+                                backgroundColor: [
+                                    'rgba(255, 215, 0, 0.8)',   // Or
+                                    'rgba(192, 192, 192, 0.8)', // Argent
+                                    'rgba(205, 127, 50, 0.8)',  // Bronze
+                                    'rgba(75, 192, 192, 0.8)',
+                                    'rgba(255, 99, 132, 0.8)',
+                                    'rgba(54, 162, 235, 0.8)'
+                                ],
+                                borderColor: [
+                                    'rgba(255, 215, 0, 1)',
+                                    'rgba(192, 192, 192, 1)',
+                                    'rgba(205, 127, 50, 1)',
+                                    'rgba(75, 192, 192, 1)',
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(54, 162, 235, 1)'
+                                ],
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                function renderRankDistributionChart(rankingStats) {
+                    const ctx = document.getElementById('rankDistributionChart');
+                    if (!ctx) return;
+                    
+                    const options = Object.keys(rankingStats.rankDistribution);
+                    const ranks = Object.keys(rankingStats.rankDistribution[options[0]] || {});
+                    
+                    const datasets = options.map((option, index) => ({
+                        label: option,
+                        data: ranks.map(rank => rankingStats.rankDistribution[option][rank] || 0),
+                        backgroundColor: `hsla(${index * 60}, 70%, 50%, 0.7)`,
+                        borderColor: `hsla(${index * 60}, 70%, 40%, 1)`,
+                        borderWidth: 2
+                    }));
+                    
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ranks.map(rank => `Rang ${rank}`),
+                            datasets: datasets
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    stacked: false
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
                 renderCharts();
+                renderRankingCharts();
             });
         })();
+    </script>
+
+    <!-- Modal pour afficher les détails du classement -->
+    <div class="modal fade" id="rankingModal" tabindex="-1" aria-labelledby="rankingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rankingModalLabel">Détails du vote par ordre</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="rankingDetails">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fonction pour afficher les détails du classement
+        async function showRankingDetails(userId, userName, userSurname) {
+            const modal = new bootstrap.Modal(document.getElementById('rankingModal'));
+            const modalTitle = document.getElementById('rankingModalLabel');
+            const rankingDetails = document.getElementById('rankingDetails');
+            
+            modalTitle.textContent = `Vote de ${userName} ${userSurname}`;
+            rankingDetails.innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                </div>
+            `;
+            
+            modal.show();
+            
+            try {
+                const response = await fetch(`/api/event/<%= eventId %>/vote_responses/${userId}/<%= voteForm.id %>`);
+                const data = await response.json();
+                
+                if (data.success && data.responses) {
+                    let html = '<div class="ranking-display">';
+                    
+                    // Parcourir les réponses pour trouver les classements
+                    Object.keys(data.responses).forEach(fieldId => {
+                        const fieldResponse = data.responses[fieldId];
+                        
+                        if (typeof fieldResponse === 'object' && fieldResponse !== null) {
+                            // C'est probablement un classement
+                            html += '<h6 class="mb-3">Classement :</h6>';
+                            html += '<div class="list-group">';
+                            
+                            // Convertir en array et trier par rang
+                            const rankings = Object.entries(fieldResponse)
+                                .map(([option, rank]) => ({ option, rank: parseInt(rank) }))
+                                .sort((a, b) => a.rank - b.rank);
+                            
+                            rankings.forEach(({ option, rank }) => {
+                                const badgeClass = rank === 1 ? 'bg-success' : rank === 2 ? 'bg-warning' : rank === 3 ? 'bg-info' : 'bg-secondary';
+                                html += `
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>${option}</span>
+                                        <span class="badge ${badgeClass} rounded-pill">${rank}</span>
+                                    </div>
+                                `;
+                            });
+                            
+                            html += '</div>';
+                        } else {
+                            // Réponse simple
+                            html += `<p><strong>Réponse :</strong> ${fieldResponse}</p>`;
+                        }
+                    });
+                    
+                    html += '</div>';
+                    rankingDetails.innerHTML = html;
+                } else {
+                    rankingDetails.innerHTML = '<div class="alert alert-warning">Aucune réponse trouvée pour cet utilisateur.</div>';
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des détails:', error);
+                rankingDetails.innerHTML = '<div class="alert alert-danger">Erreur lors du chargement des détails.</div>';
+            }
+        }
     </script>
 </body>
 </html>

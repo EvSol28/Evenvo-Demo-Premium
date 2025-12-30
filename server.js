@@ -3061,6 +3061,125 @@ app.get('/api/event/:eventId/vote_status/:userId/:formId', async (req, res) => {
     }
 });
 
+// API pour récupérer les réponses de vote d'un utilisateur spécifique
+app.get('/api/event/:eventId/vote_responses/:userId/:formId', async (req, res) => {
+    try {
+        const { eventId, userId, formId } = req.params;
+        
+        console.log(`🔍 Récupération des réponses - Event: ${eventId}, User: ${userId}, Form: ${formId}`);
+        
+        // Récupérer les réponses de l'utilisateur pour ce formulaire
+        const responseSnapshot = await firestore.collection('vote_responses')
+            .where('eventId', '==', eventId)
+            .where('userId', '==', userId)
+            .where('formId', '==', formId)
+            .limit(1)
+            .get();
+        
+        if (responseSnapshot.empty) {
+            return res.json({
+                success: false,
+                message: 'Aucune réponse trouvée'
+            });
+        }
+        
+        const responseDoc = responseSnapshot.docs[0];
+        const responseData = responseDoc.data();
+        
+        res.json({
+            success: true,
+            responses: responseData.responses,
+            submittedAt: responseData.submittedAt,
+            updatedAt: responseData.updatedAt
+        });
+        
+    } catch (error) {
+        console.error("❌ Erreur lors de la récupération des réponses:", error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de la récupération des réponses'
+        });
+    }
+});
+
+// API pour récupérer les statistiques de ranking d'un formulaire
+app.get('/api/event/:eventId/ranking_stats/:formId', async (req, res) => {
+    try {
+        const { eventId, formId } = req.params;
+        
+        console.log(`📊 Récupération des statistiques de ranking - Event: ${eventId}, Form: ${formId}`);
+        
+        // Récupérer le formulaire
+        const formSnapshot = await firestore.collection('vote_forms').doc(formId).get();
+        if (!formSnapshot.exists) {
+            return res.status(404).json({
+                success: false,
+                message: 'Formulaire non trouvé'
+            });
+        }
+        
+        const formData = formSnapshot.data();
+        
+        // Vérifier qu'il y a des champs de ranking
+        const rankingField = formData.fields && formData.fields.find(field => field.type === 'ranking');
+        if (!rankingField) {
+            return res.json({
+                success: false,
+                message: 'Aucun champ de ranking trouvé'
+            });
+        }
+        
+        // Récupérer les réponses
+        const responsesSnapshot = await firestore.collection('vote_responses')
+            .where('eventId', '==', eventId)
+            .where('formId', '==', formId)
+            .get();
+        
+        const responses = [];
+        responsesSnapshot.forEach(doc => {
+            responses.push(doc.data());
+        });
+        
+        // Récupérer les utilisateurs éligibles
+        const userSnapshot = await firestore
+            .collection('users')
+            .where('events', 'array-contains', eventId)
+            .get();
+        
+        const users = [];
+        for (const doc of userSnapshot.docs) {
+            const eligibility = await getUserVoteEligibility(doc.id, eventId);
+            if (eligibility.eligible) {
+                users.push({
+                    id: doc.id,
+                    ...eligibility.user
+                });
+            }
+        }
+        
+        // Calculer les statistiques
+        const form = { id: formId, ...formData };
+        const stats = calculateFormStats(form, responses, users);
+        
+        // Extraire les statistiques de ranking
+        const rankingStats = stats.byField[rankingField.id].rankingStats;
+        
+        res.json({
+            success: true,
+            rankingStats: rankingStats,
+            totalVotes: responses.length,
+            totalEligible: users.length
+        });
+        
+    } catch (error) {
+        console.error("❌ Erreur lors de la récupération des statistiques de ranking:", error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors de la récupération des statistiques'
+        });
+    }
+});
+
 app.get('/get-vote-status', async (req, res) => {
     try {
         const { eventId } = req.query;
@@ -3516,8 +3635,8 @@ function calculateFormStats(form, responses, users) {
             responses: {}
         };
 
-        if (field.type === 'radio' || field.type === 'checkbox' || field.type === 'select' || field.type === 'ranking') {
-            // Pour les champs à choix multiples
+        if (field.type === 'radio' || field.type === 'checkbox' || field.type === 'select') {
+            // Pour les champs à choix multiples (sauf ranking)
             field.options.forEach(option => {
                 stats.byField[field.id].responses[option] = 0;
             });
@@ -3540,6 +3659,64 @@ function calculateFormStats(form, responses, users) {
                     }
                 }
             });
+        } else if (field.type === 'ranking') {
+            // Pour les votes par ordre - statistiques spéciales
+            const rankingStats = {
+                totalVotes: 0,
+                averageRanks: {},
+                rankDistribution: {},
+                winnerByVotes: {}
+            };
+
+            // Initialiser les statistiques pour chaque option
+            field.options.forEach(option => {
+                rankingStats.averageRanks[option] = { sum: 0, count: 0, average: 0 };
+                rankingStats.winnerByVotes[option] = 0; // Nombre de fois classé 1er
+                
+                // Distribution des rangs pour chaque option
+                rankingStats.rankDistribution[option] = {};
+                for (let i = 1; i <= field.options.length; i++) {
+                    rankingStats.rankDistribution[option][i] = 0;
+                }
+            });
+
+            responses.forEach(response => {
+                const userResponse = response.responses[field.id];
+                if (userResponse && typeof userResponse === 'object') {
+                    rankingStats.totalVotes++;
+                    
+                    // Traiter chaque classement de l'utilisateur
+                    Object.entries(userResponse).forEach(([option, rank]) => {
+                        const rankNum = parseInt(rank);
+                        if (rankingStats.averageRanks[option] && rankNum >= 1 && rankNum <= field.options.length) {
+                            // Calculer la moyenne des rangs
+                            rankingStats.averageRanks[option].sum += rankNum;
+                            rankingStats.averageRanks[option].count++;
+                            
+                            // Distribution des rangs
+                            rankingStats.rankDistribution[option][rankNum]++;
+                            
+                            // Compter les premières places
+                            if (rankNum === 1) {
+                                rankingStats.winnerByVotes[option]++;
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Calculer les moyennes finales
+            Object.keys(rankingStats.averageRanks).forEach(option => {
+                const stats_option = rankingStats.averageRanks[option];
+                if (stats_option.count > 0) {
+                    stats_option.average = (stats_option.sum / stats_option.count).toFixed(2);
+                }
+            });
+
+            stats.byField[field.id].rankingStats = rankingStats;
+            
+            // Pour compatibilité avec l'affichage existant, on met aussi les premières places
+            stats.byField[field.id].responses = rankingStats.winnerByVotes;
         } else if (field.type === 'rating') {
             // Pour les évaluations
             const ratings = [1, 2, 3, 4, 5];
