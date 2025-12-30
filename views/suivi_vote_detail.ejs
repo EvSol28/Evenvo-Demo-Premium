@@ -606,7 +606,7 @@
                                         <td><%= user.role || '-' %></td>
                                         <td>
                                             <% if (user.hasVoted) { %>
-                                                <% if (voteForm && voteForm.fields && voteForm.fields.some(field => field.type === 'ranking')) { %>
+                                                <% if (form && form.fields && form.fields.some(field => field.type === 'ranking')) { %>
                                                     <button class="btn btn-sm btn-info" onclick="showRankingDetails('<%= user.id %>', '<%= user.name %>', '<%= user.surname %>')">
                                                         <i class="fas fa-eye"></i> Voté
                                                     </button>
@@ -651,7 +651,7 @@
         </div>
 
         <!-- Section spéciale pour les votes par ordre -->
-        <% if (voteForm && voteForm.fields && voteForm.fields.some(field => field.type === 'ranking')) { %>
+        <% if (form && form.fields && form.fields.some(field => field.type === 'ranking')) { %>
         <div class="content-block chart-block">
             <h2>Statistiques de classement</h2>
             
@@ -1224,14 +1224,14 @@
 
                 // Fonction pour rendre les graphiques de ranking
                 function renderRankingCharts() {
-                    const voteForm = <%- JSON.stringify(voteForm || {}) %>;
+                    const voteForm = <%- JSON.stringify(form || {}) %>;
                     
                     // Vérifier s'il y a des champs de ranking
                     const rankingField = voteForm.fields && voteForm.fields.find(field => field.type === 'ranking');
                     if (!rankingField) return;
                     
                     // Récupérer les statistiques de ranking depuis le serveur
-                    fetch(`/api/event/<%= eventId %>/ranking_stats/<%= voteForm.id %>`)
+                    fetch(`/api/event/<%= eventId %>/ranking_stats/<%= form.id %>`)
                         .then(response => response.json())
                         .then(data => {
                             if (data.success && data.rankingStats) {
@@ -1422,8 +1422,8 @@
             
             modal.show();
             
-            try {
-                const response = await fetch(`/api/event/<%= eventId %>/vote_responses/${userId}/<%= voteForm.id %>`);
+                try {
+                const response = await fetch(`/api/event/<%= eventId %>/vote_responses/${userId}/<%= form.id %>`);
                 const data = await response.json();
                 
                 if (data.success && data.responses) {
