@@ -943,7 +943,7 @@ app.get('/api/event/:eventId/active_vote_forms', async (req, res) => {
 // API pour soumettre une réponse de vote
 app.post('/api/event/:eventId/submit_vote', async (req, res) => {
     const { eventId } = req.params;
-    const { formId, userId, responses } = req.body;
+    const { formId, userId, responses, allowUpdate } = req.body;
 
     try {
         console.log(`📝 Soumission de vote pour l'événement: ${eventId}, formulaire: ${formId}, utilisateur: ${userId}`);
@@ -956,29 +956,43 @@ app.post('/api/event/:eventId/submit_vote', async (req, res) => {
             .limit(1)
             .get();
 
+        let isUpdate = false;
+        
         if (!existingVoteSnapshot.empty) {
-            console.log(`❌ Vote déjà existant pour utilisateur ${userId} sur formulaire ${formId}`);
-            return res.status(400).json({
-                success: false,
-                message: 'Vous avez déjà voté pour ce formulaire'
-            });
+            if (allowUpdate) {
+                // Mettre à jour le vote existant
+                const existingDoc = existingVoteSnapshot.docs[0];
+                await existingDoc.ref.update({
+                    responses: responses,
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                });
+                isUpdate = true;
+                console.log(`✅ Vote mis à jour avec succès pour utilisateur ${userId}`);
+            } else {
+                console.log(`❌ Vote déjà existant pour utilisateur ${userId} sur formulaire ${formId}`);
+                return res.status(400).json({
+                    success: false,
+                    message: 'Vous avez déjà voté pour ce formulaire'
+                });
+            }
+        } else {
+            // Créer un nouveau vote
+            const voteResponse = {
+                eventId: eventId,
+                formId: formId,
+                userId: userId,
+                responses: responses,
+                submittedAt: admin.firestore.FieldValue.serverTimestamp()
+            };
+
+            await firestore.collection('vote_responses').add(voteResponse);
+            console.log(`✅ Vote enregistré avec succès pour utilisateur ${userId}`);
         }
-
-        // Sauvegarder la réponse
-        const voteResponse = {
-            eventId: eventId,
-            formId: formId,
-            userId: userId,
-            responses: responses,
-            submittedAt: admin.firestore.FieldValue.serverTimestamp()
-        };
-
-        await firestore.collection('vote_responses').add(voteResponse);
-        console.log(`✅ Vote enregistré avec succès pour utilisateur ${userId}`);
 
         res.json({
             success: true,
-            message: 'Vote enregistré avec succès'
+            isUpdate: isUpdate,
+            message: isUpdate ? 'Vote mis à jour avec succès' : 'Vote enregistré avec succès'
         });
     } catch (error) {
         console.error("❌ Erreur lors de la soumission du vote:", error);
