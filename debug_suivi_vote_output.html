@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion Administrateur</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root {
+            --primary: #0D9488; --primary-light: #5EEAD4; --primary-dark: #0F766E;
+            --secondary: #22D3EE; --accent: #A78BFA; --dark: #1E293B; --light: #F8FAFC;
+            --gray: #64748B; --light_gray: #e2e8f0;
+            --form-section-bg: rgba(255, 255, 255, 0.9);
+            --form-border: rgba(13, 148, 136, 0.1);
+            --image-overlay-color: rgba(13, 148, 136, 0.35);
+            --input-bg: #EFF3F8;
+            --input-border: transparent;
+            --input-focus-border: var(--primary);
+            --input-text-color: var(--dark);
+            --placeholder-color: var(--gray);
+            --label-color: var(--gray);
+            --link-color: var(--primary-dark);
+            --link-hover-color: var(--primary);
+            --sans: 'Inter', 'Hellix', 'Arial', sans-serif;
+            --primary-success: #0D9488; --primary-dark-success: #0F766E;
+            --dark-text-swal: #1E293B; --gray-text-swal: #64748B;
+            --light-gray-border-swal: #e2e8f0;
+            --error-button-bg: rgba(239, 68, 68, 0.1); /* Rouge transparent */
+            --error-button-border: #B91C1C; /* Rouge foncé pour bordure */
+            --error-button-hover: #EF4444; /* Rouge standard pour survol */
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--sans);
+            background-color: #F1F5F9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-split-container {
+            display: flex;
+            width: 850px; height: 580px;
+            max-width: 95%; max-height: 90vh;
+            background-color: var(--light);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .image-section {
+            flex-basis: 45%;
+            background-image: url('https://images.unsplash.com/photo-1556761175-b413da4caead?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80');
+            background-size: cover; background-position: center;
+            position: relative; display: flex; flex-direction: column;
+            justify-content: space-between; align-items: center;
+            padding: 3rem 2rem; color: white; text-align: center;
+        }
+        .image-section::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--image-overlay-color);
+            z-index: 1;
+        }
+        .image-content {
+            position: relative; z-index: 2; width: 100%;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100%; justify-content: space-between;
+        }
+        .image-text { margin-bottom: auto; margin-top: 2rem; }
+        .image-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .image-text h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+        .image-text p {
+            font-size: 0.95rem;
+            opacity: 0.95;
+            line-height: 1.5;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            max-width: 320px;
+            margin: 0 auto;
+        }
+        .image-logo img {
+            height: 25px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)) brightness(0) invert(1);
+        }
+
+        .form-section {
+            flex-basis: 55%;
+            padding: 2.5rem 3.5rem;
+            display: flex; flex-direction: column; justify-content: center;
+            background-color: var(--form-section-bg);
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            border-left: 1px solid var(--form-border);
+            position: relative;
+        }
+        .form-logo-header { text-align: center; margin-bottom: 1.5rem; }
+        .form-logo-header img { height: 65px; max-width: 150px; }
+        .login-title { color: var(--dark); font-weight: 700; font-size: 1.8rem; margin-bottom: 2rem; text-align: center; }
+        .form-group { margin-bottom: 1.25rem; text-align: left; }
+        .form-group label { display: block; font-size: 0.8rem; color: var(--gray); margin-bottom: 0.4rem; font-weight: 500; }
+        .form-control {
+            background-color: var(--input-bg); border: 1.5px solid var(--input-border); border-radius: 10px;
+            padding: 0.8rem 1rem; font-size: 1rem; color: var(--input-text-color); box-shadow: none;
+            width: 100%; transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        }
+        .form-control::placeholder { color: var(--placeholder-color); opacity: 0.7; font-size: 0.95rem; }
+        .form-control:focus { outline: none; background-color: white; border-color: var(--input-focus-border); box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.15); }
+        .options-row { display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; margin-bottom: 1.75rem; font-size: 0.85rem; }
+        .form-check { display: flex; align-items: center; padding-left: 0; }
+        .form-check-input { width: 1.1em; height: 1.1em; margin-right: 0.5em; cursor: pointer; appearance: none; background-color: transparent; border: 1.5px solid var(--light_gray); border-radius: 4px; transition: background-color 0.2s ease, border-color 0.2s ease; position: relative; flex-shrink: 0; }
+        .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
+        .form-check-input:checked::before { content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: white; font-size: 0.7em; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .form-check-input:focus { box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.25); border-color: var(--primary); outline: none; }
+        .form-check-label { cursor: pointer; color: var(--gray); padding-top: 0; }
+        .forgot-password-link { color: var(--link-color); text-decoration: none; transition: color 0.2s ease; }
+        .forgot-password-link:hover { color: var(--link-hover-color); text-decoration: underline; }
+        .btn-login { display: inline-flex; align-items: center; justify-content: center; width: 100%; color: var(--primary); font-weight: 600; font-size: 1rem; padding: 0.8rem 1.2rem; border-radius: 10px; background: rgba(13, 148, 136, 0.1); border: 1px solid rgba(13, 148, 136, 0.2); transition: all 0.25s ease; text-decoration: none; cursor: pointer; margin-top: 0.5rem; }
+        .btn-login:hover { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); transform: translateY(-2px); }
+        .btn-login:focus { outline: none; box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.35); }
+        .btn-login:disabled { background-color: #e9ecef; color: #adb5bd; border-color: #dee2e6; box-shadow: none; transform: none; cursor: not-allowed; opacity: 0.7; }
+        .btn-login .spinner-border { width: 1.1rem; height: 1.1rem; margin-right: 0.5rem; color: var(--primary); }
+
+        @media (max-width: 850px) {
+            .login-split-container { flex-direction: column; width: 95%; max-width: 420px; height: auto; max-height: 95vh; margin: 2rem 0; }
+            .image-section { display: none; }
+            .form-section { flex-basis: auto; padding: 2.5rem 2rem; background-color: var(--light); backdrop-filter: none; border-left: none; }
+            .form-logo-header { margin-bottom: 1.5rem; }
+            .login-title { text-align: center; }
+        }
+
+        .swal2-popup { border-radius: 12px !important; font-family: var(--sans) !important; }
+        .swal2-title { color: var(--dark-text-swal) !important; font-weight: 600 !important; }
+        .swal2-html-container, .swal2-input-label, .swal2-input { color: var(--gray-text-swal) !important; }
+        .swal2-input { border-color: var(--light-gray-border-swal) !important; border-radius: 8px !important; }
+        .swal2-input:focus { border-color: var(--primary-success) !important; box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.25) !important; }
+        .swal2-confirm, .swal2-cancel {
+            border-radius: 8px !important; /* Coins légèrement arrondis */
+            padding: 0.6rem 1.2rem !important; /* Padding réduit pour un bouton plus petit */
+            font-weight: 500 !important;
+            font-size: 0.9rem !important; /* Texte légèrement plus petit */
+            transition: all 0.25s ease !important;
+            box-shadow: none !important;
+            min-width: 80px !important; /* Largeur minimale réduite pour un bouton plus petit */
+            text-align: center !important;
+        }
+        /* Bouton OK pour succès */
+        .swal2-confirm.swal-confirm-button-success {
+            background-color: rgba(94, 234, 212, 0.2) !important; /* Vert clair transparent */
+            border: 1px solid var(--primary-dark) !important; /* Bordure vert foncé */
+            color: var(--primary-dark) !important;
+        }
+        .swal2-confirm.swal-confirm-button-success:hover {
+            background-color: var(--primary-dark) !important; /* Fond vert foncé au survol */
+            color: white !important;
+            border-color: var(--primary-dark) !important;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25) !important;
+        }
+        /* Bouton OK pour erreur */
+        .swal2-confirm.swal2-styled.swal2-default-outline:not(.swal-confirm-button-success) {
+            background-color: var(--error-button-bg) !important; /* Rouge transparent */
+            border: 1px solid var(--error-button-border) !important; /* Bordure rouge foncé */
+            color: var(--error-button-border) !important;
+        }
+        .swal2-confirm.swal2-styled.swal2-default-outline:not(.swal-confirm-button-success):hover {
+            background-color: var(--error-button-hover) !important; /* Rouge standard au survol */
+            color: white !important;
+            border-color: var(--error-button-hover) !important;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25) !important;
+        }
+        .swal2-cancel.swal2-styled.swal2-default-outline {
+            background-color: rgba(100, 116, 139, 0.1) !important;
+            border: 1px solid rgba(100, 116, 139, 0.2) !important;
+            color: var(--gray-text-swal) !important;
+        }
+        .swal2-cancel.swal2-styled.swal2-default-outline:hover {
+            background-color: var(--gray-text-swal) !important;
+            border-color: var(--gray-text-swal) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-split-container">
+        <!-- Colonne Gauche (Image) -->
+        <div class="image-section">
+            <div class="image-content">
+                <div class="image-text">
+                    <h1>Evenvo</h1>
+                    <h2>La Solution SaaS pour vos Évènements</h2>
+                    <p>Centralisez, gérez et analysez chaque aspect de vos assemblées et votes.</p>
+                </div>
+                <div class="image-logo">
+                    <img src="/assets/evenvo.png" alt="Evenvo Logo">
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne Droite (Formulaire) -->
+        <div class="form-section">
+            <div class="form-logo-header">
+                <img src="/assets/logo.png" alt="Logo Principal">
+            </div>
+
+            <h2 class="login-title">Connexion Administrateur</h2>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="login">Adresse Email</label>
+                    <input type="email" id="login" class="form-control" name="login" required placeholder="votreadresse@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input type="password" id="password" class="form-control" name="password" required placeholder="••••••••">
+                </div>
+
+                <div class="options-row">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="rememberMeCheck">
+                        <label class="form-check-label" for="rememberMeCheck">
+                            Rester connecté
+                        </label>
+                    </div>
+                    <a href="#" id="forgotPasswordLink" class="forgot-password-link">Mot de passe oublié ?</a>
+                </div>
+
+                <button type="submit" class="btn btn-login">
+                    Se connecter
+                </button>
+            </form>
+
+            <div style="height: 1.5rem;"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        async function loadFirebaseConfig() {
+            try {
+                const response = await fetch('/firebase-config');
+                if (!response.ok) throw new Error(`Erreur lors du chargement de la configuration Firebase: ${response.statusText}`);
+                return await response.json();
+            } catch (error) {
+                console.error('Erreur lors du chargement de la configuration :', error);
+                throw error;
+            }
+        }
+
+        loadFirebaseConfig()
+            .then(firebaseConfig => {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                window.auth = firebase.auth();
+
+                document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const loginButton = e.target.querySelector('button[type="submit"]');
+                    const originalButtonText = "Se connecter";
+                    loginButton.disabled = true;
+                    loginButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Connexion...`;
+
+                    const email = document.getElementById('login').value.trim();
+                    const password = document.getElementById('password').value.trim();
+
+                    if (!email || !password) {
+                        Swal.fire({
+                            icon: 'warning', title: 'Champs manquants',
+                            text: 'Veuillez fournir un email et un mot de passe.',
+                            customClass: { confirmButton: 'swal2-confirm swal2-styled swal2-default-outline' }
+                        });
+                        loginButton.disabled = false;
+                        loginButton.innerHTML = originalButtonText;
+                        return;
+                    }
+
+                    try {
+                        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                        const user = userCredential.user;
+
+                        const response = await fetch('/verify_superadmin', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: user.email })
+                        });
+                        const result = await response.json();
+                        if (!response.ok) {
+                            await auth.signOut();
+                            throw new Error(result.error || 'Erreur lors de la vérification.');
+                        }
+
+                        const sessionResponse = await fetch('/set_session', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: user.email, uid: user.uid })
+                        });
+                        const sessionResult = await sessionResponse.json();
+                        if (!sessionResponse.ok) {
+                            await auth.signOut();
+                            throw new Error(sessionResult.error || 'Erreur lors de la création de la session.');
+                        }
+
+                        Swal.fire({
+                            icon: 'success', title: 'Connexion réussie',
+                            text: 'Vous êtes connecté en tant que super administrateur.',
+                            customClass: { confirmButton: 'swal2-confirm swal2-styled swal-confirm-button-success' }
+                        }).then(() => {
+                            window.location.href = '/dashboard';
+                        });
+                    } catch (error) {
+                        console.error('Erreur détaillée :', error);
+                        let errorMessage = 'Une erreur est survenue.';
+                        if (error.code === 'auth/invalid-login-credentials') errorMessage = 'Email ou mot de passe incorrect.';
+                        else if (error.code === 'auth/wrong-password') errorMessage = 'Mot de passe incorrect.';
+                        else if (error.code === 'auth/user-not-found') errorMessage = 'Aucun compte associé à cet email.';
+                        else if (error.code === 'auth/invalid-email') errorMessage = 'Adresse email invalide.';
+                        else if (error.code === 'auth/too-many-requests') errorMessage = 'Trop de tentatives. Réessayez plus tard.';
+                        else errorMessage = error.message;
+
+                        Swal.fire({
+                            icon: 'error', title: 'Erreur de connexion', text: errorMessage,
+                            customClass: { confirmButton: 'swal2-confirm swal2-styled swal2-default-outline' }
+                        });
+                        loginButton.disabled = false;
+                        loginButton.innerHTML = originalButtonText;
+                    }
+                });
+
+                document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Mot de passe oublié ?',
+                        text: 'Entrez votre adresse email pour recevoir un lien de réinitialisation.',
+                        input: 'email', inputPlaceholder: 'Votre email',
+                        inputAttributes: { autocapitalize: 'off', autocorrect: 'off' },
+                        showCancelButton: true, confirmButtonText: 'Envoyer', cancelButtonText: 'Annuler',
+                        customClass: {
+                            confirmButton: 'swal2-confirm swal2-styled swal2-default-outline',
+                            cancelButton: 'swal2-cancel swal2-styled swal2-default-outline'
+                        },
+                        preConfirm: async (email) => {
+                            if (!email) {
+                                Swal.showValidationMessage('Veuillez entrer un email.');
+                                return false;
+                            }
+                            try {
+                                const verifyResponse = await fetch('/verify_superadmin', {
+                                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email })
+                                });
+                                const verifyResult = await verifyResponse.json();
+                                if (!verifyResponse.ok) throw new Error(verifyResult.error || 'Cet email n\'existe pas.');
+
+                                const signInMethods = await auth.fetchSignInMethodsForEmail(email);
+                                if (signInMethods.length === 0) {
+                                    const createResponse = await fetch('/sync_auth_user', {
+                                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ email })
+                                    });
+                                    const createResult = await createResponse.json();
+                                    if (!createResponse.ok) throw new Error(createResult.error || 'Erreur de synchronisation.');
+                                }
+
+                                await auth.sendPasswordResetEmail(email);
+                                return true;
+                            } catch (error) {
+                                console.error('Erreur lors de la réinitialisation:', error);
+                                Swal.showValidationMessage(error.message);
+                                return false;
+                            }
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({
+                                icon: 'success', title: 'Email envoyé',
+                                text: 'Un lien de réinitialisation a été envoyé à votre adresse email.',
+                                customClass: { confirmButton: 'swal2-confirm swal2-styled swal-confirm-button-success' }
+                            });
+                        }
+                    });
+                });
+            })
+            .catch(error => {
+                console.error('Erreur lors de l\'initialisation de Firebase :', error);
+                Swal.fire({
+                    icon: 'error', title: 'Erreur',
+                    text: 'Erreur d\'initialisation de Firebase. Veuillez vérifier votre connexion ou contacter l\'administrateur.',
+                    customClass: { confirmButton: 'swal2-confirm swal2-styled swal2-default-outline' }
+                });
+                const form = document.getElementById('loginForm');
+                if (form) {
+                    form.style.opacity = '0.5';
+                    form.querySelectorAll('input, button').forEach(el => el.disabled = true);
+                }
+            });
+    </script>
+</body>
+</html>
