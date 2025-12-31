@@ -398,6 +398,59 @@
             display: inline-block;
         }
 
+        /* --- Styles pour les badges avec effet glass --- */
+        .badge {
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: 1px solid transparent;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .badge-success {
+            background: rgba(13, 148, 136, 0.15);
+            color: #0D9488;
+            border-color: rgba(13, 148, 136, 0.3);
+            box-shadow: 0 2px 8px rgba(13, 148, 136, 0.1);
+        }
+        
+        .badge-secondary {
+            background: rgba(107, 114, 128, 0.15);
+            color: #6B7280;
+            border-color: rgba(107, 114, 128, 0.3);
+            box-shadow: 0 2px 8px rgba(107, 114, 128, 0.1);
+        }
+        
+        .badge-info {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3B82F6;
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+        
+        .badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Styles pour les badges de statistiques */
+        .badge-total {
+            background: rgba(100, 116, 139, 0.15);
+            color: #64748B;
+            border-color: rgba(100, 116, 139, 0.3);
+            box-shadow: 0 2px 8px rgba(100, 116, 139, 0.1);
+        }
+        
+        .badge-choice-0 { background: rgba(75, 192, 192, 0.15); color: #4BC0C0; border-color: rgba(75, 192, 192, 0.3); }
+        .badge-choice-1 { background: rgba(247, 70, 74, 0.15); color: #F7464A; border-color: rgba(247, 70, 74, 0.3); }
+        .badge-choice-2 { background: rgba(255, 206, 86, 0.15); color: #FFCE56; border-color: rgba(255, 206, 86, 0.3); }
+        .badge-choice-3 { background: rgba(153, 102, 255, 0.15); color: #9966FF; border-color: rgba(153, 102, 255, 0.3); }
+        .badge-choice-4 { background: rgba(255, 159, 64, 0.15); color: #FF9F40; border-color: rgba(255, 159, 64, 0.3); }
+        .badge-choice-5 { background: rgba(54, 162, 235, 0.15); color: #36A2EB; border-color: rgba(54, 162, 235, 0.3); }
+
         /* --- Styles pour les graphiques --- */
         .chart-block { text-align: center; }
         .chart-canvas-container { 
@@ -424,6 +477,71 @@
             color: var(--gray); 
             line-height: 1.4; 
             text-align: center; 
+        }
+
+        /* --- Styles pour les cercles de statistiques --- */
+        .vote-stats-circles {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .vote-circle {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+        }
+        
+        .vote-circle svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        
+        .vote-circle-bg {
+            fill: none;
+            stroke: #e5e7eb;
+            stroke-width: 8;
+        }
+        
+        .vote-circle-progress {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.6s ease;
+        }
+        
+        .vote-circle-voted {
+            stroke: #0D9488;
+        }
+        
+        .vote-circle-not-voted {
+            stroke: #6b7280;
+        }
+        
+        .vote-circle-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        
+        .vote-circle-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            line-height: 1;
+        }
+        
+        .vote-circle-label {
+            font-size: 0.75rem;
+            color: var(--gray);
+            font-weight: 500;
+            margin-top: 0.25rem;
         }
 
         /* --- SweetAlert --- */
@@ -607,16 +725,36 @@
                                         <td>
                                             <% if (user.hasVoted) { %>
                                                 <% if (form && form.fields && form.fields.some(field => field.type === 'ranking')) { %>
-                                                    <button class="btn btn-sm btn-info" onclick="showRankingDetails('<%= user.id %>', '<%= user.name %>', '<%= user.surname %>')">
-                                                        <i class="fas fa-eye"></i> Voté
-                                                    </button>
+                                                    <span class="badge" onclick="showRankingDetails('<%= user.id %>', '<%= user.name %>', '<%= user.surname %>')" 
+                                                          style="background: rgba(13, 148, 136, 0.15); 
+                                                                 color: rgba(13, 148, 136, 0.9); 
+                                                                 border: 1px solid rgba(13, 148, 136, 0.3); 
+                                                                 backdrop-filter: blur(10px); 
+                                                                 cursor: pointer; 
+                                                                 padding: 6px 12px; 
+                                                                 border-radius: 20px; 
+                                                                 font-size: 12px; 
+                                                                 font-weight: 600; 
+                                                                 transition: all 0.3s ease;">
+                                                        <i class="fas fa-eye" style="margin-right: 5px;"></i> Voté
+                                                    </span>
                                                 <% } else { %>
-                                                    <span class="badge badge-success">
+                                                    <span class="badge" style="background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%); 
+                                                                               color: white; 
+                                                                               border-radius: 20px; 
+                                                                               padding: 8px 16px; 
+                                                                               font-size: 12px; 
+                                                                               font-weight: 600;">
                                                         <%= user.voteChoice || 'Voté' %>
                                                     </span>
                                                 <% } %>
                                             <% } else { %>
-                                                <span class="badge badge-secondary">Non voté</span>
+                                                <span class="badge" style="background: #6c757d; 
+                                                                           color: white; 
+                                                                           border-radius: 20px; 
+                                                                           padding: 8px 16px; 
+                                                                           font-size: 12px; 
+                                                                           font-weight: 600;">Non voté</span>
                                             <% } %>
                                         </td>
                                     </tr>
@@ -650,52 +788,6 @@
             <p id="totalStats" class="chart-stats">Chargement des statistiques...</p>
         </div>
 
-        <!-- Section spéciale pour les votes par ordre -->
-        <% if (form && form.fields && form.fields.some(field => field.type === 'ranking')) { %>
-        <div class="content-block chart-block">
-            <h2>Statistiques de classement</h2>
-            
-            <!-- Tableau de classement final -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <h4>Classement final (par nombre de 1ères places)</h4>
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Position</th>
-                                    <th>Option</th>
-                                    <th>1ères places</th>
-                                    <th>Rang moyen</th>
-                                </tr>
-                            </thead>
-                            <tbody id="finalRankingTable">
-                                <!-- Rempli par JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <div class="col-md-6">
-                    <h4>Graphique du classement</h4>
-                    <div class="chart-canvas-container">
-                        <canvas id="rankingChart" class="chart-size"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Graphiques de distribution des rangs -->
-            <div class="row">
-                <div class="col-12">
-                    <h4>Distribution des rangs par option</h4>
-                    <div class="chart-canvas-container" style="height: 400px;">
-                        <canvas id="rankDistributionChart" class="chart-size"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <% } %>
-
         <% if (chartData && chartData.length > 0) { %>
         <div class="content-block chart-block">
             <h2>Statistiques par Profil</h2>
@@ -710,6 +802,45 @@
                         <p id="<%= roleIdSuffix %>Stats" class="chart-stats">Chargement...</p>
                     </div>
                 <% }); %>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Section spéciale pour les votes par ordre -->
+        <% if (form && form.fields && form.fields.some(field => field.type === 'ranking')) { %>
+        <div class="content-block chart-block">
+            <h2>Statistiques de classement</h2>
+            
+            <!-- Tableau de classement final -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 style="color: var(--primary-dark); font-weight: 600; margin-bottom: 20px;">Classement final</h4>
+                    <div class="table-responsive">
+                        <table class="table table-striped" style="border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(13, 148, 136, 0.1);">
+                            <thead style="background: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%); color: white;">
+                                <tr>
+                                    <th style="border: none; padding: 15px;">Classement</th>
+                                    <th style="border: none; padding: 15px;">Option</th>
+                                    <th style="border: none; padding: 15px;">Votes 1ère place</th>
+                                    <th style="border: none; padding: 15px;">Rang moyen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="finalRankingTable" style="background: white;">
+                                <!-- Rempli par JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Graphique du classement -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h4 style="color: var(--primary-dark); font-weight: 600; margin-bottom: 20px;">Graphique du classement</h4>
+                    <div class="chart-canvas-container">
+                        <canvas id="rankingChart" class="chart-size"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
         <% } %>
@@ -961,6 +1092,9 @@
                     if (totalChartElement && totalStatsElement) {
                         destroyChart('totalChart');
                         if (globalStats && globalStats.total > 0) {
+                            // Vérifier si c'est un vote par ordre (ranking)
+                            const isRankingVote = formChoices.length === 0 || (voteForm.fields && voteForm.fields.some(field => field.type === 'ranking'));
+                            
                             // Préparer les données pour le graphique global
                             const chartLabels = [];
                             const chartValues = [];
@@ -977,24 +1111,41 @@
                                 { bg: 'rgba(255, 159, 64, 0.08)', border: 'rgba(255, 159, 64, 0.5)', hover: 'rgba(255, 159, 64, 1)' }
                             ];
 
-                            // Ajouter les choix du formulaire
-                            formChoices.forEach((choice, index) => {
-                                const count = globalStats.choices[choice] || 0;
-                                if (count > 0) {
-                                    chartLabels.push(choice);
-                                    chartValues.push(count);
-                                    const colorIndex = index % colors.length;
-                                    backgroundColors.push(colors[colorIndex].bg);
-                                    borderColors.push(colors[colorIndex].border);
+                            if (isRankingVote) {
+                                // Pour les votes par ordre, afficher "Voté" et "Non voté"
+                                if (globalStats.voted > 0) {
+                                    chartLabels.push('Voté');
+                                    chartValues.push(globalStats.voted);
+                                    backgroundColors.push('rgba(13, 148, 136, 0.15)');
+                                    borderColors.push('rgba(13, 148, 136, 0.5)');
                                 }
-                            });
+                                
+                                if (globalStats.notVoted > 0) {
+                                    chartLabels.push('Non voté');
+                                    chartValues.push(globalStats.notVoted);
+                                    backgroundColors.push('rgba(107, 114, 128, 0.15)');
+                                    borderColors.push('rgba(107, 114, 128, 0.5)');
+                                }
+                            } else {
+                                // Pour les autres types de votes, afficher les choix spécifiques
+                                formChoices.forEach((choice, index) => {
+                                    const count = globalStats.choices[choice] || 0;
+                                    if (count > 0) {
+                                        chartLabels.push(choice);
+                                        chartValues.push(count);
+                                        const colorIndex = index % colors.length;
+                                        backgroundColors.push(colors[colorIndex].bg);
+                                        borderColors.push(colors[colorIndex].border);
+                                    }
+                                });
 
-                            // Ajouter "Non voté" s'il y en a
-                            if (globalStats.notVoted > 0) {
-                                chartLabels.push('Non voté');
-                                chartValues.push(globalStats.notVoted);
-                                backgroundColors.push('rgba(108, 117, 125, 0.08)');
-                                borderColors.push('rgba(108, 117, 125, 0.5)');
+                                // Ajouter "Non voté" s'il y en a
+                                if (globalStats.notVoted > 0) {
+                                    chartLabels.push('Non voté');
+                                    chartValues.push(globalStats.notVoted);
+                                    backgroundColors.push('rgba(108, 117, 125, 0.08)');
+                                    borderColors.push('rgba(108, 117, 125, 0.5)');
+                                }
                             }
 
                             if (chartValues.length > 0) {
@@ -1054,18 +1205,35 @@
 
                                 // Afficher les statistiques
                                 let statsHtml = '';
-                                formChoices.forEach((choice, index) => {
-                                    const count = globalStats.choices[choice] || 0;
-                                    if (count > 0) {
-                                        const percentage = Math.round((count / globalStats.total) * 100);
-                                        const colorClass = `badge-choice-${index % 6}`;
-                                        statsHtml += `<span class="badge ${colorClass}">${choice}: ${count} (${percentage}%)</span>`;
+                                
+                                if (isRankingVote) {
+                                    // Pour les votes par ordre
+                                    if (globalStats.voted > 0) {
+                                        const percentage = Math.round((globalStats.voted / globalStats.total) * 100);
+                                        statsHtml += `<span class="badge badge-success">Voté: ${globalStats.voted} (${percentage}%)</span>`;
                                     }
-                                });
-                                if (globalStats.notVoted > 0) {
-                                    const percentage = Math.round((globalStats.notVoted / globalStats.total) * 100);
-                                    statsHtml += `<span class="badge badge-secondary">Non voté: ${globalStats.notVoted} (${percentage}%)</span>`;
+                                    
+                                    if (globalStats.notVoted > 0) {
+                                        const percentage = Math.round((globalStats.notVoted / globalStats.total) * 100);
+                                        statsHtml += `<span class="badge badge-secondary">Non voté: ${globalStats.notVoted} (${percentage}%)</span>`;
+                                    }
+                                } else {
+                                    // Pour les autres types de votes
+                                    formChoices.forEach((choice, index) => {
+                                        const count = globalStats.choices[choice] || 0;
+                                        if (count > 0) {
+                                            const percentage = Math.round((count / globalStats.total) * 100);
+                                            const colorClass = `badge-choice-${index % 6}`;
+                                            statsHtml += `<span class="badge ${colorClass}">${choice}: ${count} (${percentage}%)</span>`;
+                                        }
+                                    });
+                                    
+                                    if (globalStats.notVoted > 0) {
+                                        const percentage = Math.round((globalStats.notVoted / globalStats.total) * 100);
+                                        statsHtml += `<span class="badge badge-secondary">Non voté: ${globalStats.notVoted} (${percentage}%)</span>`;
+                                    }
                                 }
+                                
                                 statsHtml += `<span class="badge badge-total">Total: ${globalStats.total}</span>`;
                                 totalStatsElement.innerHTML = statsHtml;
                             } else { 
@@ -1188,6 +1356,14 @@
 
                                         // Afficher les statistiques pour ce rôle
                                         let roleStatsHtml = '';
+                                        
+                                        // Ajouter "Voté" en premier
+                                        if (data.voted > 0) {
+                                            const percentage = Math.round((data.voted / total) * 100);
+                                            roleStatsHtml += `<span class="badge badge-success">Voté: ${data.voted} (${percentage}%)</span>`;
+                                        }
+                                        
+                                        // Puis les choix spécifiques
                                         formChoices.forEach((choice, index) => {
                                             const count = data.choices[choice] || 0;
                                             if (count > 0) {
@@ -1196,10 +1372,14 @@
                                                 roleStatsHtml += `<span class="badge ${colorClass}">${choice}: ${count} (${percentage}%)</span>`;
                                             }
                                         });
+                                        
+                                        // Puis "Non voté"
                                         if (data.notVoted > 0) {
                                             const percentage = Math.round((data.notVoted / total) * 100);
                                             roleStatsHtml += `<span class="badge badge-secondary">Non voté: ${data.notVoted} (${percentage}%)</span>`;
                                         }
+                                        
+                                        // Enfin le total
                                         roleStatsHtml += `<span class="badge badge-total">Total: ${total}</span>`;
                                         console.log('🔥 KIRO DEBUG JS - HTML des stats:', roleStatsHtml);
                                         statsElement.innerHTML = roleStatsHtml;
@@ -1237,7 +1417,6 @@
                             if (data.success && data.rankingStats) {
                                 renderFinalRankingTable(data.rankingStats);
                                 renderRankingChart(data.rankingStats);
-                                renderRankDistributionChart(data.rankingStats);
                             }
                         })
                         .catch(error => {
@@ -1266,12 +1445,27 @@
                     let html = '';
                     sortedOptions.forEach((item, index) => {
                         const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                        const rowStyle = index < 3 ? 'background: rgba(13, 148, 136, 0.05);' : '';
+                        const firstPlacesStyle = item.firstPlaces > 0 
+                            ? 'background: rgba(13, 148, 136, 0.15); color: rgba(13, 148, 136, 0.9); border: 1px solid rgba(13, 148, 136, 0.3); backdrop-filter: blur(10px);'
+                            : 'background: rgba(108, 117, 125, 0.15); color: rgba(108, 117, 125, 0.9); border: 1px solid rgba(108, 117, 125, 0.3); backdrop-filter: blur(10px);';
+                        
+                        const avgRankStyle = 'background: rgba(108, 117, 125, 0.15); color: rgba(108, 117, 125, 0.9); border: 1px solid rgba(108, 117, 125, 0.3); backdrop-filter: blur(10px);';
+                        
                         html += `
-                            <tr class="${index < 3 ? 'table-warning' : ''}">
-                                <td>${medal} ${index + 1}</td>
-                                <td><strong>${item.option}</strong></td>
-                                <td><span class="badge bg-success">${item.firstPlaces}</span></td>
-                                <td><span class="badge bg-info">${item.averageRank}</span></td>
+                            <tr style="${rowStyle}">
+                                <td style="padding: 15px; font-weight: 600;">${medal} ${index + 1}</td>
+                                <td style="padding: 15px;"><strong>${item.option}</strong></td>
+                                <td style="padding: 15px;">
+                                    <span class="badge" style="${firstPlacesStyle} padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                        ${item.firstPlaces}
+                                    </span>
+                                </td>
+                                <td style="padding: 15px;">
+                                    <span class="badge" style="${avgRankStyle} padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                        ${item.averageRank === 999 ? 'N/A' : item.averageRank}
+                                    </span>
+                                </td>
                             </tr>
                         `;
                     });
@@ -1291,25 +1485,13 @@
                         data: {
                             labels: options,
                             datasets: [{
-                                label: 'Nombre de 1ères places',
+                                label: 'Nombre de votes 1ère place',
                                 data: firstPlaces,
-                                backgroundColor: [
-                                    'rgba(255, 215, 0, 0.8)',   // Or
-                                    'rgba(192, 192, 192, 0.8)', // Argent
-                                    'rgba(205, 127, 50, 0.8)',  // Bronze
-                                    'rgba(75, 192, 192, 0.8)',
-                                    'rgba(255, 99, 132, 0.8)',
-                                    'rgba(54, 162, 235, 0.8)'
-                                ],
-                                borderColor: [
-                                    'rgba(255, 215, 0, 1)',
-                                    'rgba(192, 192, 192, 1)',
-                                    'rgba(205, 127, 50, 1)',
-                                    'rgba(75, 192, 192, 1)',
-                                    'rgba(255, 99, 132, 1)',
-                                    'rgba(54, 162, 235, 1)'
-                                ],
-                                borderWidth: 2
+                                backgroundColor: 'rgba(13, 148, 136, 0.8)', // Couleur de l'en-tête
+                                borderColor: 'rgba(13, 148, 136, 1)',
+                                borderWidth: 2,
+                                borderRadius: 8,
+                                borderSkipped: false,
                             }]
                         },
                         options: {
@@ -1321,11 +1503,36 @@
                                 }
                             },
                             scales: {
+                                x: {
+                                    grid: {
+                                        display: false
+                                    },
+                                    ticks: {
+                                        color: '#64748B',
+                                        font: {
+                                            size: 12,
+                                            weight: '500'
+                                        }
+                                    }
+                                },
                                 y: {
                                     beginAtZero: true,
+                                    grid: {
+                                        color: 'rgba(148, 163, 184, 0.1)',
+                                        drawBorder: false
+                                    },
                                     ticks: {
-                                        stepSize: 1
+                                        stepSize: 1,
+                                        color: '#64748B',
+                                        font: {
+                                            size: 12
+                                        }
                                     }
+                                }
+                            },
+                            elements: {
+                                bar: {
+                                    borderRadius: 4
                                 }
                             }
                         }
