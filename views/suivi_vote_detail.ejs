@@ -1093,7 +1093,8 @@
                         destroyChart('totalChart');
                         if (globalStats && globalStats.total > 0) {
                             // Vérifier si c'est un vote par ordre (ranking)
-                            const isRankingVote = formChoices.length === 0 || (voteForm.fields && voteForm.fields.some(field => field.type === 'ranking'));
+                            const form = <%- JSON.stringify(form || {}) %>;
+                            const isRankingVote = formChoices.length === 0 || (form.fields && form.fields.some(field => field.type === 'ranking'));
                             
                             // Préparer les données pour le graphique global
                             const chartLabels = [];
