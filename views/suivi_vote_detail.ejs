@@ -398,6 +398,26 @@
             display: inline-block;
         }
 
+        /* --- Styles pour les tableaux avec en-têtes glass --- */
+        .table thead th {
+            background: rgba(13, 148, 136, 0.15);
+            color: #0D9488;
+            border-color: rgba(13, 148, 136, 0.3);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            font-weight: 600;
+            border-bottom: 2px solid rgba(13, 148, 136, 0.3);
+            box-shadow: 0 2px 8px rgba(13, 148, 136, 0.1);
+        }
+        
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(13, 148, 136, 0.02);
+        }
+        
+        .table-warning {
+            background-color: rgba(255, 193, 7, 0.1) !important;
+        }
+
         /* --- Styles pour les badges avec effet glass --- */
         .badge {
             border-radius: 20px;
@@ -1358,29 +1378,34 @@
                                         // Afficher les statistiques pour ce rôle
                                         let roleStatsHtml = '';
                                         
-                                        // Ajouter "Voté" en premier
-                                        if (data.voted > 0) {
-                                            const percentage = Math.round((data.voted / total) * 100);
-                                            roleStatsHtml += `<span class="badge badge-success">Voté: ${data.voted} (${percentage}%)</span>`;
-                                        }
-                                        
-                                        // Puis les choix spécifiques
-                                        formChoices.forEach((choice, index) => {
-                                            const count = data.choices[choice] || 0;
-                                            if (count > 0) {
-                                                const percentage = Math.round((count / total) * 100);
-                                                const colorClass = `badge-choice-${index % 6}`;
-                                                roleStatsHtml += `<span class="badge ${colorClass}">${choice}: ${count} (${percentage}%)</span>`;
+                                        if (isRankingVote) {
+                                            // Pour les votes par ordre
+                                            if (data.voted > 0) {
+                                                const percentage = Math.round((data.voted / total) * 100);
+                                                roleStatsHtml += `<span class="badge badge-success">Voté: ${data.voted} (${percentage}%)</span>`;
                                             }
-                                        });
-                                        
-                                        // Puis "Non voté"
-                                        if (data.notVoted > 0) {
-                                            const percentage = Math.round((data.notVoted / total) * 100);
-                                            roleStatsHtml += `<span class="badge badge-secondary">Non voté: ${data.notVoted} (${percentage}%)</span>`;
+                                            
+                                            if (data.notVoted > 0) {
+                                                const percentage = Math.round((data.notVoted / total) * 100);
+                                                roleStatsHtml += `<span class="badge badge-secondary">Non voté: ${data.notVoted} (${percentage}%)</span>`;
+                                            }
+                                        } else {
+                                            // Pour les autres types de votes
+                                            formChoices.forEach((choice, index) => {
+                                                const count = data.choices[choice] || 0;
+                                                if (count > 0) {
+                                                    const percentage = Math.round((count / total) * 100);
+                                                    const colorClass = `badge-choice-${index % 6}`;
+                                                    roleStatsHtml += `<span class="badge ${colorClass}">${choice}: ${count} (${percentage}%)</span>`;
+                                                }
+                                            });
+                                            
+                                            if (data.notVoted > 0) {
+                                                const percentage = Math.round((data.notVoted / total) * 100);
+                                                roleStatsHtml += `<span class="badge badge-secondary">Non voté: ${data.notVoted} (${percentage}%)</span>`;
+                                            }
                                         }
                                         
-                                        // Enfin le total
                                         roleStatsHtml += `<span class="badge badge-total">Total: ${total}</span>`;
                                         console.log('🔥 KIRO DEBUG JS - HTML des stats:', roleStatsHtml);
                                         statsElement.innerHTML = roleStatsHtml;
@@ -1488,8 +1513,8 @@
                             datasets: [{
                                 label: 'Nombre de votes 1ère place',
                                 data: firstPlaces,
-                                backgroundColor: 'rgba(13, 148, 136, 0.8)', // Couleur de l'en-tête
-                                borderColor: 'rgba(13, 148, 136, 1)',
+                                backgroundColor: 'rgba(13, 148, 136, 0.15)', // Même couleur que badge "Voté"
+                                borderColor: 'rgba(13, 148, 136, 0.5)',
                                 borderWidth: 2,
                                 borderRadius: 8,
                                 borderSkipped: false,
