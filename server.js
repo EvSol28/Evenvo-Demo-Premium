@@ -1113,11 +1113,6 @@ app.get('/test/rating-comments', (req, res) => {
     res.render('test_rating_comments');
 });
 
-// Route de test pour simuler l'application mobile
-app.get('/test/mobile-app', (req, res) => {
-    res.render('mobile_app_test');
-});
-
 // Route pour sauvegarder un formulaire de vote
 app.post('/event/:eventId/save_vote_form', requireAuth, async (req, res) => {
     try {
