@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Évaluation avec commentaires</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background-color: #F1F5F9; 
+            padding: 20px;
+        }
+        .rating-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .stars {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .star {
+            font-size: 40px;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .star.active {
+            color: #ffc107;
+        }
+        .comment-field {
+            margin-top: 20px;
+        }
+        .comment-field textarea {
+            width: 100%;
+            border: 2px solid #0E6655;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: inherit;
+        }
+        .submit-btn {
+            background: #0E6655;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Test - Évaluation avec commentaires</h1>
+        
+        <div class="rating-container">
+            <h3>Évaluation 2028</h3>
+            <p class="text-muted">Évaluez et laissez un commentaire</p>
+            
+            <div class="stars" id="stars">
+                <span class="star" data-rating="1">★</span>
+                <span class="star" data-rating="2">★</span>
+                <span class="star" data-rating="3">★</span>
+                <span class="star" data-rating="4">★</span>
+                <span class="star" data-rating="5">★</span>
+            </div>
+            
+            <div class="comment-field">
+                <label for="comment" class="form-label fw-bold" style="color: #0E6655;">
+                    Commentaire (facultatif)
+                </label>
+                <textarea 
+                    id="comment" 
+                    rows="3" 
+                    placeholder="Laissez un commentaire sur votre évaluation..."
+                ></textarea>
+            </div>
+            
+            <button class="submit-btn" onclick="submitRating()">
+                Soumettre l'évaluation
+            </button>
+            
+            <div id="result" class="mt-3"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedRating = 0;
+        
+        // Gestion des étoiles
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', function() {
+                selectedRating = parseInt(this.dataset.rating);
+                updateStars();
+            });
+        });
+        
+        function updateStars() {
+            document.querySelectorAll('.star').forEach((star, index) => {
+                if (index < selectedRating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+        
+        function submitRating() {
+            const comment = document.getElementById('comment').value;
+            const result = document.getElementById('result');
+            
+            if (selectedRating === 0) {
+                result.innerHTML = '<div class="alert alert-warning">Veuillez sélectionner une note</div>';
+                return;
+            }
+            
+            result.innerHTML = `
+                <div class="alert alert-success">
+                    <h5>✅ Évaluation soumise !</h5>
+                    <p><strong>Note :</strong> ${selectedRating}/5 étoiles</p>
+                    ${comment ? `<p><strong>Commentaire :</strong> ${comment}</p>` : '<p><em>Aucun commentaire</em></p>'}
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

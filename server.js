@@ -1108,6 +1108,16 @@ app.put('/api/vote_forms/:formId', requireAuth, async (req, res) => {
     }
 });
 
+// Route de test pour les commentaires d'évaluation
+app.get('/test/rating-comments', (req, res) => {
+    res.render('test_rating_comments');
+});
+
+// Route de test mobile pour les votes avec commentaires
+app.get('/test/mobile-vote', (req, res) => {
+    res.render('mobile_vote_test');
+});
+
 // Route pour sauvegarder un formulaire de vote
 app.post('/event/:eventId/save_vote_form', requireAuth, async (req, res) => {
     try {

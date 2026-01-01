@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Vote Mobile - Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'CenturyGothic', 'Arial', sans-serif; 
+            background: linear-gradient(135deg, #a2d9ce 0%, #7dd3c0 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .mobile-container {
+            max-width: 100%;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .vote-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+        }
+        
+        .vote-title {
+            color: #0E6655;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .vote-subtitle {
+            color: #0E6655;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .stars-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .star {
+            font-size: 40px;
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        
+        .star.active {
+            color: #ffc107;
+            transform: scale(1.1);
+        }
+        
+        .comment-section {
+            margin-top: 30px;
+        }
+        
+        .comment-label {
+            color: #0E6655;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .comment-field {
+            width: 100%;
+            border: 2px solid rgba(14, 102, 85, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(14, 102, 85, 0.1);
+        }
+        
+        .comment-field:focus {
+            outline: none;
+            border-color: #0E6655;
+            box-shadow: 0 0 0 3px rgba(14, 102, 85, 0.1);
+        }
+        
+        .submit-btn {
+            background: #0E6655;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .submit-btn:hover {
+            background: #0a5a4a;
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(13, 148, 136, 0.1);
+            border: 1px solid rgba(13, 148, 136, 0.3);
+        }
+        
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #0E6655;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 480px) {
+            .stars-container {
+                gap: 10px;
+            }
+            .star {
+                font-size: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="history.back()">←</button>
+    
+    <div class="mobile-container">
+        <div class="vote-card">
+            <h1 class="vote-title">Évaluation Test</h1>
+            <h2 class="vote-subtitle">Évaluation avec commentaire</h2>
+            
+            <div class="stars-container" id="stars">
+                <span class="star" data-rating="1">★</span>
+                <span class="star" data-rating="2">★</span>
+                <span class="star" data-rating="3">★</span>
+                <span class="star" data-rating="4">★</span>
+                <span class="star" data-rating="5">★</span>
+            </div>
+            
+            <div class="comment-section">
+                <label class="comment-label">Commentaire (facultatif)</label>
+                <textarea 
+                    id="comment" 
+                    class="comment-field"
+                    placeholder="Laissez un commentaire sur votre évaluation..."
+                ></textarea>
+            </div>
+            
+            <button class="submit-btn" id="submitBtn" onclick="submitVote()">
+                Soumettre le vote
+            </button>
+            
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedRating = 0;
+        
+        // Gestion des étoiles
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', function() {
+                selectedRating = parseInt(this.dataset.rating);
+                updateStars();
+                updateSubmitButton();
+            });
+            
+            // Effet tactile pour mobile
+            star.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                this.style.transform = 'scale(1.2)';
+            });
+            
+            star.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                selectedRating = parseInt(this.dataset.rating);
+                updateStars();
+                updateSubmitButton();
+            });
+        });
+        
+        function updateStars() {
+            document.querySelectorAll('.star').forEach((star, index) => {
+                if (index < selectedRating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+        
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('submitBtn');
+            if (selectedRating > 0) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Soumettre le vote';
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sélectionnez une note';
+            }
+        }
+        
+        function submitVote() {
+            const comment = document.getElementById('comment').value.trim();
+            const result = document.getElementById('result');
+            
+            if (selectedRating === 0) {
+                result.innerHTML = '<div class="alert alert-warning">Veuillez sélectionner une note</div>';
+                return;
+            }
+            
+            // Simulation d'envoi
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = 'Envoi en cours...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                result.innerHTML = `
+                    <div class="result">
+                        <h5 style="color: #0E6655; margin-bottom: 10px;">✅ Vote soumis avec succès !</h5>
+                        <p><strong>Note :</strong> ${selectedRating}/5 étoiles</p>
+                        ${comment ? `<p><strong>Commentaire :</strong> "${comment}"</p>` : '<p><em>Aucun commentaire ajouté</em></p>'}
+                        <small style="color: #666;">Merci pour votre participation !</small>
+                    </div>
+                `;
+                submitBtn.textContent = 'Vote soumis !';
+                submitBtn.style.background = '#28a745';
+            }, 1000);
+        }
+        
+        // Initialisation
+        updateSubmitButton();
+    </script>
+</body>
+</html>
