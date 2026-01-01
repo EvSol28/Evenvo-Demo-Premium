@@ -1113,9 +1113,9 @@ app.get('/test/rating-comments', (req, res) => {
     res.render('test_rating_comments');
 });
 
-// Route de test mobile pour les votes avec commentaires
-app.get('/test/mobile-vote', (req, res) => {
-    res.render('mobile_vote_test');
+// Route de test pour simuler l'application mobile
+app.get('/test/mobile-app', (req, res) => {
+    res.render('mobile_app_test');
 });
 
 // Route pour sauvegarder un formulaire de vote
