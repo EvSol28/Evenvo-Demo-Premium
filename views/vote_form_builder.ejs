@@ -544,16 +544,6 @@
                     Éléments de formulaire
                 </div>
                 
-                <div class="form-element" draggable="true" data-type="text">
-                    <i class="fas fa-font"></i>
-                    Texte court
-                </div>
-                
-                <div class="form-element" draggable="true" data-type="textarea">
-                    <i class="fas fa-align-left"></i>
-                    Texte long
-                </div>
-                
                 <div class="form-element" draggable="true" data-type="radio">
                     <i class="fas fa-dot-circle"></i>
                     Choix unique
@@ -562,21 +552,6 @@
                 <div class="form-element" draggable="true" data-type="checkbox">
                     <i class="fas fa-check-square"></i>
                     Choix multiple
-                </div>
-                
-                <div class="form-element" draggable="true" data-type="select">
-                    <i class="fas fa-list"></i>
-                    Liste déroulante
-                </div>
-                
-                <div class="form-element" draggable="true" data-type="ranking">
-                    <i class="fas fa-sort-numeric-up"></i>
-                    Classement
-                </div>
-                
-                <div class="form-element" draggable="true" data-type="date">
-                    <i class="fas fa-calendar"></i>
-                    Date
                 </div>
                 
                 <div class="form-element" draggable="true" data-type="rating">
@@ -749,7 +724,7 @@
                 label: getDefaultLabel(type),
                 description: '', // Nouveau champ pour le paragraphe
                 required: false,
-                options: type === 'radio' || type === 'checkbox' || type === 'select' || type === 'ranking' ? ['Option 1', 'Option 2'] : null
+                options: getDefaultOptions(type)
             };
 
             formFields.push(field);
@@ -764,13 +739,26 @@
                 'radio': 'Choix unique',
                 'checkbox': 'Choix multiple',
                 'select': 'Liste déroulante',
-                'ranking': 'Classement',
+                'ranking': 'Vote par ordre',
                 'date': 'Date',
                 'rating': 'Évaluation',
-                'ranking': 'Vote par ordre',
                 'syndical': 'Vote syndical'
             };
+            
+            // Pour le vote syndical, générer automatiquement "Loi X"
+            if (type === 'syndical') {
+                const syndicalsCount = formFields.filter(f => f.type === 'syndical').length;
+                return `Loi ${syndicalsCount + 1}`;
+            }
+            
             return labels[type] || 'Champ';
+        }
+
+        function getDefaultOptions(type) {
+            if (type === 'radio' || type === 'checkbox' || type === 'select' || type === 'ranking') {
+                return ['Option 1', 'Option 2'];
+            }
+            return null;
         }
 
         function renderFormField(field) {
@@ -858,14 +846,22 @@
                     });
                     break;
                 case 'date':
-                    html += `<input type="date" class="form-control" disabled>`;
+                    html += `<input type="date" class="form-control" placeholder="Sélectionner une date">`;
                     break;
                 case 'rating':
                     html += `
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 mb-3">
                             ${[1,2,3,4,5].map(i => `<i class="fas fa-star text-warning" style="font-size: 1.5rem;"></i>`).join('')}
                         </div>
                     `;
+                    if (field.allowComments) {
+                        html += `
+                            <div class="mt-3">
+                                <label class="form-label">Commentaire (facultatif)</label>
+                                <textarea class="form-control" rows="3" placeholder="Laissez un commentaire sur votre évaluation..." disabled></textarea>
+                            </div>
+                        `;
+                    }
                     break;
                 case 'ranking':
                     html += `
@@ -923,7 +919,7 @@
             if (!field) return;
 
             let optionsHtml = '';
-            if (field.options) {
+            if (field.options && field.type !== 'syndical') {
                 optionsHtml = `
                     <label class="form-label mt-3">Options</label>
                     <div id="optionsContainer">
@@ -942,13 +938,48 @@
                 `;
             }
 
+            // Ajouter un aperçu du champ pour les types sans options
+            let previewHtml = '';
+            if (!field.options || field.type === 'date' || field.type === 'rating') {
+                previewHtml = `
+                    <label class="form-label mt-3">Aperçu du champ</label>
+                    <div class="border rounded p-3 bg-light">
+                `;
+                
+                switch (field.type) {
+                    case 'date':
+                        previewHtml += `<input type="date" class="form-control" placeholder="Sélectionner une date">`;
+                        break;
+                    case 'rating':
+                        previewHtml += `
+                            <div class="d-flex gap-2">
+                                ${[1,2,3,4,5].map(i => `<i class="fas fa-star text-warning" style="font-size: 1.5rem;"></i>`).join('')}
+                            </div>
+                        `;
+                        break;
+                    case 'text':
+                        previewHtml += `<input type="text" class="form-control" placeholder="Réponse courte" disabled>`;
+                        break;
+                    case 'textarea':
+                        previewHtml += `<textarea class="form-control" rows="3" placeholder="Réponse longue" disabled></textarea>`;
+                        break;
+                }
+                
+                previewHtml += `</div>`;
+            }
+
             // Create edit modal
             Swal.fire({
                 title: 'Modifier le champ',
                 html: `
                     <div class="text-start">
                         <label class="form-label">Libellé</label>
-                        <input type="text" id="editLabel" class="form-control mb-3" value="${field.label}">
+                        <div class="input-group mb-3">
+                            <input type="text" id="editLabel" class="form-control bg-light" value="${field.label}" readonly>
+                            <button class="btn btn-outline-secondary" type="button" id="editLabelBtn" onclick="toggleLabelEdit()">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                        </div>
                         
                         <label class="form-label">Description (paragraphe explicatif)</label>
                         <textarea id="editDescription" class="form-control mb-3" rows="3" placeholder="Description optionnelle pour expliquer ce champ...">${field.description || ''}</textarea>
@@ -958,7 +989,15 @@
                             <label class="form-check-label" for="editRequired">Champ obligatoire</label>
                         </div>
                         
+                        ${field.type === 'rating' ? `
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="allowComments" ${field.allowComments ? 'checked' : ''}>
+                            <label class="form-check-label" for="allowComments">Permettre aux participants de laisser un commentaire (facultatif)</label>
+                        </div>
+                        ` : ''}
+                        
                         ${optionsHtml}
+                        ${previewHtml}
                     </div>
                 `,
                 width: '600px',
@@ -969,6 +1008,7 @@
                     const label = document.getElementById('editLabel').value;
                     const description = document.getElementById('editDescription').value;
                     const required = document.getElementById('editRequired').checked;
+                    const allowComments = field.type === 'rating' ? document.getElementById('allowComments')?.checked || false : false;
                     
                     if (!label.trim()) {
                         Swal.showValidationMessage('Le libellé est requis');
@@ -976,7 +1016,7 @@
                     }
                     
                     let options = null;
-                    if (field.options) {
+                    if (field.options && field.type !== 'syndical') {
                         const optionInputs = document.querySelectorAll('.option-input');
                         options = Array.from(optionInputs).map(input => input.value.trim()).filter(val => val);
                         
@@ -986,14 +1026,17 @@
                         }
                     }
                     
-                    return { label: label.trim(), description: description.trim(), required, options };
+                    return { label: label.trim(), description: description.trim(), required, allowComments, options };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
                     field.label = result.value.label;
                     field.description = result.value.description;
                     field.required = result.value.required;
-                    if (result.value.options) {
+                    if (field.type === 'rating') {
+                        field.allowComments = result.value.allowComments;
+                    }
+                    if (result.value.options && field.type !== 'syndical') {
                         field.options = result.value.options;
                     }
                     
@@ -1003,13 +1046,47 @@
                 }
             });
 
+            // Add function to toggle label editing
+            window.toggleLabelEdit = function() {
+                const labelInput = document.getElementById('editLabel');
+                const editBtn = document.getElementById('editLabelBtn');
+                
+                if (labelInput.hasAttribute('readonly')) {
+                    // Activer l'édition
+                    labelInput.removeAttribute('readonly');
+                    labelInput.classList.remove('bg-light');
+                    labelInput.classList.add('bg-white');
+                    labelInput.focus();
+                    editBtn.innerHTML = '<i class="fas fa-check text-success"></i>';
+                    editBtn.classList.remove('btn-outline-secondary');
+                    editBtn.classList.add('btn-outline-success');
+                } else {
+                    // Désactiver l'édition
+                    labelInput.setAttribute('readonly', 'readonly');
+                    labelInput.classList.remove('bg-white');
+                    labelInput.classList.add('bg-light');
+                    editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                    editBtn.classList.remove('btn-outline-success');
+                    editBtn.classList.add('btn-outline-secondary');
+                }
+            };
+
             // Add functions for option management
             window.addOption = function() {
                 const container = document.getElementById('optionsContainer');
                 const index = container.children.length;
+                
+                // Déterminer le type de champ pour générer le bon libellé
+                const field = formFields.find(f => f.id === fieldId);
+                let newOptionText = 'Nouvelle option';
+                
+                if (field && field.type === 'syndical') {
+                    newOptionText = `Loi ${index + 1}`;
+                }
+                
                 const newOptionHtml = `
                     <div class="input-group mb-2">
-                        <input type="text" class="form-control option-input" value="Nouvelle option" data-index="${index}">
+                        <input type="text" class="form-control option-input" value="${newOptionText}" data-index="${index}">
                         <button class="btn btn-outline-danger btn-sm" type="button" onclick="removeOption(${index})">
                             <i class="fas fa-trash"></i>
                         </button>

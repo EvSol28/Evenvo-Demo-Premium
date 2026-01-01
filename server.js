@@ -3102,6 +3102,106 @@ app.get('/api/event/:eventId/vote_responses/:userId/:formId', async (req, res) =
     }
 });
 
+// API pour récupérer les statistiques des votes syndicaux
+app.get('/api/event/:eventId/syndical_statistics/:formId', async (req, res) => {
+    try {
+        const { eventId, formId } = req.params;
+        
+        console.log(`🔍 Calcul des statistiques syndicales - Event: ${eventId}, Form: ${formId}`);
+        
+        // Récupérer le formulaire pour identifier les champs syndicaux
+        const formSnapshot = await firestore.collection('vote_forms')
+            .where('eventId', '==', eventId)
+            .where('id', '==', formId)
+            .limit(1)
+            .get();
+        
+        if (formSnapshot.empty) {
+            return res.json({
+                success: false,
+                message: 'Formulaire non trouvé'
+            });
+        }
+        
+        const form = formSnapshot.docs[0].data();
+        const syndicalFields = form.fields.filter(field => field.type === 'syndical');
+        
+        if (syndicalFields.length === 0) {
+            return res.json({
+                success: false,
+                message: 'Aucun champ syndical trouvé'
+            });
+        }
+        
+        // Récupérer toutes les réponses pour ce formulaire
+        const responsesSnapshot = await firestore.collection('vote_responses')
+            .where('eventId', '==', eventId)
+            .where('formId', '==', formId)
+            .get();
+        
+        const statistics = {};
+        
+        // Initialiser les statistiques pour chaque champ syndical
+        syndicalFields.forEach(field => {
+            statistics[field.id] = {
+                oui: 0,
+                non: 0,
+                abstenir: 0,
+                resultat: 'Égalité'
+            };
+        });
+        
+        // Compter les votes pour chaque champ
+        responsesSnapshot.docs.forEach(doc => {
+            const responseData = doc.data();
+            const responses = responseData.responses || {};
+            
+            syndicalFields.forEach(field => {
+                const fieldResponse = responses[field.id];
+                if (fieldResponse) {
+                    if (fieldResponse === 'Oui') {
+                        statistics[field.id].oui++;
+                    } else if (fieldResponse === 'Non') {
+                        statistics[field.id].non++;
+                    } else if (fieldResponse === "S'abstenir") {
+                        statistics[field.id].abstenir++;
+                    }
+                }
+            });
+        });
+        
+        // Déterminer le résultat final pour chaque loi
+        Object.keys(statistics).forEach(fieldId => {
+            const stats = statistics[fieldId];
+            const max = Math.max(stats.oui, stats.non, stats.abstenir);
+            
+            if (stats.oui === max && stats.oui > stats.non && stats.oui > stats.abstenir) {
+                stats.resultat = 'Oui';
+            } else if (stats.non === max && stats.non > stats.oui && stats.non > stats.abstenir) {
+                stats.resultat = 'Non';
+            } else if (stats.abstenir === max && stats.abstenir > stats.oui && stats.abstenir > stats.non) {
+                stats.resultat = "S'abstenir";
+            } else {
+                stats.resultat = 'Égalité';
+            }
+        });
+        
+        console.log('📊 Statistiques calculées:', statistics);
+        
+        res.json({
+            success: true,
+            statistics: statistics
+        });
+        
+    } catch (error) {
+        console.error("❌ Erreur lors du calcul des statistiques syndicales:", error);
+        res.status(500).json({
+            success: false,
+            message: 'Erreur lors du calcul des statistiques'
+        });
+    }
+});
+
 // API pour récupérer les statistiques de ranking d'un formulaire
 app.get('/api/event/:eventId/ranking_stats/:formId', async (req, res) => {
     try {
